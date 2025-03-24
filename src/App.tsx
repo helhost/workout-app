@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
+import { getCounter, updateCounter } from "@/api/counter"
 
 function App() {
   const [count, setCount] = useState(0)
@@ -7,16 +8,22 @@ function App() {
 
   useEffect(() => {
     const root = window.document.documentElement
-    if (darkMode) {
-      root.classList.add("dark")
-    } else {
-      root.classList.remove("dark")
-    }
+    darkMode ? root.classList.add("dark") : root.classList.remove("dark")
   }, [darkMode])
+
+  useEffect(() => {
+    getCounter().then(setCount)
+  }, [])
+
+  const handleClick = async () => {
+    const newCount = count + 1
+    setCount(newCount)
+    await updateCounter(newCount)
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-svh bg-white dark:bg-gray-900 text-black dark:text-white">
-      <Button onClick={() => setCount(count + 1)}>Click me</Button>
+      <Button onClick={handleClick}>Click me</Button>
       <p className="text-2xl mt-4">You clicked {count} times</p>
       <Button onClick={() => setDarkMode(!darkMode)} className="mt-4">
         Toggle Dark Mode
