@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { getCounter, updateCounter } from "@/api/counter"
+import { getCounter, updateCounter } from "@/features/counter/api/counterAPI"
 
 function App() {
     const [count, setCount] = useState(0)

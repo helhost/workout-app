@@ -2,13 +2,13 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "@/compon
 import { Link, useLocation, Outlet } from "react-router-dom"
 import { cn } from "@/lib/utils"
 
-const links = [
+const navigationLinks = [
     { to: "/", label: "Home" },
     { to: "/stats", label: "Stats" },
     { to: "/settings", label: "Settings" }
 ]
 
-export default function Layout() {
+export default function MainLayout() {
     const { pathname } = useLocation()
 
     return (
@@ -16,7 +16,7 @@ export default function Layout() {
             {/* Nav bar */}
             <NavigationMenu className="fixed w-full z-50 bg-white dark:bg-gray-900 border-t md:border-t-0 md:border-b bottom-0 md:top-0 md:bottom-auto">
                 <NavigationMenuList className="flex justify-around w-full">
-                    {links.map(({ to, label }) => (
+                    {navigationLinks.map(({ to, label }) => (
                         <NavigationMenuItem key={to}>
                             <Link
                                 to={to}
