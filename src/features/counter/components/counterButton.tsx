@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { getCounter, updateCounter } from "@/features/counter/counterApi"
+import { getCounter, updateCounter } from "@/features/counter/api/counterAPI"
 interface CounterButtonProps {
     className?: string
 }
