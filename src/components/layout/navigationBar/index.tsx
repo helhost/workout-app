@@ -1,0 +1,81 @@
+import { Link, Outlet, useLocation } from "react-router-dom";
+import { useState } from "react";
+import ThemeToggle from "@/features/theme/themeToggle";
+import { Button } from "@/components/ui/button";
+
+export default function NavigationBar() {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const location = useLocation();
+
+    const routes = [
+        { name: "Home", path: "/" },
+        { name: "Stats", path: "/stats" },
+        { name: "Settings", path: "/settings" },
+    ];
+
+    return (
+        <>
+            <header className="border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800">
+                <div className="container mx-auto px-4 py-4">
+                    {/* Logo and Brand */}
+                    <div className="flex items-center justify-between">
+                        <Link to="/" className="text-2xl font-bold">
+                            AppName
+                        </Link>
+
+                        {/* Hamburger menu for mobile */}
+                        <Button
+                            className="md:hidden p-2"
+                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        >
+                            ☰
+                        </Button>
+
+                        {/* Desktop Navigation */}
+                        <nav className="hidden md:flex md:items-center md:space-x-8">
+                            {routes.map((route) => (
+                                <Link
+                                    key={route.path}
+                                    to={route.path}
+                                    className={`text-base font-medium ${location.pathname === route.path
+                                        ? "text-blue-600 dark:text-blue-400"
+                                        : "text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
+                                        }`}
+                                >
+                                    {route.name}
+                                </Link>
+                            ))}
+                            <ThemeToggle />
+                        </nav>
+                    </div>
+
+                    {/* Mobile Navigation */}
+                    {mobileMenuOpen && (
+                        <nav className="mt-4 md:hidden space-y-2 py-2">
+                            {routes.map((route) => (
+                                <Link
+                                    key={route.path}
+                                    to={route.path}
+                                    className={`block py-2 text-base font-medium ${location.pathname === route.path
+                                        ? "text-blue-600 dark:text-blue-400"
+                                        : "text-gray-800 dark:text-gray-200"
+                                        }`}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    {route.name}
+                                </Link>
+                            ))}
+                            <div className="py-2">
+                                <ThemeToggle />
+                            </div>
+                        </nav>
+                    )}
+                </div>
+            </header>
+
+            <main className="container mx-auto px-4 py-6">
+                <Outlet />
+            </main>
+        </>
+    );
+}
