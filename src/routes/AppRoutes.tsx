@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom"
-import NavigationBar from "@/components/navigationBar"
+import { NavigationBar } from "@/features/navigation"
 import HomePage from "@/pages/HomePage"
 import StatsPage from "@/pages/StatsPage"
 import SettingsPage from "@/pages/SettingsPage"

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { NavLinkProps } from "./types";
+import { NavLinkProps } from "../types";
 
 export default function NavLink({ route, isActive, onClick, showLabel = true }: NavLinkProps) {
     const baseClasses = `${isActive

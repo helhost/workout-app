@@ -12,3 +12,13 @@ export interface NavLinkProps {
     onClick?: () => void;
     showLabel?: boolean;
 }
+
+export interface DesktopNavigationProps {
+    routes: RouteItem[];
+}
+
+export interface MobileNavigationProps {
+    routes: RouteItem[];
+    isOpen: boolean;
+    onItemClick: () => void;
+}

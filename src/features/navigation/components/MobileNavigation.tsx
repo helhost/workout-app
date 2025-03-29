@@ -1,12 +1,6 @@
 import { useLocation } from "react-router-dom";
 import NavLink from "./NavLink";
-import { RouteItem } from "./types";
-
-interface MobileNavigationProps {
-    routes: RouteItem[];
-    isOpen: boolean;
-    onItemClick: () => void;
-}
+import { MobileNavigationProps } from "../types";
 
 export default function MobileNavigation({ routes, isOpen, onItemClick }: MobileNavigationProps) {
     const location = useLocation();
