@@ -1,7 +1,7 @@
 import { Link, Outlet } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { User, Settings, BarChart } from "lucide-react";
+import { User, Settings, BarChart, Dumbbell } from "lucide-react";
 import DesktopNavigation from "./DesktopNavigation";
 import MobileNavigation from "./MobileNavigation";
 import { RouteItem } from "../types";
@@ -11,6 +11,7 @@ export default function NavigationBar() {
 
     const routes: RouteItem[] = [
         { name: "Stats", path: "/stats", icon: <BarChart className="size-5" /> },
+        { name: "Workouts", path: "/workouts", icon: <Dumbbell className="size-5" /> },
         { name: "Settings", path: "/settings", icon: <Settings className="size-5" /> },
         { name: "Profile", path: "/profile", icon: <User className="size-5" /> }
     ];
