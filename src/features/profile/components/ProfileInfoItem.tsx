@@ -1,0 +1,36 @@
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ProfileInfoItemProps } from "../types";
+
+export default function ProfileInfoItem({
+    label,
+    value,
+    icon,
+    editable = false,
+    onEdit,
+    className
+}: ProfileInfoItemProps) {
+    return (
+        <div className={cn("flex items-center justify-between py-3", className)}>
+            <div className="flex items-center space-x-2">
+                {icon && <span className="text-gray-400">{icon}</span>}
+                <div>
+                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</div>
+                    <div className="text-gray-800 dark:text-gray-200">{value}</div>
+                </div>
+            </div>
+            {editable && (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onEdit}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                    <Pencil className="h-4 w-4" />
+                    <span className="sr-only">Edit {label}</span>
+                </Button>
+            )}
+        </div>
+    );
+}
