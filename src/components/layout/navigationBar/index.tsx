@@ -1,6 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useState } from "react";
-import ThemeToggle from "@/features/theme/themeToggle";
 import { Button } from "@/components/ui/button";
 
 export default function NavigationBar() {
@@ -45,7 +44,6 @@ export default function NavigationBar() {
                                     {route.name}
                                 </Link>
                             ))}
-                            <ThemeToggle />
                         </nav>
                     </div>
 
@@ -65,9 +63,6 @@ export default function NavigationBar() {
                                     {route.name}
                                 </Link>
                             ))}
-                            <div className="py-2">
-                                <ThemeToggle />
-                            </div>
                         </nav>
                     )}
                 </div>
