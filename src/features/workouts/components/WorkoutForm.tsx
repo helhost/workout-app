@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlusCircle, MinusCircle, Trash2, Save, Dumbbell, ArrowLeftRight } from "lucide-react";
+import { PlusCircle, MinusCircle, Trash2, Save, Dumbbell, ArrowLeftRight, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Select,
@@ -112,14 +112,11 @@ export default function WorkoutForm({
         const updatedItems = [...formData.items];
         const exercise = updatedItems[itemIndex] as Exercise;
 
-        // Create superset with the existing exercise and a new empty one
+        // Create superset with just the existing exercise
         const superset: SuperSet = {
             id: generateId('ss'),
             type: 'superset',
-            exercises: [
-                exercise,
-                createEmptyExercise()
-            ]
+            exercises: [exercise]
         };
 
         updatedItems[itemIndex] = superset;
@@ -128,6 +125,56 @@ export default function WorkoutForm({
             ...formData,
             items: updatedItems
         });
+    };
+
+    // Add a new exercise to a superset
+    const addExerciseToSuperset = (itemIndex: number) => {
+        const updatedItems = [...formData.items];
+        const item = updatedItems[itemIndex];
+
+        if (isSuperset(item)) {
+            const superset = item as SuperSet;
+            const newExercise = createEmptyExercise();
+
+            updatedItems[itemIndex] = {
+                ...superset,
+                exercises: [...superset.exercises, newExercise]
+            };
+
+            setFormData({
+                ...formData,
+                items: updatedItems
+            });
+        }
+    };
+
+    // Remove an exercise from a superset
+    const removeExerciseFromSuperset = (itemIndex: number, exerciseIndex: number) => {
+        const updatedItems = [...formData.items];
+        const item = updatedItems[itemIndex];
+
+        if (isSuperset(item)) {
+            const superset = item as SuperSet;
+
+            // If this is the last exercise in the superset, convert to regular exercise
+            if (superset.exercises.length === 1) {
+                // Just convert the superset to a regular exercise
+                updatedItems[itemIndex] = superset.exercises[0];
+            } else {
+                // Remove the exercise from the superset
+                const updatedExercises = superset.exercises.filter((_, i) => i !== exerciseIndex);
+
+                updatedItems[itemIndex] = {
+                    ...superset,
+                    exercises: updatedExercises
+                };
+            }
+
+            setFormData({
+                ...formData,
+                items: updatedItems
+            });
+        }
     };
 
     // Add a new set to an exercise
@@ -293,38 +340,41 @@ export default function WorkoutForm({
     ) => {
         return (
             <div className={cn(
-                "border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden",
-                isInSuperset && "mb-4"
+                "border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm",
+                isInSuperset
+                    ? "mb-4 bg-white dark:bg-gray-800"
+                    : "bg-white dark:bg-gray-800"
             )}>
                 {/* Exercise Header */}
                 <div className={cn(
                     "p-4 flex flex-wrap gap-4 justify-between items-center",
                     isInSuperset
-                        ? "bg-gray-100 dark:bg-gray-700"
-                        : "bg-gray-50 dark:bg-gray-700"
+                        ? "bg-slate-100 dark:bg-gray-800 border-b border-slate-200 dark:border-gray-700"
+                        : "bg-slate-50 dark:bg-gray-800 border-b border-slate-200 dark:border-gray-700"
                 )}>
                     <div className="flex-1 min-w-[200px]">
-                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                            {isInSuperset ? `Exercise ${exerciseIndex! + 1} Name` : "Exercise Name"}
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {isInSuperset ? `Exercise ${exerciseIndex! + 1}` : "Exercise Name"}
                         </label>
                         <input
                             type="text"
                             value={exercise.name}
+                            placeholder="Enter exercise name"
                             onChange={(e) => updateExercise(itemIndex, exerciseIndex, "name", e.target.value)}
                             required
-                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                         />
                     </div>
 
-                    <div className="w-40">
-                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <div className="w-48">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Muscle Group
                         </label>
                         <Select
                             value={exercise.muscleGroup}
                             onValueChange={(value) => updateExercise(itemIndex, exerciseIndex, "muscleGroup", value as MuscleGroup)}
                         >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -337,92 +387,113 @@ export default function WorkoutForm({
                         </Select>
                     </div>
 
-                    {!isInSuperset && (
-                        <div className="flex flex-shrink-0 space-x-2">
+                    <div className="flex flex-shrink-0 space-x-2">
+                        {!isInSuperset ? (
+                            <>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => convertToSuperset(itemIndex)}
+                                    className="flex items-center gap-1 bg-white dark:bg-gray-800 text-blue-600 border-blue-300 dark:border-blue-700 dark:text-blue-400"
+                                    title="Convert to superset"
+                                >
+                                    <ArrowLeftRight className="h-4 w-4" />
+                                    <span>Superset</span>
+                                </Button>
+
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => removeItem(itemIndex)}
+                                    className="bg-white dark:bg-gray-800 text-red-600 border-red-300 dark:border-red-700 dark:text-red-400"
+                                    title="Remove exercise"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Remove Exercise</span>
+                                </Button>
+                            </>
+                        ) : (
                             <Button
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => convertToSuperset(itemIndex)}
-                                className="flex items-center gap-1"
-                                title="Convert to superset"
-                            >
-                                <ArrowLeftRight className="h-4 w-4" />
-                                <span>Superset</span>
-                            </Button>
-
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => removeItem(itemIndex)}
-                                title="Remove exercise"
+                                onClick={() => removeExerciseFromSuperset(itemIndex, exerciseIndex!)}
+                                className="bg-white dark:bg-gray-800 text-red-600 border-red-300 dark:border-red-700 dark:text-red-400"
+                                title="Remove exercise from superset"
                             >
                                 <Trash2 className="h-4 w-4" />
                                 <span className="sr-only">Remove Exercise</span>
                             </Button>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
 
                 {/* Sets */}
                 <div className="p-4">
-                    <div className="mb-3 flex justify-between items-center">
-                        <h4 className="font-medium text-sm">Sets</h4>
+                    <div className="mb-4 flex justify-between items-center">
+                        <h4 className="font-medium text-gray-800 dark:text-gray-200">Sets</h4>
                         <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={() => addSet(itemIndex, exerciseIndex)}
-                            className="flex items-center gap-1 text-xs"
+                            className="flex items-center gap-1 bg-white dark:bg-gray-800 text-green-600 border-green-300 dark:border-green-700 dark:text-green-400"
                         >
-                            <PlusCircle className="h-3 w-3" />
+                            <PlusCircle className="h-4 w-4" />
                             Add Set
                         </Button>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                                    <th className="text-left py-2 pl-2">Set</th>
-                                    <th className="text-center py-2">Weight (lbs)</th>
-                                    <th className="text-center py-2">Reps</th>
-                                    <th className="text-center py-2">Completed</th>
-                                    <th className="text-right py-2 pr-2">Actions</th>
+                                <tr className="border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-900">
+                                    <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Set</th>
+                                    <th className="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Weight (lbs)</th>
+                                    <th className="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Reps</th>
+                                    <th className="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Completed</th>
+                                    <th className="text-right py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {exercise.sets.map((set, setIndex) => (
-                                    <tr key={set.id} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-                                        <td className="py-2 pl-2">{setIndex + 1}</td>
-                                        <td className="py-2 text-center">
+                                    <tr
+                                        key={set.id}
+                                        className={cn(
+                                            "border-b border-gray-200 dark:border-gray-700 last:border-b-0",
+                                            setIndex % 2 === 0 ? "bg-white dark:bg-gray-800" : "bg-slate-50 dark:bg-gray-900"
+                                        )}
+                                    >
+                                        <td className="py-3 px-4">{setIndex + 1}</td>
+                                        <td className="py-3 px-4 text-center">
                                             <input
                                                 type="number"
                                                 min="0"
                                                 value={set.weight}
                                                 onChange={(e) => updateSet(itemIndex, exerciseIndex, setIndex, "weight", parseInt(e.target.value) || 0)}
-                                                className="w-20 text-center rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                                className="w-24 text-center rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                             />
                                         </td>
-                                        <td className="py-2 text-center">
+                                        <td className="py-3 px-4 text-center">
                                             <input
                                                 type="number"
                                                 min="1"
                                                 value={set.reps}
                                                 onChange={(e) => updateSet(itemIndex, exerciseIndex, setIndex, "reps", parseInt(e.target.value) || 1)}
-                                                className="w-20 text-center rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                                className="w-24 text-center rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                             />
                                         </td>
-                                        <td className="py-2 text-center">
+                                        <td className="py-3 px-4 text-center">
                                             <input
                                                 type="checkbox"
                                                 checked={set.completed}
                                                 onChange={(e) => updateSet(itemIndex, exerciseIndex, setIndex, "completed", e.target.checked)}
-                                                className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+                                                className="h-5 w-5 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
                                             />
                                         </td>
-                                        <td className="py-2 pr-2 text-right">
+                                        <td className="py-3 px-4 text-right">
                                             <Button
                                                 type="button"
                                                 variant="ghost"
@@ -441,15 +512,16 @@ export default function WorkoutForm({
                         </table>
                     </div>
 
-                    <div className="mt-3">
-                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Exercise Notes (Optional)
                         </label>
                         <textarea
                             value={exercise.notes || ""}
                             onChange={(e) => updateExercise(itemIndex, exerciseIndex, "notes", e.target.value)}
-                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                             rows={2}
+                            placeholder="Add any notes about this exercise..."
                         />
                     </div>
                 </div>
@@ -559,25 +631,41 @@ export default function WorkoutForm({
                                 return (
                                     <div
                                         key={item.id}
-                                        className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden"
+                                        className="border border-blue-300 dark:border-blue-700 rounded-xl overflow-hidden shadow-sm"
                                     >
-                                        <div className="bg-blue-50 dark:bg-blue-900 p-3 flex justify-between items-center">
-                                            <h3 className="font-medium flex items-center">
-                                                <ArrowLeftRight className="h-4 w-4 mr-2" />
+                                        <div className="bg-blue-100 dark:bg-blue-950 p-4 flex justify-between items-center">
+                                            <h3 className="font-semibold flex items-center text-blue-800 dark:text-blue-300">
+                                                <ArrowLeftRight className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
                                                 Superset
                                             </h3>
-                                            <Button
-                                                type="button"
-                                                variant="destructive"
-                                                size="sm"
-                                                onClick={() => removeItem(itemIndex)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                                <span className="sr-only">Remove Superset</span>
-                                            </Button>
+                                            <div className="flex space-x-3">
+                                                {/* Add Exercise to Superset Button */}
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => addExerciseToSuperset(itemIndex)}
+                                                    className="flex items-center gap-1 bg-white dark:bg-gray-800 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-400"
+                                                >
+                                                    <PlusCircle className="h-4 w-4" />
+                                                    <span>Add Exercise</span>
+                                                </Button>
+
+                                                {/* Remove Superset Button */}
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => removeItem(itemIndex)}
+                                                    className="bg-white dark:bg-gray-800 border-red-300 dark:border-red-700 text-red-600 dark:text-red-400"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                    <span className="sr-only">Remove Superset</span>
+                                                </Button>
+                                            </div>
                                         </div>
 
-                                        <div className="p-4 space-y-2">
+                                        <div className="p-5 space-y-4 bg-slate-50 dark:bg-gray-900">
                                             {item.exercises.map((exercise, exerciseIndex) =>
                                                 renderExerciseForm(exercise, itemIndex, exerciseIndex, true)
                                             )}

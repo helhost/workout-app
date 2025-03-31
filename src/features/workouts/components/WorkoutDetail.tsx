@@ -32,7 +32,7 @@ export default function WorkoutDetail({
             {/* Header with back button */}
             <div className="border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between">
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={onBack}
                     className="flex items-center gap-1 text-gray-600 dark:text-gray-300"
@@ -46,6 +46,7 @@ export default function WorkoutDetail({
                         onClick={() => onEdit(workout)}
                         variant="outline"
                         size="sm"
+                        className="text-blue-600 border-blue-300 dark:border-blue-700 dark:text-blue-400"
                     >
                         Edit Workout
                     </Button>
@@ -81,7 +82,7 @@ export default function WorkoutDetail({
                 </div>
 
                 {workout.notes && (
-                    <div className="mt-4 bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
+                    <div className="mt-4 bg-slate-50 dark:bg-gray-700 p-3 rounded-md">
                         <h3 className="font-medium text-sm text-gray-600 dark:text-gray-300 mb-1">Notes</h3>
                         <p className="text-gray-700 dark:text-gray-300">{workout.notes}</p>
                     </div>
@@ -97,44 +98,50 @@ export default function WorkoutDetail({
                         if (isSuperset(item)) {
                             // Render superset
                             return (
-                                <div key={item.id} className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
-                                    <div className="bg-blue-50 dark:bg-blue-900 p-3 flex items-center">
-                                        <ArrowLeftRight className="h-4 w-4 mr-2" />
-                                        <h3 className="font-medium">Superset</h3>
+                                <div key={item.id} className="border border-blue-300 dark:border-blue-700 rounded-xl overflow-hidden shadow-sm">
+                                    <div className="bg-blue-100 dark:bg-blue-950 p-4 flex items-center">
+                                        <ArrowLeftRight className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
+                                        <h3 className="font-semibold text-blue-800 dark:text-blue-300">Superset</h3>
                                     </div>
 
-                                    <div className="p-4 space-y-4">
+                                    <div className="p-5 space-y-4 bg-slate-50 dark:bg-gray-900">
                                         {item.exercises.map((exercise, exerciseIndex) => (
-                                            <div key={exercise.id} className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
-                                                <div className="bg-gray-100 dark:bg-gray-700 p-3 flex justify-between items-center">
-                                                    <h4 className="font-medium">Exercise {exerciseIndex + 1}: {exercise.name}</h4>
-                                                    <span className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                                            <div key={exercise.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm bg-white dark:bg-gray-800">
+                                                <div className="bg-slate-100 dark:bg-gray-800 p-4 flex justify-between items-center border-b border-slate-200 dark:border-gray-700">
+                                                    <h4 className="font-medium text-gray-800 dark:text-gray-200">Exercise {exerciseIndex + 1}: {exercise.name}</h4>
+                                                    <span className="text-sm text-gray-500 dark:text-gray-400 capitalize px-3 py-1 bg-slate-200 dark:bg-gray-700 rounded-full">
                                                         {exercise.muscleGroup}
                                                     </span>
                                                 </div>
 
-                                                <div className="p-3">
+                                                <div className="p-4">
                                                     {exercise.notes && (
-                                                        <p className="text-sm text-gray-600 dark:text-gray-400 italic mb-2">{exercise.notes}</p>
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400 italic mb-3 px-1">{exercise.notes}</p>
                                                     )}
 
-                                                    <div className="overflow-x-auto">
+                                                    <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg">
                                                         <table className="w-full text-sm">
                                                             <thead>
-                                                                <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                                                                    <th className="text-left py-2">Set</th>
-                                                                    <th className="text-center py-2">Weight</th>
-                                                                    <th className="text-center py-2">Reps</th>
-                                                                    <th className="text-center py-2">Status</th>
+                                                                <tr className="border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-900">
+                                                                    <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Set</th>
+                                                                    <th className="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Weight</th>
+                                                                    <th className="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Reps</th>
+                                                                    <th className="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Status</th>
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
                                                                 {exercise.sets.map((set, setIndex) => (
-                                                                    <tr key={set.id} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-                                                                        <td className="py-2 pl-2">{setIndex + 1}</td>
-                                                                        <td className="py-2 text-center">{set.weight > 0 ? `${set.weight} lbs` : 'Bodyweight'}</td>
-                                                                        <td className="py-2 text-center">{set.reps}</td>
-                                                                        <td className="py-2 pr-2 text-center">
+                                                                    <tr
+                                                                        key={set.id}
+                                                                        className={cn(
+                                                                            "border-b border-gray-200 dark:border-gray-700 last:border-b-0",
+                                                                            setIndex % 2 === 0 ? "bg-white dark:bg-gray-800" : "bg-slate-50 dark:bg-gray-900"
+                                                                        )}
+                                                                    >
+                                                                        <td className="py-3 px-4">{setIndex + 1}</td>
+                                                                        <td className="py-3 px-4 text-center">{set.weight > 0 ? `${set.weight} lbs` : 'Bodyweight'}</td>
+                                                                        <td className="py-3 px-4 text-center">{set.reps}</td>
+                                                                        <td className="py-3 px-4 text-center">
                                                                             {set.completed ? (
                                                                                 <span className="inline-flex items-center text-green-500">
                                                                                     <CheckCircle className="h-4 w-4 mr-1" />
@@ -162,36 +169,42 @@ export default function WorkoutDetail({
                             // Render regular exercise
                             const exercise = item;
                             return (
-                                <div key={exercise.id} className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
-                                    <div className="bg-gray-50 dark:bg-gray-700 p-3 flex justify-between items-center">
-                                        <h3 className="font-medium">{exercise.name}</h3>
-                                        <span className="text-sm text-gray-500 dark:text-gray-400 capitalize">
+                                <div key={exercise.id} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm bg-white dark:bg-gray-800">
+                                    <div className="bg-slate-50 dark:bg-gray-800 p-4 flex justify-between items-center border-b border-slate-200 dark:border-gray-700">
+                                        <h3 className="font-medium text-gray-800 dark:text-gray-200">{exercise.name}</h3>
+                                        <span className="text-sm text-gray-500 dark:text-gray-400 capitalize px-3 py-1 bg-slate-200 dark:bg-gray-700 rounded-full">
                                             {exercise.muscleGroup}
                                         </span>
                                     </div>
 
-                                    <div className="p-3">
+                                    <div className="p-4">
                                         {exercise.notes && (
-                                            <p className="text-sm text-gray-600 dark:text-gray-400 italic mb-2">{exercise.notes}</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 italic mb-3 px-1">{exercise.notes}</p>
                                         )}
 
-                                        <div className="overflow-x-auto">
+                                        <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg">
                                             <table className="w-full text-sm">
                                                 <thead>
-                                                    <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                                                        <th className="text-left py-2">Set</th>
-                                                        <th className="text-center py-2">Weight</th>
-                                                        <th className="text-center py-2">Reps</th>
-                                                        <th className="text-center py-2">Status</th>
+                                                    <tr className="border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-900">
+                                                        <th className="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Set</th>
+                                                        <th className="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Weight</th>
+                                                        <th className="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Reps</th>
+                                                        <th className="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Status</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {exercise.sets.map((set, setIndex) => (
-                                                        <tr key={set.id} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-                                                            <td className="py-2 pl-2">{setIndex + 1}</td>
-                                                            <td className="py-2 text-center">{set.weight > 0 ? `${set.weight} lbs` : 'Bodyweight'}</td>
-                                                            <td className="py-2 text-center">{set.reps}</td>
-                                                            <td className="py-2 pr-2 text-center">
+                                                        <tr
+                                                            key={set.id}
+                                                            className={cn(
+                                                                "border-b border-gray-200 dark:border-gray-700 last:border-b-0",
+                                                                setIndex % 2 === 0 ? "bg-white dark:bg-gray-800" : "bg-slate-50 dark:bg-gray-900"
+                                                            )}
+                                                        >
+                                                            <td className="py-3 px-4">{setIndex + 1}</td>
+                                                            <td className="py-3 px-4 text-center">{set.weight > 0 ? `${set.weight} lbs` : 'Bodyweight'}</td>
+                                                            <td className="py-3 px-4 text-center">{set.reps}</td>
+                                                            <td className="py-3 px-4 text-center">
                                                                 {set.completed ? (
                                                                     <span className="inline-flex items-center text-green-500">
                                                                         <CheckCircle className="h-4 w-4 mr-1" />
