@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlusCircle, MinusCircle, Trash2, Save } from "lucide-react";
+import { PlusCircle, MinusCircle, Trash2, Save, Dumbbell, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Select,
@@ -9,7 +9,7 @@ import {
     SelectValue
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Workout, Exercise, Set, MuscleGroup } from "../types";
+import { Workout, Exercise, Set, MuscleGroup, SuperSet, isSuperset } from "../types";
 
 interface WorkoutFormProps {
     workout?: Workout;
@@ -30,7 +30,7 @@ export default function WorkoutForm({
             id: `workout-${Date.now()}`,
             name: "",
             date: new Date().toISOString(),
-            exercises: [],
+            items: [],
             completed: false,
         }
     );
@@ -43,112 +43,225 @@ export default function WorkoutForm({
         setFormData({ ...formData, [field]: value });
     };
 
+    // Create a new empty exercise
+    const createEmptyExercise = (): Exercise => ({
+        id: generateId('ex'),
+        name: "",
+        muscleGroup: "fullBody" as MuscleGroup,
+        sets: [
+            {
+                id: generateId('set'),
+                weight: 0,
+                reps: 10,
+                completed: false
+            }
+        ]
+    });
+
     // Add a new exercise to the workout
     const addExercise = () => {
-        const newExercise: Exercise = {
-            id: generateId('ex'),
-            name: "",
-            muscleGroup: "fullBody" as MuscleGroup,
-            sets: [
-                {
-                    id: generateId('set'),
-                    weight: 0,
-                    reps: 10,
-                    completed: false
-                }
-            ],
-            restTimeSec: 60
-        };
-
+        const newExercise = createEmptyExercise();
         setFormData({
             ...formData,
-            exercises: [...formData.exercises, newExercise]
+            items: [...formData.items, newExercise]
         });
     };
 
     // Update an exercise
-    const updateExercise = (index: number, field: keyof Exercise, value: any) => {
-        const updatedExercises = [...formData.exercises];
-        updatedExercises[index] = {
-            ...updatedExercises[index],
-            [field]: value
-        };
+    const updateExercise = (itemIndex: number, exerciseIndex: number | null, field: keyof Exercise, value: any) => {
+        const updatedItems = [...formData.items];
+        const item = updatedItems[itemIndex];
+
+        if (isSuperset(item) && exerciseIndex !== null) {
+            // Update an exercise within a superset
+            const updatedExercises = [...item.exercises];
+            updatedExercises[exerciseIndex] = {
+                ...updatedExercises[exerciseIndex],
+                [field]: value
+            };
+
+            updatedItems[itemIndex] = {
+                ...item,
+                exercises: updatedExercises
+            };
+        } else if (!isSuperset(item) && exerciseIndex === null) {
+            // Update a standalone exercise
+            updatedItems[itemIndex] = {
+                ...item,
+                [field]: value
+            };
+        }
 
         setFormData({
             ...formData,
-            exercises: updatedExercises
+            items: updatedItems
         });
     };
 
-    // Remove an exercise
-    const removeExercise = (index: number) => {
-        const updatedExercises = formData.exercises.filter((_, i) => i !== index);
+    // Remove a workout item (exercise or superset)
+    const removeItem = (itemIndex: number) => {
+        const updatedItems = formData.items.filter((_, i) => i !== itemIndex);
         setFormData({
             ...formData,
-            exercises: updatedExercises
+            items: updatedItems
+        });
+    };
+
+    // Convert a regular exercise to a superset
+    const convertToSuperset = (itemIndex: number) => {
+        const updatedItems = [...formData.items];
+        const exercise = updatedItems[itemIndex] as Exercise;
+
+        // Create superset with the existing exercise and a new empty one
+        const superset: SuperSet = {
+            id: generateId('ss'),
+            type: 'superset',
+            exercises: [
+                exercise,
+                createEmptyExercise()
+            ]
+        };
+
+        updatedItems[itemIndex] = superset;
+
+        setFormData({
+            ...formData,
+            items: updatedItems
         });
     };
 
     // Add a new set to an exercise
-    const addSet = (exerciseIndex: number) => {
-        const updatedExercises = [...formData.exercises];
-        const exercise = updatedExercises[exerciseIndex];
+    const addSet = (itemIndex: number, exerciseIndex: number | null) => {
+        const updatedItems = [...formData.items];
+        const item = updatedItems[itemIndex];
 
-        const lastSet = exercise.sets[exercise.sets.length - 1];
-        const newSet: Set = {
-            id: generateId('set'),
-            weight: lastSet?.weight || 0,
-            reps: lastSet?.reps || 10,
-            completed: false
-        };
+        if (isSuperset(item) && exerciseIndex !== null) {
+            // Add set to an exercise within a superset
+            const exercise = item.exercises[exerciseIndex];
+            const lastSet = exercise.sets[exercise.sets.length - 1];
 
-        updatedExercises[exerciseIndex] = {
-            ...exercise,
-            sets: [...exercise.sets, newSet]
-        };
+            const newSet: Set = {
+                id: generateId('set'),
+                weight: lastSet?.weight || 0,
+                reps: lastSet?.reps || 10,
+                completed: false
+            };
+
+            const updatedExercises = [...item.exercises];
+            updatedExercises[exerciseIndex] = {
+                ...exercise,
+                sets: [...exercise.sets, newSet]
+            };
+
+            updatedItems[itemIndex] = {
+                ...item,
+                exercises: updatedExercises
+            };
+        } else if (!isSuperset(item) && exerciseIndex === null) {
+            // Add set to a standalone exercise
+            const exercise = item as Exercise;
+            const lastSet = exercise.sets[exercise.sets.length - 1];
+
+            const newSet: Set = {
+                id: generateId('set'),
+                weight: lastSet?.weight || 0,
+                reps: lastSet?.reps || 10,
+                completed: false
+            };
+
+            updatedItems[itemIndex] = {
+                ...exercise,
+                sets: [...exercise.sets, newSet]
+            };
+        }
 
         setFormData({
             ...formData,
-            exercises: updatedExercises
+            items: updatedItems
         });
     };
 
     // Update a set
-    const updateSet = (exerciseIndex: number, setIndex: number, field: keyof Set, value: any) => {
-        const updatedExercises = [...formData.exercises];
-        const exercise = updatedExercises[exerciseIndex];
-        const updatedSets = [...exercise.sets];
+    const updateSet = (itemIndex: number, exerciseIndex: number | null, setIndex: number, field: keyof Set, value: any) => {
+        const updatedItems = [...formData.items];
+        const item = updatedItems[itemIndex];
 
-        updatedSets[setIndex] = {
-            ...updatedSets[setIndex],
-            [field]: value
-        };
+        if (isSuperset(item) && exerciseIndex !== null) {
+            // Update a set within a superset exercise
+            const exercise = item.exercises[exerciseIndex];
+            const updatedSets = [...exercise.sets];
 
-        updatedExercises[exerciseIndex] = {
-            ...exercise,
-            sets: updatedSets
-        };
+            updatedSets[setIndex] = {
+                ...updatedSets[setIndex],
+                [field]: value
+            };
+
+            const updatedExercises = [...item.exercises];
+            updatedExercises[exerciseIndex] = {
+                ...exercise,
+                sets: updatedSets
+            };
+
+            updatedItems[itemIndex] = {
+                ...item,
+                exercises: updatedExercises
+            };
+        } else if (!isSuperset(item) && exerciseIndex === null) {
+            // Update a set in a standalone exercise
+            const exercise = item as Exercise;
+            const updatedSets = [...exercise.sets];
+
+            updatedSets[setIndex] = {
+                ...updatedSets[setIndex],
+                [field]: value
+            };
+
+            updatedItems[itemIndex] = {
+                ...exercise,
+                sets: updatedSets
+            };
+        }
 
         setFormData({
             ...formData,
-            exercises: updatedExercises
+            items: updatedItems
         });
     };
 
-    // Remove a set from an exercise
-    const removeSet = (exerciseIndex: number, setIndex: number) => {
-        const updatedExercises = [...formData.exercises];
-        const exercise = updatedExercises[exerciseIndex];
-        const updatedSets = exercise.sets.filter((_, i) => i !== setIndex);
+    // Remove a set
+    const removeSet = (itemIndex: number, exerciseIndex: number | null, setIndex: number) => {
+        const updatedItems = [...formData.items];
+        const item = updatedItems[itemIndex];
 
-        updatedExercises[exerciseIndex] = {
-            ...exercise,
-            sets: updatedSets
-        };
+        if (isSuperset(item) && exerciseIndex !== null) {
+            // Remove a set from a superset exercise
+            const exercise = item.exercises[exerciseIndex];
+            const updatedSets = exercise.sets.filter((_, i) => i !== setIndex);
+
+            const updatedExercises = [...item.exercises];
+            updatedExercises[exerciseIndex] = {
+                ...exercise,
+                sets: updatedSets
+            };
+
+            updatedItems[itemIndex] = {
+                ...item,
+                exercises: updatedExercises
+            };
+        } else if (!isSuperset(item) && exerciseIndex === null) {
+            // Remove a set from a standalone exercise
+            const exercise = item as Exercise;
+            const updatedSets = exercise.sets.filter((_, i) => i !== setIndex);
+
+            updatedItems[itemIndex] = {
+                ...exercise,
+                sets: updatedSets
+            };
+        }
 
         setFormData({
             ...formData,
-            exercises: updatedExercises
+            items: updatedItems
         });
     };
 
@@ -170,6 +283,179 @@ export default function WorkoutForm({
         { label: "Cardio", value: "cardio" },
         { label: "Full Body", value: "fullBody" }
     ];
+
+    // Render an exercise form (either standalone or part of a superset)
+    const renderExerciseForm = (
+        exercise: Exercise,
+        itemIndex: number,
+        exerciseIndex: number | null,
+        isInSuperset: boolean = false
+    ) => {
+        return (
+            <div className={cn(
+                "border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden",
+                isInSuperset && "mb-4"
+            )}>
+                {/* Exercise Header */}
+                <div className={cn(
+                    "p-4 flex flex-wrap gap-4 justify-between items-center",
+                    isInSuperset
+                        ? "bg-gray-100 dark:bg-gray-700"
+                        : "bg-gray-50 dark:bg-gray-700"
+                )}>
+                    <div className="flex-1 min-w-[200px]">
+                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                            {isInSuperset ? `Exercise ${exerciseIndex! + 1} Name` : "Exercise Name"}
+                        </label>
+                        <input
+                            type="text"
+                            value={exercise.name}
+                            onChange={(e) => updateExercise(itemIndex, exerciseIndex, "name", e.target.value)}
+                            required
+                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                        />
+                    </div>
+
+                    <div className="w-40">
+                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                            Muscle Group
+                        </label>
+                        <Select
+                            value={exercise.muscleGroup}
+                            onValueChange={(value) => updateExercise(itemIndex, exerciseIndex, "muscleGroup", value as MuscleGroup)}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {muscleGroups.map((group) => (
+                                    <SelectItem key={group.value} value={group.value}>
+                                        {group.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {!isInSuperset && (
+                        <div className="flex flex-shrink-0 space-x-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => convertToSuperset(itemIndex)}
+                                className="flex items-center gap-1"
+                                title="Convert to superset"
+                            >
+                                <ArrowLeftRight className="h-4 w-4" />
+                                <span>Superset</span>
+                            </Button>
+
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => removeItem(itemIndex)}
+                                title="Remove exercise"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Remove Exercise</span>
+                            </Button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Sets */}
+                <div className="p-4">
+                    <div className="mb-3 flex justify-between items-center">
+                        <h4 className="font-medium text-sm">Sets</h4>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => addSet(itemIndex, exerciseIndex)}
+                            className="flex items-center gap-1 text-xs"
+                        >
+                            <PlusCircle className="h-3 w-3" />
+                            Add Set
+                        </Button>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                                    <th className="text-left py-2 pl-2">Set</th>
+                                    <th className="text-center py-2">Weight (lbs)</th>
+                                    <th className="text-center py-2">Reps</th>
+                                    <th className="text-center py-2">Completed</th>
+                                    <th className="text-right py-2 pr-2">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {exercise.sets.map((set, setIndex) => (
+                                    <tr key={set.id} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                                        <td className="py-2 pl-2">{setIndex + 1}</td>
+                                        <td className="py-2 text-center">
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                value={set.weight}
+                                                onChange={(e) => updateSet(itemIndex, exerciseIndex, setIndex, "weight", parseInt(e.target.value) || 0)}
+                                                className="w-20 text-center rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                            />
+                                        </td>
+                                        <td className="py-2 text-center">
+                                            <input
+                                                type="number"
+                                                min="1"
+                                                value={set.reps}
+                                                onChange={(e) => updateSet(itemIndex, exerciseIndex, setIndex, "reps", parseInt(e.target.value) || 1)}
+                                                className="w-20 text-center rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                            />
+                                        </td>
+                                        <td className="py-2 text-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={set.completed}
+                                                onChange={(e) => updateSet(itemIndex, exerciseIndex, setIndex, "completed", e.target.checked)}
+                                                className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+                                            />
+                                        </td>
+                                        <td className="py-2 pr-2 text-right">
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => removeSet(itemIndex, exerciseIndex, setIndex)}
+                                                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                                disabled={exercise.sets.length <= 1}
+                                            >
+                                                <MinusCircle className="h-4 w-4" />
+                                                <span className="sr-only">Remove Set</span>
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="mt-3">
+                        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                            Exercise Notes (Optional)
+                        </label>
+                        <textarea
+                            value={exercise.notes || ""}
+                            onChange={(e) => updateExercise(itemIndex, exerciseIndex, "notes", e.target.value)}
+                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                            rows={2}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <form onSubmit={handleSubmit} className={cn("space-y-6", className)}>
@@ -234,37 +520,32 @@ export default function WorkoutForm({
                             className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                         />
                     </div>
-
-                    <div className="flex items-center">
-                        <input
-                            id="workoutCompleted"
-                            type="checkbox"
-                            checked={formData.completed}
-                            onChange={(e) => handleWorkoutChange("completed", e.target.checked)}
-                            className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
-                        />
-                        <label htmlFor="workoutCompleted" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                            Mark as completed
-                        </label>
-                    </div>
                 </div>
             </div>
 
-            {/* Exercises */}
+            {/* Mark as Completed Section */}
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                <div className="flex items-center">
+                    <input
+                        id="workoutCompleted"
+                        type="checkbox"
+                        checked={formData.completed}
+                        onChange={(e) => handleWorkoutChange("completed", e.target.checked)}
+                        className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+                    />
+                    <label htmlFor="workoutCompleted" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                        Mark workout as completed
+                    </label>
+                </div>
+            </div>
+
+            {/* Unified Exercises and Supersets List */}
             <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">Exercises</h2>
-                    <Button
-                        type="button"
-                        onClick={addExercise}
-                        className="flex items-center gap-1"
-                    >
-                        <PlusCircle className="h-4 w-4" />
-                        Add Exercise
-                    </Button>
                 </div>
 
-                {formData.exercises.length === 0 ? (
+                {formData.items.length === 0 ? (
                     <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md">
                         <p className="text-gray-500 dark:text-gray-400">
                             No exercises added yet. Click "Add Exercise" to get started.
@@ -272,167 +553,56 @@ export default function WorkoutForm({
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {formData.exercises.map((exercise, exerciseIndex) => (
-                            <div
-                                key={exercise.id}
-                                className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden"
-                            >
-                                {/* Exercise Header */}
-                                <div className="bg-gray-50 dark:bg-gray-700 p-4 flex flex-wrap gap-4 justify-between items-center">
-                                    <div className="flex-1 min-w-[200px]">
-                                        <label htmlFor={`exercise-${exerciseIndex}-name`} className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                            Exercise Name
-                                        </label>
-                                        <input
-                                            id={`exercise-${exerciseIndex}-name`}
-                                            type="text"
-                                            value={exercise.name}
-                                            onChange={(e) => updateExercise(exerciseIndex, "name", e.target.value)}
-                                            required
-                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                                        />
-                                    </div>
-
-                                    <div className="w-40">
-                                        <label htmlFor={`exercise-${exerciseIndex}-muscle`} className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                            Muscle Group
-                                        </label>
-                                        <Select
-                                            value={exercise.muscleGroup}
-                                            onValueChange={(value) => updateExercise(exerciseIndex, "muscleGroup", value as MuscleGroup)}
-                                        >
-                                            <SelectTrigger id={`exercise-${exerciseIndex}-muscle`} className="w-full">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {muscleGroups.map((group) => (
-                                                    <SelectItem key={group.value} value={group.value}>
-                                                        {group.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div className="w-32">
-                                        <label htmlFor={`exercise-${exerciseIndex}-rest`} className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                            Rest (sec)
-                                        </label>
-                                        <input
-                                            id={`exercise-${exerciseIndex}-rest`}
-                                            type="number"
-                                            min="0"
-                                            value={exercise.restTimeSec || ""}
-                                            onChange={(e) => updateExercise(exerciseIndex, "restTimeSec", parseInt(e.target.value) || undefined)}
-                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                                        />
-                                    </div>
-
-                                    <Button
-                                        type="button"
-                                        variant="destructive"
-                                        size="sm"
-                                        onClick={() => removeExercise(exerciseIndex)}
-                                        className="flex-shrink-0"
+                        {formData.items.map((item, itemIndex) => {
+                            if (isSuperset(item)) {
+                                // Render superset
+                                return (
+                                    <div
+                                        key={item.id}
+                                        className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden"
                                     >
-                                        <Trash2 className="h-4 w-4" />
-                                        <span className="sr-only">Remove Exercise</span>
-                                    </Button>
-                                </div>
+                                        <div className="bg-blue-50 dark:bg-blue-900 p-3 flex justify-between items-center">
+                                            <h3 className="font-medium flex items-center">
+                                                <ArrowLeftRight className="h-4 w-4 mr-2" />
+                                                Superset
+                                            </h3>
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="sm"
+                                                onClick={() => removeItem(itemIndex)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                                <span className="sr-only">Remove Superset</span>
+                                            </Button>
+                                        </div>
 
-                                {/* Sets */}
-                                <div className="p-4">
-                                    <div className="mb-3 flex justify-between items-center">
-                                        <h4 className="font-medium text-sm">Sets</h4>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => addSet(exerciseIndex)}
-                                            className="flex items-center gap-1 text-xs"
-                                        >
-                                            <PlusCircle className="h-3 w-3" />
-                                            Add Set
-                                        </Button>
+                                        <div className="p-4 space-y-2">
+                                            {item.exercises.map((exercise, exerciseIndex) =>
+                                                renderExerciseForm(exercise, itemIndex, exerciseIndex, true)
+                                            )}
+                                        </div>
                                     </div>
-
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-sm">
-                                            <thead>
-                                                <tr className="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                                                    <th className="text-left py-2 pl-2">Set</th>
-                                                    <th className="text-center py-2">Weight (lbs)</th>
-                                                    <th className="text-center py-2">Reps</th>
-                                                    <th className="text-center py-2">Completed</th>
-                                                    <th className="text-right py-2 pr-2">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {exercise.sets.map((set, setIndex) => (
-                                                    <tr key={set.id} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-                                                        <td className="py-2 pl-2">{setIndex + 1}</td>
-                                                        <td className="py-2 text-center">
-                                                            <input
-                                                                type="number"
-                                                                min="0"
-                                                                value={set.weight}
-                                                                onChange={(e) => updateSet(exerciseIndex, setIndex, "weight", parseInt(e.target.value) || 0)}
-                                                                className="w-20 text-center rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                                            />
-                                                        </td>
-                                                        <td className="py-2 text-center">
-                                                            <input
-                                                                type="number"
-                                                                min="1"
-                                                                value={set.reps}
-                                                                onChange={(e) => updateSet(exerciseIndex, setIndex, "reps", parseInt(e.target.value) || 1)}
-                                                                className="w-20 text-center rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                                            />
-                                                        </td>
-                                                        <td className="py-2 text-center">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={set.completed}
-                                                                onChange={(e) => updateSet(exerciseIndex, setIndex, "completed", e.target.checked)}
-                                                                className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
-                                                            />
-                                                        </td>
-                                                        <td className="py-2 pr-2 text-right">
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => removeSet(exerciseIndex, setIndex)}
-                                                                className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                                                                disabled={exercise.sets.length <= 1}
-                                                            >
-                                                                <MinusCircle className="h-4 w-4" />
-                                                                <span className="sr-only">Remove Set</span>
-                                                            </Button>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <div className="mt-3">
-                                        <label htmlFor={`exercise-${exerciseIndex}-notes`} className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                                            Exercise Notes (Optional)
-                                        </label>
-                                        <textarea
-                                            id={`exercise-${exerciseIndex}-notes`}
-                                            value={exercise.notes || ""}
-                                            onChange={(e) => updateExercise(exerciseIndex, "notes", e.target.value)}
-                                            className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                                            rows={2}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                                );
+                            } else {
+                                // Render single exercise
+                                return renderExerciseForm(item as Exercise, itemIndex, null);
+                            }
+                        })}
                     </div>
                 )}
+
+                {/* Add Exercise button moved to bottom */}
+                <div className="mt-4 text-center">
+                    <Button
+                        type="button"
+                        onClick={addExercise}
+                        className="flex items-center gap-1"
+                    >
+                        <Dumbbell className="h-4 w-4" />
+                        Add Exercise
+                    </Button>
+                </div>
             </div>
 
             {/* Form Actions */}

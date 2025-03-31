@@ -1,6 +1,6 @@
-import { CheckCircle, Calendar, Clock } from "lucide-react";
+import { CheckCircle, Calendar, Clock, ArrowLeftRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Workout } from "../types";
+import { Workout, isSuperset } from "../types";
 
 interface WorkoutItemProps {
     workout: Workout;
@@ -34,11 +34,31 @@ export default function WorkoutItem({
     };
 
     // Calculate exercise and set counts
-    const exerciseCount = workout.exercises.length;
-    const setCount = workout.exercises.reduce(
-        (total, exercise) => total + exercise.sets.length,
-        0
-    );
+    const exerciseCount = workout.items.reduce((count, item) => {
+        if (isSuperset(item)) {
+            // Count both exercises in the superset
+            return count + item.exercises.length;
+        } else {
+            // Count the single exercise
+            return count + 1;
+        }
+    }, 0);
+
+    const setCount = workout.items.reduce((total, item) => {
+        if (isSuperset(item)) {
+            // Count sets from both exercises in the superset
+            return total + item.exercises.reduce(
+                (subTotal, exercise) => subTotal + exercise.sets.length,
+                0
+            );
+        } else {
+            // Count sets from the single exercise
+            return total + item.sets.length;
+        }
+    }, 0);
+
+    // Count supersets
+    const supersetCount = workout.items.filter(item => isSuperset(item)).length;
 
     // Format date and time for display
     const formattedDate = formatDate(workout.date);
@@ -73,6 +93,12 @@ export default function WorkoutItem({
                 <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm">
                     {exerciseCount} {exerciseCount === 1 ? 'exercise' : 'exercises'}
                 </div>
+                {supersetCount > 0 && (
+                    <div className="bg-blue-100 dark:bg-blue-800 px-3 py-1 rounded text-sm flex items-center">
+                        <ArrowLeftRight className="h-3 w-3 mr-1" />
+                        {supersetCount} {supersetCount === 1 ? 'superset' : 'supersets'}
+                    </div>
+                )}
                 <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm">
                     {setCount} {setCount === 1 ? 'set' : 'sets'}
                 </div>

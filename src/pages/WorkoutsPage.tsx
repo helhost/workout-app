@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, ArrowLeft } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import {
     WorkoutsList,
     WorkoutDetail,
@@ -131,19 +131,7 @@ export default function WorkoutsPage() {
 
     return (
         <div className="max-w-2xl mx-auto">
-            {viewMode !== "list" && (
-                <div className="mb-6">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleBackToList}
-                        className="flex items-center gap-1 text-gray-600 dark:text-gray-300"
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to workouts
-                    </Button>
-                </div>
-            )}
+            {/* Removed the duplicate "Back to workouts" button here */}
             {renderContent()}
         </div>
     );

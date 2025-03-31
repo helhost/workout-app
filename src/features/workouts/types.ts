@@ -13,14 +13,23 @@ export interface Exercise {
     muscleGroup: MuscleGroup;
     sets: Set[];
     notes?: string;
-    restTimeSec?: number;
+}
+
+// WorkoutItem can be either a single Exercise or a SuperSet
+export type WorkoutItem = Exercise | SuperSet;
+
+export interface SuperSet {
+    id: string;
+    type: 'superset'; // Type discriminator to differentiate from Exercise
+    exercises: Exercise[]; // Always contains exactly 2 exercises
+    notes?: string;
 }
 
 export interface Workout {
     id: string;
     name: string;
     date: string; // ISO date string
-    exercises: Exercise[];
+    items: WorkoutItem[]; // Unified list of exercises and supersets
     duration?: number; // in minutes
     notes?: string;
     completed: boolean;
@@ -37,7 +46,12 @@ export type MuscleGroup =
     | 'cardio'
     | 'fullBody';
 
-// Component props types - only include what we need for WorkoutsList for now
+// Helper function to check if a workout item is a superset
+export function isSuperset(item: WorkoutItem): item is SuperSet {
+    return 'type' in item && item.type === 'superset';
+}
+
+// Component props types
 export interface WorkoutsListProps {
     workouts: Workout[];
     onWorkoutClick?: (workout: Workout) => void;
