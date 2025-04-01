@@ -5,6 +5,8 @@ import StatsPage from "@/pages/StatsPage"
 import SettingsPage from "@/pages/SettingsPage"
 import ProfilePage from "@/pages/ProfilePage"
 import WorkoutsPage from "@/pages/WorkoutsPage"
+import WorkoutDetailPage from "@/pages/WorkoutDetailPage"
+import WorkoutFormPage from "@/pages/WorkoutFormPage"
 
 export default function AppRoutes() {
     return (
@@ -13,6 +15,9 @@ export default function AppRoutes() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/stats" element={<StatsPage />} />
                 <Route path="/workouts" element={<WorkoutsPage />} />
+                <Route path="/workouts/new" element={<WorkoutFormPage />} />
+                <Route path="/workouts/:workoutId" element={<WorkoutDetailPage />} />
+                <Route path="/workouts/:workoutId/edit" element={<WorkoutFormPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
             </Route>
