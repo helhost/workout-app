@@ -1,4 +1,4 @@
-import { Workout, isSuperset } from "../types";
+import { Workout, isSuperset } from "../../types";
 import { BackButton } from "./BackButton";
 import { EditButton } from "./EditButton";
 import { WorkoutHeader } from "./WorkoutHeader";

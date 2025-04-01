@@ -1,6 +1,6 @@
 import { CheckCircle, Calendar, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Workout, isSuperset } from "../types";
+import { Workout, isSuperset } from "../../types";
 
 interface WorkoutItemProps {
     workout: Workout;

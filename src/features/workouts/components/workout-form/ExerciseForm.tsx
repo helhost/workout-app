@@ -1,7 +1,7 @@
 import { ArrowLeftRight, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Exercise, MuscleGroup } from "../types";
+import { Exercise, MuscleGroup } from "../../types";
 import { ExerciseSetsTable } from "./ExerciseSetsTable";
 import { MuscleGroupSelect } from "./MuscleGroupSelect";
 

@@ -1,7 +1,7 @@
 import { PlusCircle, MinusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Set } from "../types";
+import { Set } from "../../types";
 
 interface ExerciseSetsTableProps {
     sets: Set[];

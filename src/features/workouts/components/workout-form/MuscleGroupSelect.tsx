@@ -5,7 +5,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { MuscleGroup } from "../types";
+import { MuscleGroup } from "../../types";
 
 interface MuscleGroupSelectProps {
     value: MuscleGroup;

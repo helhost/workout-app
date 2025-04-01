@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import WorkoutItem from "./WorkoutItem";
-import { WorkoutsListProps } from "../types";
+import { WorkoutsListProps } from "../../types";
 
 export default function WorkoutsList({
     workouts,

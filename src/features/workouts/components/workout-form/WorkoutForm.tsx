@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Workout } from "../types";
+import { Workout } from "../../types";
 import { WorkoutFormHeader } from "./WorkoutFormHeader";
 import { WorkoutFormCompletionToggle } from "./WorkoutFormCompletionToggle";
 import { WorkoutItemsList } from "./WorkoutItemsList";

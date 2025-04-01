@@ -1,4 +1,4 @@
-import { Workout } from "../types";
+import { Workout } from "../../types";
 
 interface WorkoutFormHeaderProps {
     name: string;

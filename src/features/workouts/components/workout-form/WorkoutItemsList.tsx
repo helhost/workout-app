@@ -1,6 +1,6 @@
 import { Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { WorkoutItem, Exercise, SuperSet, isSuperset } from "../types";
+import { WorkoutItem, Exercise, SuperSet, isSuperset } from "../../types";
 import { ExerciseForm } from "./ExerciseForm";
 import { SupersetForm } from "./SupersetForm";
 
