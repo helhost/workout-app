@@ -1,4 +1,4 @@
-import { CheckCircle, Calendar, Clock, ArrowLeftRight } from "lucide-react";
+import { CheckCircle, Calendar, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Workout, isSuperset } from "../types";
 
@@ -57,9 +57,6 @@ export default function WorkoutItem({
         }
     }, 0);
 
-    // Count supersets
-    const supersetCount = workout.items.filter(item => isSuperset(item)).length;
-
     // Format date and time for display
     const formattedDate = formatDate(workout.date);
     const formattedTime = formatTime(workout.date);
@@ -93,12 +90,6 @@ export default function WorkoutItem({
                 <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm">
                     {exerciseCount} {exerciseCount === 1 ? 'exercise' : 'exercises'}
                 </div>
-                {supersetCount > 0 && (
-                    <div className="bg-blue-100 dark:bg-blue-800 px-3 py-1 rounded text-sm flex items-center">
-                        <ArrowLeftRight className="h-3 w-3 mr-1" />
-                        {supersetCount} {supersetCount === 1 ? 'superset' : 'supersets'}
-                    </div>
-                )}
                 <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm">
                     {setCount} {setCount === 1 ? 'set' : 'sets'}
                 </div>
