@@ -8,7 +8,7 @@ export interface RouteItem {
 
 export interface NavLinkProps {
     route: RouteItem;
-    isActive: boolean;
+    isActive?: boolean; // Make isActive optional
     onClick?: () => void;
     showLabel?: boolean;
 }

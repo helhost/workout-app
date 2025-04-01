@@ -1,10 +1,7 @@
-import { useLocation } from "react-router-dom";
 import NavLink from "./NavLink";
 import { MobileNavigationProps } from "../types";
 
 export default function MobileNavigation({ routes, isOpen, onItemClick }: MobileNavigationProps) {
-    const location = useLocation();
-
     if (!isOpen) return null;
 
     return (
@@ -14,7 +11,6 @@ export default function MobileNavigation({ routes, isOpen, onItemClick }: Mobile
                     <li key={route.path} className="w-full">
                         <NavLink
                             route={route}
-                            isActive={location.pathname === route.path}
                             onClick={onItemClick}
                             showLabel={true}
                         />
