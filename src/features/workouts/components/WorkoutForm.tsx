@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PlusCircle, MinusCircle, Trash2, Save, Dumbbell, ArrowLeftRight, ChevronLeft } from "lucide-react";
+import { PlusCircle, MinusCircle, Trash2, Save, Dumbbell, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Select,
