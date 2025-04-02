@@ -17,3 +17,33 @@ model Counter {
   id    Int @id @default(autoincrement())
   value Int
 }
+
+model User {
+  id         String        @id @default(uuid())
+  name       String
+  email      String        @unique
+  password   String
+  phone      String?
+  address    String?
+  occupation String?
+  birthday   DateTime?
+  website    String?
+  bio        String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  settings   UserSettings?
+}
+
+model UserSettings {
+  id                 String   @id @default(uuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  darkMode           Boolean  @default(false)
+  highContrast       Boolean  @default(false)
+  emailNotifications Boolean  @default(true)
+  pushNotifications  Boolean  @default(true)
+  notificationSound  Boolean  @default(true)
+  language           String   @default("en")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
