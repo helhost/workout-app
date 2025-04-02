@@ -10,15 +10,16 @@ export const getCounter = async (_req: Request, res: Response) => {
     }
 }
 
-export const incrementCounter = async (req: Request, res: Response): Promise<any> => {
+export const incrementCounter = async (req: Request, res: Response) => {
     try {
         const { value } = req.body
 
         // Basic validation
         if (value === undefined || typeof value !== 'number') {
-            return res.status(400).json({
+            res.status(400).json({
                 error: "Invalid input. Value must be a number."
             })
+            return
         }
 
         const updatedCounter = await incrementCounterValue(value)

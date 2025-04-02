@@ -77,19 +77,21 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
 
 
 
-export const loginController = async (req: Request, res: Response): Promise<any> => {
+export const loginController = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
 
         // Basic validation
         if (!email || !password) {
-            return res.status(400).json({ error: 'Email and password are required' });
+            res.status(400).json({ error: 'Email and password are required' });
+            return
         }
 
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            return res.status(400).json({ error: 'Invalid email format' });
+            res.status(400).json({ error: 'Invalid email format' });
+            return
         }
 
         // Attempt login
@@ -118,7 +120,8 @@ export const loginController = async (req: Request, res: Response): Promise<any>
     } catch (error: any) {
         // Handle specific error types
         if (error.message === 'Invalid credentials') {
-            return res.status(401).json({ error: 'Invalid email or password' });
+            res.status(401).json({ error: 'Invalid email or password' });
+            return
         }
 
         console.error(error);
