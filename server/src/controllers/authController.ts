@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { createUser } from '../services/authService';
-import { generateAccessToken } from '../middleware/authMiddleware';
+import { createUser, loginUser } from '../services/authService';
+import { generateAccessToken, generateRefreshToken } from '../middleware/authMiddleware';
 
 export const registerUser = async (req: Request, res: Response): Promise<any> => {
     try {
@@ -71,5 +71,57 @@ export const registerUser = async (req: Request, res: Response): Promise<any> =>
 
         console.error(error);
         res.status(500).json({ error: 'Registration failed' });
+    }
+};
+
+
+
+
+export const loginController = async (req: Request, res: Response): Promise<any> => {
+    try {
+        const { email, password } = req.body;
+
+        // Basic validation
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: 'Invalid email format' });
+        }
+
+        // Attempt login
+        const user = await loginUser(email, password);
+
+        // Generate tokens
+        const accessToken = generateAccessToken({
+            id: user.id,
+            email: user.email,
+            name: user.name
+        });
+
+        const refreshToken = generateRefreshToken({
+            id: user.id,
+            email: user.email,
+            name: user.name
+        });
+
+        // Optional: Store refresh token in database or secure cookie
+        res.status(200).json({
+            message: 'Login successful',
+            user,
+            accessToken,
+            refreshToken
+        });
+    } catch (error: any) {
+        // Handle specific error types
+        if (error.message === 'Invalid credentials') {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        console.error(error);
+        res.status(500).json({ error: 'Login failed' });
     }
 };
