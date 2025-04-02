@@ -7,7 +7,7 @@ export default function LoginPage() {
     // Mock login handler (non-functional)
     const handleLogin = (email: string, password: string, rememberMe: boolean) => {
         console.log("Login attempted with:", { email, password, rememberMe });
-        // In a real app, you would authenticate the user here
+        // In production, you would authenticate the user here
         // For now, just navigate to home page
         navigate("/");
     };
@@ -15,7 +15,7 @@ export default function LoginPage() {
     // Handle Google login
     const handleGoogleLogin = () => {
         console.log("Google login clicked");
-        // In a real app, you would authenticate via Google here
+        // In production, you would authenticate via Google here
         navigate("/");
     };
 

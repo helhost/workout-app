@@ -9,7 +9,7 @@ export default function WorkoutDetailPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // In a real app, you would fetch the workout data from an API
+        // In production, you would fetch the workout data from an API
         // For now, we'll use the sample data
         if (workoutId) {
             const foundWorkout = sampleWorkouts.find(w => w.id === workoutId);

@@ -15,7 +15,7 @@ export default function WorkoutFormPage() {
     useEffect(() => {
         // Only fetch workout if we're in edit mode
         if (isEditMode && workoutId) {
-            // In a real app, you would fetch the workout data from an API
+            // In production, you would fetch the workout data from an API
             // For now, we'll use the sample data
             const foundWorkout = sampleWorkouts.find(w => w.id === workoutId);
             setWorkout(foundWorkout || null);
@@ -24,7 +24,7 @@ export default function WorkoutFormPage() {
     }, [workoutId, isEditMode]);
 
     const handleSave = (updatedWorkout: Workout) => {
-        // In a real app, you would save the workout to an API
+        // In production, you would save the workout to an API
         console.log("Saving workout:", updatedWorkout);
 
         // Navigate back to the detail page if editing, or to the list if creating

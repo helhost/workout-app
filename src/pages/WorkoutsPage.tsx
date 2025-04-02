@@ -9,7 +9,7 @@ import {
 } from "@/features/workouts";
 
 export default function WorkoutsPage() {
-    // Use sample data for now - in a real app, you'd fetch this from an API
+    // Use sample data for now - In production, you'd fetch this from an API
     const [workouts] = useState(sampleWorkouts);
     const navigate = useNavigate();
 

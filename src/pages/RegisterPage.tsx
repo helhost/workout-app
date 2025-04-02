@@ -7,7 +7,7 @@ export default function RegisterPage() {
     // Mock registration handler (non-functional)
     const handleRegister = (name: string, email: string, password: string, agreeToTerms: boolean) => {
         console.log("Registration attempted with:", { name, email, password, agreeToTerms });
-        // In a real app, you would register the user here
+        // In production, you would register the user here
         // For now, just navigate to home page
         navigate("/");
     };
@@ -15,7 +15,7 @@ export default function RegisterPage() {
     // Handle Google sign up
     const handleGoogleSignUp = () => {
         console.log("Google sign up clicked");
-        // In a real app, you would authenticate via Google here
+        // In production, you would authenticate via Google here
         navigate("/");
     };
 

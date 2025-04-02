@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export default function ProfilePage() {
-    // Mock user data - in a real app, this would come from a store or API
+    // Mock user data - In production, this would come from a store or API
     const [userData] = useState({
         name: "Alex Johnson",
         email: "alex.johnson@example.com",
