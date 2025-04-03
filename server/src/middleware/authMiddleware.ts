@@ -1,7 +1,8 @@
+// src/middleware/authMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-// Extend the Express Request interface to include user
+// Extend Express Request interface
 interface CustomUser {
     id: string;
     email: string;
@@ -17,16 +18,31 @@ declare global {
 }
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    // Get token from cookies instead of headers
+    const token = req.cookies.access_token;
 
-    if (token == null) {
-        res.sendStatus(401);
+    if (!token) {
+        res.status(401).json({ error: 'Access denied' });
         return
     }
 
+    // Verify CSRF token for non-GET requests
+    if (req.method !== 'GET') {
+        const csrfToken = req.headers['x-xsrf-token'];
+        const expectedCsrfToken = req.cookies['XSRF-TOKEN'];
+
+        if (!csrfToken || csrfToken !== expectedCsrfToken) {
+            res.status(403).json({ error: 'CSRF token validation failed' });
+            return
+        }
+    }
+
     jwt.verify(token, process.env.JWT_SECRET!, (err: any, user: any) => {
-        if (err) return res.sendStatus(403);
+        if (err) {
+            res.status(403).json({ error: 'Invalid token' });
+            return
+        }
+
         req.user = user;
         next();
     });
