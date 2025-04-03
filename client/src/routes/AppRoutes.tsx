@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import { NavigationBar } from "@/features/navigation"
 import HomePage from "@/pages/HomePage"
 import StatsPage from "@/pages/StatsPage"
@@ -9,6 +9,7 @@ import WorkoutDetailPage from "@/pages/WorkoutDetailPage"
 import WorkoutFormPage from "@/pages/WorkoutFormPage"
 import LoginPage from "@/pages/LoginPage"
 import RegisterPage from "@/pages/RegisterPage"
+import ProtectedRoute from "./ProtectedRoutes"
 
 export default function AppRoutes() {
     return (
@@ -17,16 +18,77 @@ export default function AppRoutes() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Protected routes with navigation bar */}
+            {/* Routes with navigation bar */}
             <Route element={<NavigationBar />}>
+                {/* Public routes */}
                 <Route path="/" element={<HomePage />} />
-                <Route path="/stats" element={<StatsPage />} />
-                <Route path="/workouts" element={<WorkoutsPage />} />
-                <Route path="/workouts/new" element={<WorkoutFormPage />} />
-                <Route path="/workouts/:workoutId" element={<WorkoutDetailPage />} />
-                <Route path="/workouts/:workoutId/edit" element={<WorkoutFormPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
+
+                {/* Protected routes */}
+                <Route
+                    path="/stats"
+                    element={
+                        <ProtectedRoute>
+                            <StatsPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/workouts"
+                    element={
+                        <ProtectedRoute>
+                            <WorkoutsPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/workouts/new"
+                    element={
+                        <ProtectedRoute>
+                            <WorkoutFormPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/workouts/:workoutId"
+                    element={
+                        <ProtectedRoute>
+                            <WorkoutDetailPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/workouts/:workoutId/edit"
+                    element={
+                        <ProtectedRoute>
+                            <WorkoutFormPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/settings"
+                    element={
+                        <ProtectedRoute>
+                            <SettingsPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <ProfilePage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* Fallback route */}
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
         </Routes>
     )

@@ -4,7 +4,7 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { LoginFormProps } from "../types";
 import { cn } from "@/lib/utils";
 
-export default function LoginForm({ onSubmit, className }: LoginFormProps) {
+export default function LoginForm({ onSubmit, className, disabled = false }: LoginFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -42,6 +42,7 @@ export default function LoginForm({ onSubmit, className }: LoginFormProps) {
                             onChange={(e) => setEmail(e.target.value)}
                             className="block w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 pl-10 pr-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500"
                             placeholder="you@example.com"
+                            disabled={disabled}
                         />
                     </div>
                 </div>
@@ -65,11 +66,13 @@ export default function LoginForm({ onSubmit, className }: LoginFormProps) {
                             onChange={(e) => setPassword(e.target.value)}
                             className="block w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 pl-10 pr-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500"
                             placeholder="••••••••"
+                            disabled={disabled}
                         />
                         <button
                             type="button"
                             className="absolute inset-y-0 right-0 flex items-center pr-3"
                             onClick={togglePasswordVisibility}
+                            disabled={disabled}
                         >
                             {showPassword ? (
                                 <EyeOff className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -91,6 +94,7 @@ export default function LoginForm({ onSubmit, className }: LoginFormProps) {
                         checked={rememberMe}
                         onChange={(e) => setRememberMe(e.target.checked)}
                         className="h-4 w-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+                        disabled={disabled}
                     />
                     <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                         Remember me
@@ -102,6 +106,7 @@ export default function LoginForm({ onSubmit, className }: LoginFormProps) {
                         type="button"
                         className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
                         onClick={() => console.log("Forgot password clicked")}
+                        disabled={disabled}
                     >
                         Forgot your password?
                     </button>
@@ -113,8 +118,9 @@ export default function LoginForm({ onSubmit, className }: LoginFormProps) {
                 <Button
                     type="submit"
                     className="w-full flex justify-center py-2 px-4"
+                    disabled={disabled}
                 >
-                    Sign in
+                    {disabled ? "Signing in..." : "Sign in"}
                 </Button>
             </div>
         </form>

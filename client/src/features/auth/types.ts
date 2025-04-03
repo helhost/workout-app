@@ -26,7 +26,6 @@ export interface AuthLayoutProps {
     className?: string;
 }
 
-// LoginLayoutProps doesn't need the title because LoginLayout provides it
 export interface LoginLayoutProps {
     children: ReactNode;
     className?: string;

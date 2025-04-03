@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { SocialLoginProps } from "../types";
 import { cn } from "@/lib/utils";
 
-export default function SocialLogin({ onGoogleLogin, className, registerMode = false }: SocialLoginProps) {
+export default function SocialLogin({ onGoogleLogin, className, registerMode = false, disabled = false }: SocialLoginProps) {
     return (
         <div className={cn("mt-6", className)}>
             <div className="relative">
@@ -22,6 +22,7 @@ export default function SocialLogin({ onGoogleLogin, className, registerMode = f
                     variant="outline"
                     className="w-full flex justify-center py-2 px-4"
                     onClick={onGoogleLogin}
+                    disabled={disabled}
                 >
                     Google
                 </Button>
