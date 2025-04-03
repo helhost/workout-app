@@ -11,6 +11,8 @@ export default function RegisterPage() {
 
     // Handle registration through auth context
     const handleRegister = async (name: string, email: string, password: string, agreeToTerms: boolean) => {
+        if (isSubmitting) return; // Prevent double submission
+
         if (!agreeToTerms) {
             setRegistrationError("You must agree to the Terms of Service and Privacy Policy");
             return;
@@ -19,8 +21,10 @@ export default function RegisterPage() {
         try {
             setIsSubmitting(true);
             setRegistrationError(null);
+
             // Pass agreeToTerms to the register function
             await register(name, email, password);
+
             // If registration is successful, navigate to home
             navigate("/");
         } catch (err) {

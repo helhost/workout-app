@@ -1,3 +1,5 @@
+// In client/src/features/auth/api.ts
+
 import api from '@/lib/api/axios';
 import { handleApiError } from '@/lib/api/errors';
 
@@ -38,9 +40,21 @@ export const login = async (data: LoginData): Promise<AuthResponse> => {
 
 export const register = async (data: RegisterData): Promise<AuthResponse> => {
     try {
-        const response = await api.post<AuthResponse>('/auth/register', data);
+        // Add debugging logs
+        console.log('Register request data:', { ...data, password: '[REDACTED]' });
+
+        // Make the API call with explicit content-type and credentials
+        const response = await api.post<AuthResponse>('/auth/register', data, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+        });
+
+        console.log('Register response:', response.data);
         return response.data;
     } catch (error) {
+        console.error('Registration error:', error);
         throw handleApiError(error);
     }
 };

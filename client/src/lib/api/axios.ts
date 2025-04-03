@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 // Create base axios instance
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
-    withCredentials: true, // Required for cookies to be sent/received
+    withCredentials: true, // Important for CORS with cookies
     headers: {
         'Content-Type': 'application/json',
     },
@@ -21,12 +21,16 @@ api.interceptors.request.use((config) => {
         }
     }
     return config;
+}, (error) => {
+    return Promise.reject(error);
 });
 
 // Add response interceptor for handling token refresh
 api.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
+        console.error('API Error:', error);
+
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
         // If error is 401 and we haven't retried yet

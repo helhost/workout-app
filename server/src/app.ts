@@ -12,25 +12,35 @@ import {
 
 const app = express();
 
+// Read allowed origins from .env
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173'];
+
 // CORS Configuration
 const corsOptions = {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.log(`Origin ${origin} not allowed by CORS`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-XSRF-TOKEN', 'x-xsrf-token'],
+    exposedHeaders: ['X-XSRF-TOKEN', 'x-xsrf-token'],
     optionsSuccessStatus: 200
 };
 
-// Middleware
+// Apply middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(rateLimiter);
 app.use(securityMiddleware);
-
-// Optional CSRF protection (uncomment if using server-side rendering)
-// app.use(csrfProtection);
-// app.use(csrfErrorHandler);
 
 // Routes
 app.use("/api/counter", counterRoutes);
