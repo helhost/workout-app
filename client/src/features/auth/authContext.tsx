@@ -24,11 +24,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const checkAuthStatus = async () => {
             try {
                 setIsLoading(true);
-                const { profile } = await authApi.getProfile();
-                setUser(profile);
-            } catch (err) {
-                // User is not authenticated, that's okay
-                console.log('User not authenticated');
+
+                // Check if we're on a public route (login or register)
+                const isPublicRoute = window.location.pathname === '/login' ||
+                    window.location.pathname === '/register';
+
+                // Skip profile check if we're on a public route
+                if (!isPublicRoute) {
+                    try {
+                        const { profile } = await authApi.getProfile();
+                        setUser(profile);
+                    } catch (err) {
+                        // User is not authenticated, that's okay for public routes
+                        console.log('User not authenticated');
+                        setUser(null);
+                    }
+                }
             } finally {
                 setIsLoading(false);
             }

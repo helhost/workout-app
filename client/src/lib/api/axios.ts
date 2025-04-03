@@ -26,26 +26,52 @@ api.interceptors.request.use((config) => {
 });
 
 // Add response interceptor for handling token refresh
+let isRefreshing = false;
+let refreshPromise: Promise<any> | null = null;
+let refreshFailure = false;
+
 api.interceptors.response.use(
     (response) => response,
     async (error: AxiosError) => {
-        console.error('API Error:', error);
-
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-        // If error is 401 and we haven't retried yet
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
+        // If error is 401 and we haven't retried yet and not already refreshing
+        if (error.response?.status === 401 && !originalRequest._retry && !refreshFailure) {
+            // Only try to refresh if we're not already doing so
+            if (!isRefreshing) {
+                isRefreshing = true;
+                refreshPromise = api.post('/auth/refresh')
+                    .then(response => {
+                        isRefreshing = false;
+                        refreshFailure = false;
+                        return response;
+                    })
+                    .catch(refreshError => {
+                        console.error('Token refresh failed:', refreshError);
+                        isRefreshing = false;
+                        refreshFailure = true;
+
+                        // If we're on a login or register page, don't redirect
+                        const currentPath = window.location.pathname;
+                        if (!/^\/(login|register)/.test(currentPath)) {
+                            // If refresh fails and we're not on login page, redirect to login
+                            window.location.href = '/login';
+                        }
+
+                        return Promise.reject(refreshError);
+                    });
+            }
 
             try {
-                // Try to refresh the token
-                await api.post('/auth/refresh');
+                originalRequest._retry = true;
 
-                // Retry the original request
+                // Wait for the refresh to complete
+                await refreshPromise;
+
+                // If refresh was successful, retry the original request
                 return api(originalRequest);
             } catch (refreshError) {
-                // If refresh fails, redirect to login
-                window.location.href = '/login';
+                // If refresh failed, we already handled the redirect in the catch above
                 return Promise.reject(refreshError);
             }
         }
