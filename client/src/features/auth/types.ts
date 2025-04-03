@@ -3,17 +3,20 @@ import { ReactNode } from 'react';
 export interface LoginFormProps {
     onSubmit: (email: string, password: string, rememberMe: boolean) => void;
     className?: string;
+    disabled?: boolean;
 }
 
 export interface RegisterFormProps {
     onSubmit: (name: string, email: string, password: string, agreeToTerms: boolean) => void;
     className?: string;
+    disabled?: boolean;
 }
 
 export interface SocialLoginProps {
     onGoogleLogin: () => void;
     className?: string;
     registerMode?: boolean;
+    disabled?: boolean;
 }
 
 export interface AuthLayoutProps {
