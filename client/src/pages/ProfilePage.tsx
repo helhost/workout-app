@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Mail, Phone, MapPin, Briefcase, Calendar, Globe } from "lucide-react";
 import {
     ProfileLayout,
     ProfileSection,
@@ -7,37 +6,36 @@ import {
     ProfileInfoItem
 } from "@/features/profile";
 import { Button } from "@/components/ui/button";
+import { Scale, Ruler, Percent, Activity } from "lucide-react";
 
 export default function ProfilePage() {
     // Mock user data - In production, this would come from a store or API
     const [userData] = useState({
         name: "Alex Johnson",
         email: "alex.johnson@example.com",
-        phone: "+1 (555) 123-4567",
-        address: "123 Main Street, San Francisco, CA",
-        occupation: "Software Engineer",
-        birthday: "May 15, 1990",
-        website: "alexjohnson.dev",
-        bio: "Passionate developer with a love for clean code and user-friendly interfaces. Enjoys hiking and photography in free time."
+        bio: "Fitness enthusiast focused on strength training and functional movement. Currently training for my first 10K."
     });
 
-    // These would be real handlers in a complete implementation
-    const handleEditInfo = (field: string) => {
-        console.log(`Editing ${field}`);
-        // Would open a modal or inline form
-    };
+    // Mock measurements data - In production, this would come from an API
+    const [measurementsData] = useState({
+        weight: "75 kg",
+        height: "180 cm",
+        bodyFat: "16%",
+        chest: "98 cm",
+        waist: "82 cm",
+        arms: "38 cm",
+        lastUpdated: "March 28, 2025"
+    });
 
-    const handleChangePassword = () => {
-        console.log("Change password clicked");
-        // Would open password change dialog
+    // This would open a modal or form to update measurements
+    const handleUpdateMeasurements = () => {
+        console.log("Update measurements clicked");
+        // Would open measurement update form
     };
 
     return (
         <ProfileLayout>
-            <ProfileSection
-                title="Personal Profile"
-                description="Your personal information and preferences"
-            >
+            <ProfileSection title="Profile">
                 <ProfileCard
                     name={userData.name}
                     email={userData.email}
@@ -52,81 +50,56 @@ export default function ProfilePage() {
             </ProfileSection>
 
             <ProfileSection
-                title="Contact Information"
-                description="Your contact details that may be shared with other users"
+                title="Body Measurements"
+                description={`Last updated: ${measurementsData.lastUpdated}`}
             >
                 <ProfileInfoItem
-                    label="Email"
-                    value={userData.email}
-                    icon={<Mail className="h-5 w-5" />}
+                    label="Weight"
+                    value={measurementsData.weight}
+                    icon={<Scale className="h-5 w-5" />}
                     editable
-                    onEdit={() => handleEditInfo('email')}
+                    onEdit={() => handleUpdateMeasurements()}
                 />
 
                 <ProfileInfoItem
-                    label="Phone"
-                    value={userData.phone}
-                    icon={<Phone className="h-5 w-5" />}
+                    label="Height"
+                    value={measurementsData.height}
+                    icon={<Ruler className="h-5 w-5" />}
                     editable
-                    onEdit={() => handleEditInfo('phone')}
+                    onEdit={() => handleUpdateMeasurements()}
                 />
 
                 <ProfileInfoItem
-                    label="Address"
-                    value={userData.address}
-                    icon={<MapPin className="h-5 w-5" />}
+                    label="Body Fat"
+                    value={measurementsData.bodyFat}
+                    icon={<Percent className="h-5 w-5" />}
                     editable
-                    onEdit={() => handleEditInfo('address')}
+                    onEdit={() => handleUpdateMeasurements()}
                 />
 
                 <ProfileInfoItem
-                    label="Website"
-                    value={userData.website}
-                    icon={<Globe className="h-5 w-5" />}
+                    label="Chest"
+                    value={measurementsData.chest}
+                    icon={<Activity className="h-5 w-5" />}
                     editable
-                    onEdit={() => handleEditInfo('website')}
-                />
-            </ProfileSection>
-
-            <ProfileSection
-                title="Personal Details"
-                description="Additional information about you"
-            >
-                <ProfileInfoItem
-                    label="Occupation"
-                    value={userData.occupation}
-                    icon={<Briefcase className="h-5 w-5" />}
-                    editable
-                    onEdit={() => handleEditInfo('occupation')}
+                    onEdit={() => handleUpdateMeasurements()}
                 />
 
                 <ProfileInfoItem
-                    label="Birthday"
-                    value={userData.birthday}
-                    icon={<Calendar className="h-5 w-5" />}
+                    label="Waist"
+                    value={measurementsData.waist}
+                    icon={<Activity className="h-5 w-5" />}
                     editable
-                    onEdit={() => handleEditInfo('birthday')}
+                    onEdit={() => handleUpdateMeasurements()}
                 />
-            </ProfileSection>
 
-            <ProfileSection
-                title="Security"
-                description="Manage your account security settings"
-            >
-                <div className="py-4 flex items-center justify-between">
-                    <div>
-                        <h3 className="font-medium">Password</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Last changed 3 months ago
-                        </p>
-                    </div>
-                    <Button
-                        variant="outline"
-                        onClick={handleChangePassword}
-                    >
-                        Change Password
-                    </Button>
-                </div>
+                <ProfileInfoItem
+                    label="Arms"
+                    value={measurementsData.arms}
+                    icon={<Activity className="h-5 w-5" />}
+                    editable
+                    onEdit={() => handleUpdateMeasurements()}
+                />
             </ProfileSection>
         </ProfileLayout>
     );
