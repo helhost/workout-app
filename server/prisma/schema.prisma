@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -19,19 +16,15 @@ model Counter {
 }
 
 model User {
-  id         String        @id @default(uuid())
-  name       String
-  email      String        @unique
-  password   String
-  phone      String?
-  address    String?
-  occupation String?
-  birthday   DateTime?
-  website    String?
-  bio        String?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  settings   UserSettings?
+  id           String            @id @default(uuid())
+  name         String
+  email        String            @unique
+  password     String
+  bio          String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  settings     UserSettings?
+  measurements BodyMeasurement[] // Relation to body measurements
 }
 
 model UserSettings {
@@ -46,4 +39,18 @@ model UserSettings {
   language           String   @default("en")
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+}
+
+model BodyMeasurement {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @default(now())
+  weight    Float? // Weight in kg
+  height    Float? // Height in cm
+  bodyFat   Float? // Body fat percentage
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, date]) // Index for faster queries by user and date
 }
