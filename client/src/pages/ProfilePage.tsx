@@ -5,7 +5,6 @@ import {
     ProfileCard,
     ProfileInfoItem
 } from "@/features/profile";
-import { Button } from "@/components/ui/button";
 import { Scale, Ruler, Percent, Activity } from "lucide-react";
 
 export default function ProfilePage() {
