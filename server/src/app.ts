@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import counterRoutes from "./routes/counter";
 import authRoutes from "./routes/auth";
+import profileRoutes from "./routes/profile"; // Import profile routes
 import {
     rateLimiter,
     securityMiddleware,
@@ -29,7 +30,7 @@ const corsOptions = {
         }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-XSRF-TOKEN', 'x-xsrf-token'],
     exposedHeaders: ['X-XSRF-TOKEN', 'x-xsrf-token'],
     optionsSuccessStatus: 200
@@ -45,5 +46,6 @@ app.use(securityMiddleware);
 // Routes
 app.use("/api/counter", counterRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/profile", profileRoutes); // Add profile routes
 
 export default app;

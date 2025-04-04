@@ -7,12 +7,8 @@ export const createUser = async (userData: {
     email: string;
     password: string;
     name: string;
-    phone?: string;
-    address?: string;
-    occupation?: string;
-    birthday?: Date;
-    website?: string;
     bio?: string;
+    profilePicture?: string;
 }) => {
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -27,26 +23,37 @@ export const createUser = async (userData: {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
 
-    // Create user with optional fields
-    return prisma.user.create({
-        data: {
-            ...userData,
-            password: hashedPassword,
-            settings: {
-                create: {} // Creates default UserSettings
+    // Create user with all the related data in a transaction
+    return prisma.$transaction(async (tx) => {
+        // Create the user
+        const user = await tx.user.create({
+            data: {
+                email: userData.email,
+                password: hashedPassword,
+                name: userData.name,
+                bio: userData.bio,
+                profilePicture: userData.profilePicture,
+                settings: {
+                    create: {} // Creates default UserSettings
+                }
             }
-        },
-        select: {
-            id: true,
-            email: true,
-            name: true,
-            phone: true,
-            address: true,
-            occupation: true,
-            birthday: true,
-            website: true,
-            bio: true
-        }
+        });
+
+        // Create empty measurements container for the user
+        await tx.userMeasurements.create({
+            data: {
+                userId: user.id
+            }
+        });
+
+        // Return user without password
+        return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            bio: user.bio,
+            profilePicture: user.profilePicture
+        };
     });
 };
 
