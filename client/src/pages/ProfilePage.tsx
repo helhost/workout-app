@@ -85,20 +85,20 @@ export default function ProfilePage() {
                     />
                     {/* Edit profile picture button */}
                     <button
-                        className="absolute top-0 right-0 bg-white dark:bg-gray-700 rounded-full p-1 shadow-sm border border-gray-200 dark:border-gray-600"
+                        className="absolute top-0 right-[calc(50%-3rem)] p-1.5 rounded-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
                         onClick={handleEditProfilePicture}
                         aria-label="Edit profile picture"
                     >
-                        <Pencil className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                        <Pencil className="h-4 w-4" />
                     </button>
 
                     {/* Edit name button */}
                     <button
-                        className="absolute top-28 right-1/2 transform translate-x-16 bg-white dark:bg-gray-700 rounded-full p-1 shadow-sm border border-gray-200 dark:border-gray-600"
+                        className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
                         onClick={() => openEditDialog("Edit Name", "name", userData.name, "profile")}
-                        aria-label="Edit name"
                     >
-                        <Pencil className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                        <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Edit name</span>
                     </button>
                 </div>
 
@@ -106,11 +106,11 @@ export default function ProfilePage() {
                     <div className="flex justify-between items-center mb-2">
                         <h3 className="font-medium">About Me</h3>
                         <button
-                            className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                            className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
                             onClick={() => openEditDialog("Edit Bio", "bio", userData.bio, "profile")}
                             aria-label="Edit bio"
                         >
-                            <Pencil className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                            <Pencil className="h-4 w-4" />
                         </button>
                     </div>
                     <p className="text-gray-600 dark:text-gray-300">
