@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
     ProfileLayout,
     ProfileSection,
-    ProfileCard,
     ProfileInfoItem
 } from "@/features/profile";
 import { Scale, Ruler, Percent, Pencil, User } from "lucide-react";
