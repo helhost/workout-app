@@ -9,7 +9,11 @@ import {
     getMeasurementHistoryData,
     addWeight,
     addHeight,
-    addBodyFat
+    addBodyFat,
+    uploadProfileImage,
+    getProfileImage,
+    removeProfileImage,
+    upload
 } from '../controllers/profileController';
 
 const router = express.Router();
@@ -22,6 +26,12 @@ router.get('/', getProfile);
 router.patch('/name', updateName);
 router.patch('/bio', updateBio);
 router.patch('/profile-picture', updateProfilePicture);
+
+// Profile image routes
+router.post('/image', upload.single('image'), uploadProfileImage);
+router.get('/image', getProfileImage);
+router.get('/image/:userId', getProfileImage); // To get other users' profile images
+router.delete('/image', removeProfileImage);
 
 // Measurements routes
 router.get('/measurements/latest', getLatestMeasurementData);
