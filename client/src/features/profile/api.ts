@@ -1,3 +1,4 @@
+// client/src/features/profile/api.ts
 import api from '@/lib/api/axios';
 import { handleApiError } from '@/lib/api/errors';
 
@@ -11,6 +12,13 @@ export interface ProfileUser {
     createdAt: string;
     settings: UserSettings;
     measurements: UserMeasurements;
+    hasProfileImage: boolean;
+    profileImage?: {
+        id: string;
+        filename: string;
+        mimeType: string;
+        size: number;
+    };
 }
 
 export interface UserSettings {
@@ -80,6 +88,43 @@ export const updateProfilePicture = async (profilePicture: string): Promise<{
     } catch (error) {
         throw handleApiError(error);
     }
+};
+
+// New profile image API functions
+export const uploadProfileImage = async (file: File): Promise<{ message: string; image: any }> => {
+    try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await api.post<{ message: string; image: any }>('/profile/image', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw handleApiError(error);
+    }
+};
+
+export const deleteProfileImage = async (): Promise<{ message: string }> => {
+    try {
+        const response = await api.delete<{ message: string }>('/profile/image');
+        return response.data;
+    } catch (error) {
+        throw handleApiError(error);
+    }
+};
+
+// Get the profile image URL (this will be used in image tags)
+export const getProfileImageUrl = (): string => {
+    // Add a timestamp to prevent caching
+    return `${api.defaults.baseURL}/profile/image?t=${new Date().getTime()}`;
+};
+
+// Get profile image URL for a specific user (for viewing others' profiles)
+export const getUserProfileImageUrl = (userId: string): string => {
+    return `${api.defaults.baseURL}/profile/image/${userId}?t=${new Date().getTime()}`;
 };
 
 // API functions for measurements

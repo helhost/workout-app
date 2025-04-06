@@ -1,10 +1,12 @@
+// client/src/pages/ProfilePage.tsx
 import { useState, useEffect } from "react";
 import {
     ProfileLayout,
     ProfileSection,
-    ProfileInfoItem
+    ProfileInfoItem,
+    ProfileImageUploader
 } from "@/features/profile";
-import { Scale, Ruler, Percent, Pencil, User } from "lucide-react";
+import { Scale, Ruler, Percent, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -17,7 +19,6 @@ import {
     getProfile,
     updateName,
     updateBio,
-    updateProfilePicture,
     addWeightMeasurement,
     addHeightMeasurement,
     addBodyFatMeasurement,
@@ -45,21 +46,21 @@ export default function ProfilePage() {
     const [newValue, setNewValue] = useState("");
 
     // Fetch profile data on page load
-    useEffect(() => {
-        const fetchProfileData = async () => {
-            try {
-                setIsLoading(true);
-                setError(null);
-                const response = await getProfile();
-                setProfileData(response.profile);
-            } catch (err: any) {
-                setError(err.message || "Failed to load profile data");
-                console.error("Error fetching profile data:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const fetchProfileData = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const response = await getProfile();
+            setProfileData(response.profile);
+        } catch (err: any) {
+            setError(err.message || "Failed to load profile data");
+            console.error("Error fetching profile data:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchProfileData();
     }, []);
 
@@ -146,29 +147,6 @@ export default function ProfilePage() {
         }
     };
 
-    // Edit profile picture (would typically open file picker)
-    const handleEditProfilePicture = async () => {
-        // In a real app, you would handle file upload here
-        // For now, we'll just update with a placeholder URL
-        try {
-            setIsLoading(true);
-            const placeholderUrl = "/api/placeholder/400/400";
-            const response = await updateProfilePicture(placeholderUrl);
-
-            if (profileData) {
-                setProfileData({
-                    ...profileData,
-                    profilePicture: response.user.profilePicture
-                });
-            }
-        } catch (err: any) {
-            setError(err.message || "Failed to update profile picture");
-            console.error("Error updating profile picture:", err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
     // Get the last updated date for measurements
     const getLastMeasurementDate = (): string => {
         if (!profileData?.measurements) return "No data";
@@ -237,36 +215,18 @@ export default function ProfilePage() {
             )}
 
             <ProfileSection title="Profile">
-                {/* Profile Card with Edit Button */}
+                {/* Profile Card with Profile Image Uploader */}
                 <div className="relative">
                     {/* Custom display instead of using ProfileCard to have better control over layout */}
                     <div className="flex flex-col items-center mb-6">
-                        {/* Avatar with edit button */}
-                        <div className="relative">
-                            <div className="h-24 w-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-3 overflow-hidden">
-                                {profileData?.profilePicture ? (
-                                    <img
-                                        src={profileData.profilePicture}
-                                        alt={profileData.name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <User className="h-12 w-12 text-gray-500 dark:text-gray-400" />
-                                )}
-                            </div>
-                            {/* Edit profile picture button */}
-                            <button
-                                className="absolute top-0 right-0 p-1.5 rounded-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700"
-                                onClick={handleEditProfilePicture}
-                                aria-label="Edit profile picture"
-                                disabled={isLoading}
-                            >
-                                <Pencil className="h-4 w-4" />
-                            </button>
-                        </div>
+                        {/* Profile Image Uploader Component */}
+                        <ProfileImageUploader
+                            hasProfileImage={profileData?.hasProfileImage || false}
+                            onImageUpdated={fetchProfileData}
+                        />
 
                         {/* Name with inline edit button */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mt-2">
                             <h2 className="text-xl font-semibold">{profileData?.name}</h2>
                             <button
                                 className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
