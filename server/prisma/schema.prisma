@@ -23,6 +23,20 @@ model User {
   updatedAt      DateTime          @updatedAt
   settings       UserSettings?
   measurements   UserMeasurements?
+  profileImage   ProfileImage? // New relation to profile image
+}
+
+// New model for storing profile images
+model ProfileImage {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filename  String
+  data      Bytes // Binary data of the image
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model UserSettings {
