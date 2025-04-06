@@ -7,7 +7,6 @@ export default function ProfileLayout({
 }: ProfileLayoutProps) {
     return (
         <div className={cn("max-w-2xl mx-auto", className)}>
-            <h1 className="text-2xl font-bold mb-6">User Profile</h1>
             {children}
         </div>
     );

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     ProfileLayout,
     ProfileSection,
@@ -13,22 +13,24 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    getProfile,
+    updateName,
+    updateBio,
+    updateProfilePicture,
+    addWeightMeasurement,
+    addHeightMeasurement,
+    addBodyFatMeasurement,
+    ProfileUser,
+    MeasurementData,
+    UserMeasurements
+} from "@/features/profile/api";
 
 export default function ProfilePage() {
-    // Mock user data - In production, this would come from a store or API
-    const [userData, setUserData] = useState({
-        name: "Alex Johnson",
-        email: "alex.johnson@example.com",
-        bio: "Fitness enthusiast focused on strength training and functional movement. Currently training for my first 10K."
-    });
-
-    // Mock measurements data - In production, this would come from an API
-    const [measurementsData, setMeasurementsData] = useState({
-        weight: "75 kg",
-        height: "180 cm",
-        bodyFat: "16%",
-        lastUpdated: "March 28, 2025"
-    });
+    // State to hold profile data
+    const [profileData, setProfileData] = useState<ProfileUser | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     // Dialog state
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -42,6 +44,25 @@ export default function ProfilePage() {
     // New value for editing
     const [newValue, setNewValue] = useState("");
 
+    // Fetch profile data on page load
+    useEffect(() => {
+        const fetchProfileData = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+                const response = await getProfile();
+                setProfileData(response.profile);
+            } catch (err: any) {
+                setError(err.message || "Failed to load profile data");
+                console.error("Error fetching profile data:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProfileData();
+    }, []);
+
     // Open dialog for editing a field
     const openEditDialog = (title: string, field: string, value: string, section: string) => {
         setDialogConfig({ title, field, value, section });
@@ -49,31 +70,172 @@ export default function ProfilePage() {
         setDialogOpen(true);
     };
 
+    // Format measurement for display
+    const formatMeasurement = (measurement: MeasurementData | null, unit: string): string => {
+        if (!measurement) return "Not set";
+        return `${measurement.value} ${unit}`;
+    };
+
     // Handle saving the new value
-    const handleSaveEdit = () => {
-        if (dialogConfig.section === "profile") {
-            setUserData({
-                ...userData,
-                [dialogConfig.field]: newValue
-            });
-        } else if (dialogConfig.section === "measurements") {
-            setMeasurementsData({
-                ...measurementsData,
-                [dialogConfig.field]: newValue,
-                lastUpdated: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-            });
+    const handleSaveEdit = async () => {
+        try {
+            setIsLoading(true);
+
+            if (dialogConfig.section === "profile") {
+                if (dialogConfig.field === "name") {
+                    const response = await updateName(newValue);
+                    if (profileData) {
+                        setProfileData({
+                            ...profileData,
+                            name: response.user.name
+                        });
+                    }
+                } else if (dialogConfig.field === "bio") {
+                    const response = await updateBio(newValue);
+                    if (profileData) {
+                        setProfileData({
+                            ...profileData,
+                            bio: response.user.bio
+                        });
+                    }
+                }
+            } else if (dialogConfig.section === "measurements") {
+                const value = parseFloat(newValue);
+
+                if (isNaN(value)) {
+                    setError("Please enter a valid number");
+                    return;
+                }
+
+                let updatedMeasurements: UserMeasurements = { ...profileData?.measurements } as UserMeasurements;
+
+                if (dialogConfig.field === "weight") {
+                    const response = await addWeightMeasurement(value);
+                    updatedMeasurements.weight = {
+                        value: response.measurement.value,
+                        date: response.measurement.date
+                    };
+                } else if (dialogConfig.field === "height") {
+                    const response = await addHeightMeasurement(value);
+                    updatedMeasurements.height = {
+                        value: response.measurement.value,
+                        date: response.measurement.date
+                    };
+                } else if (dialogConfig.field === "bodyFat") {
+                    const response = await addBodyFatMeasurement(value);
+                    updatedMeasurements.bodyFat = {
+                        value: response.measurement.value,
+                        date: response.measurement.date
+                    };
+                }
+
+                if (profileData) {
+                    setProfileData({
+                        ...profileData,
+                        measurements: updatedMeasurements
+                    });
+                }
+            }
+
+            setDialogOpen(false);
+        } catch (err: any) {
+            setError(err.message || "Failed to update data");
+            console.error("Error updating data:", err);
+        } finally {
+            setIsLoading(false);
         }
-        setDialogOpen(false);
     };
 
     // Edit profile picture (would typically open file picker)
-    const handleEditProfilePicture = () => {
-        console.log("Edit profile picture clicked");
-        // In a real app, this would open a file picker
+    const handleEditProfilePicture = async () => {
+        // In a real app, you would handle file upload here
+        // For now, we'll just update with a placeholder URL
+        try {
+            setIsLoading(true);
+            const placeholderUrl = "/api/placeholder/400/400";
+            const response = await updateProfilePicture(placeholderUrl);
+
+            if (profileData) {
+                setProfileData({
+                    ...profileData,
+                    profilePicture: response.user.profilePicture
+                });
+            }
+        } catch (err: any) {
+            setError(err.message || "Failed to update profile picture");
+            console.error("Error updating profile picture:", err);
+        } finally {
+            setIsLoading(false);
+        }
     };
+
+    // Get the last updated date for measurements
+    const getLastMeasurementDate = (): string => {
+        if (!profileData?.measurements) return "No data";
+
+        const dates: Date[] = [];
+
+        if (profileData.measurements.weight) {
+            dates.push(new Date(profileData.measurements.weight.date));
+        }
+        if (profileData.measurements.height) {
+            dates.push(new Date(profileData.measurements.height.date));
+        }
+        if (profileData.measurements.bodyFat) {
+            dates.push(new Date(profileData.measurements.bodyFat.date));
+        }
+
+        if (dates.length === 0) return "No measurements";
+
+        // Find the most recent date
+        const latestDate = new Date(Math.max(...dates.map(date => date.getTime())));
+        return latestDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
+    if (isLoading && !profileData) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <span className="text-gray-500 dark:text-gray-400">Loading profile data...</span>
+            </div>
+        );
+    }
+
+    if (error && !profileData) {
+        return (
+            <div className="flex justify-center items-center h-64">
+                <div className="bg-red-100 dark:bg-red-900 p-4 rounded-md text-red-700 dark:text-red-200">
+                    <h2 className="font-semibold mb-2">Error Loading Profile</h2>
+                    <p>{error}</p>
+                    <Button
+                        className="mt-4"
+                        onClick={() => window.location.reload()}
+                    >
+                        Try Again
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <ProfileLayout>
+            {error && (
+                <div className="mb-6 bg-red-100 dark:bg-red-900 p-3 rounded-md text-red-700 dark:text-red-200">
+                    {error}
+                    <Button
+                        variant="ghost"
+                        className="ml-2 p-1 h-auto text-red-700 dark:text-red-200"
+                        onClick={() => setError(null)}
+                    >
+                        ✕
+                    </Button>
+                </div>
+            )}
+
             <ProfileSection title="Profile">
                 {/* Profile Card with Edit Button */}
                 <div className="relative">
@@ -81,14 +243,23 @@ export default function ProfilePage() {
                     <div className="flex flex-col items-center mb-6">
                         {/* Avatar with edit button */}
                         <div className="relative">
-                            <div className="h-24 w-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-3">
-                                <User className="h-12 w-12 text-gray-500 dark:text-gray-400" />
+                            <div className="h-24 w-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-3 overflow-hidden">
+                                {profileData?.profilePicture ? (
+                                    <img
+                                        src={profileData.profilePicture}
+                                        alt={profileData.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <User className="h-12 w-12 text-gray-500 dark:text-gray-400" />
+                                )}
                             </div>
                             {/* Edit profile picture button */}
                             <button
                                 className="absolute top-0 right-0 p-1.5 rounded-full bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700"
                                 onClick={handleEditProfilePicture}
                                 aria-label="Edit profile picture"
+                                disabled={isLoading}
                             >
                                 <Pencil className="h-4 w-4" />
                             </button>
@@ -96,17 +267,18 @@ export default function ProfilePage() {
 
                         {/* Name with inline edit button */}
                         <div className="flex items-center gap-2">
-                            <h2 className="text-xl font-semibold">{userData.name}</h2>
+                            <h2 className="text-xl font-semibold">{profileData?.name}</h2>
                             <button
                                 className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                                onClick={() => openEditDialog("Edit Name", "name", userData.name, "profile")}
+                                onClick={() => openEditDialog("Edit Name", "name", profileData?.name || "", "profile")}
                                 aria-label="Edit name"
+                                disabled={isLoading}
                             >
                                 <Pencil className="h-4 w-4" />
                             </button>
                         </div>
 
-                        <p className="text-gray-500 dark:text-gray-400">{userData.email}</p>
+                        <p className="text-gray-500 dark:text-gray-400">{profileData?.email}</p>
                     </div>
 
                     <div className="py-4">
@@ -114,14 +286,15 @@ export default function ProfilePage() {
                             <h3 className="font-medium">About Me</h3>
                             <button
                                 className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                                onClick={() => openEditDialog("Edit Bio", "bio", userData.bio, "profile")}
+                                onClick={() => openEditDialog("Edit Bio", "bio", profileData?.bio || "", "profile")}
                                 aria-label="Edit bio"
+                                disabled={isLoading}
                             >
                                 <Pencil className="h-4 w-4" />
                             </button>
                         </div>
                         <p className="text-gray-600 dark:text-gray-300">
-                            {userData.bio}
+                            {profileData?.bio || "No bio added yet."}
                         </p>
                     </div>
                 </div>
@@ -129,30 +302,45 @@ export default function ProfilePage() {
 
             <ProfileSection
                 title="Body Measurements"
-                description={`Last updated: ${measurementsData.lastUpdated}`}
+                description={`Last updated: ${getLastMeasurementDate()}`}
             >
                 <ProfileInfoItem
                     label="Weight"
-                    value={measurementsData.weight}
+                    value={formatMeasurement(profileData?.measurements?.weight || null, "kg")}
                     icon={<Scale className="h-5 w-5" />}
                     editable
-                    onEdit={() => openEditDialog("Edit Weight", "weight", measurementsData.weight, "measurements")}
+                    onEdit={() => openEditDialog(
+                        "Edit Weight",
+                        "weight",
+                        profileData?.measurements?.weight?.value.toString() || "",
+                        "measurements"
+                    )}
                 />
 
                 <ProfileInfoItem
                     label="Height"
-                    value={measurementsData.height}
+                    value={formatMeasurement(profileData?.measurements?.height || null, "cm")}
                     icon={<Ruler className="h-5 w-5" />}
                     editable
-                    onEdit={() => openEditDialog("Edit Height", "height", measurementsData.height, "measurements")}
+                    onEdit={() => openEditDialog(
+                        "Edit Height",
+                        "height",
+                        profileData?.measurements?.height?.value.toString() || "",
+                        "measurements"
+                    )}
                 />
 
                 <ProfileInfoItem
                     label="Body Fat"
-                    value={measurementsData.bodyFat}
+                    value={formatMeasurement(profileData?.measurements?.bodyFat || null, "%")}
                     icon={<Percent className="h-5 w-5" />}
                     editable
-                    onEdit={() => openEditDialog("Edit Body Fat", "bodyFat", measurementsData.bodyFat, "measurements")}
+                    onEdit={() => openEditDialog(
+                        "Edit Body Fat",
+                        "bodyFat",
+                        profileData?.measurements?.bodyFat?.value.toString() || "",
+                        "measurements"
+                    )}
                 />
             </ProfileSection>
 
@@ -170,6 +358,7 @@ export default function ProfilePage() {
                                 value={newValue}
                                 onChange={(e) => setNewValue(e.target.value)}
                                 rows={4}
+                                disabled={isLoading}
                             />
                         ) : (
                             <input
@@ -177,15 +366,25 @@ export default function ProfilePage() {
                                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 value={newValue}
                                 onChange={(e) => setNewValue(e.target.value)}
+                                disabled={isLoading}
+                                type={dialogConfig.section === "measurements" ? "number" : "text"}
+                                step={dialogConfig.field === "bodyFat" ? "0.1" : "1"}
                             />
                         )}
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                        <Button
+                            variant="outline"
+                            onClick={() => setDialogOpen(false)}
+                            disabled={isLoading}
+                        >
                             Cancel
                         </Button>
-                        <Button onClick={handleSaveEdit}>
-                            Confirm
+                        <Button
+                            onClick={handleSaveEdit}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Saving..." : "Confirm"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
