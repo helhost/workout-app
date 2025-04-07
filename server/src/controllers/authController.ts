@@ -232,9 +232,6 @@ export const refreshToken = async (req: Request, res: Response) => {
     }
 };
 
-
-// Add this to src/controllers/authController.ts
-
 export const logout = (req: Request, res: Response) => {
     // Clear all auth cookies
     res.clearCookie('access_token');
