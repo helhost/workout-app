@@ -1,4 +1,4 @@
-// This file should replace the content in client/src/features/profile/components/ProfileCard.tsx
+// client/src/features/profile/components/ProfileCard.tsx
 
 import { Pencil } from "lucide-react";
 import { ProfileImageUploader } from "@/features/profile";

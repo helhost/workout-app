@@ -83,10 +83,6 @@ export const getProfileImage = async (req: Request, res: Response) => {
             res.set('Content-Type', imageData.mimeType);
             res.set('Content-Disposition', `inline; filename="${imageData.filename}"`);
 
-            // Don't set charset for binary data
-            res.removeHeader('Content-Type');
-            res.setHeader('Content-Type', imageData.mimeType);
-
             // Send the binary data as a Buffer, not JSON
             res.send(Buffer.from(imageData.data));
         } catch (error: any) {

@@ -1,9 +1,10 @@
 // client/src/features/profile/components/ProfileImageUploader.tsx
-import { useState, useRef, ChangeEvent } from 'react';
-import { User, Upload, Trash2 } from 'lucide-react';
+import { useState, useRef, ChangeEvent, useEffect } from 'react';
+import { Upload, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { uploadProfileImage, deleteProfileImage, getProfileImageUrl } from '../api';
+import { uploadProfileImage, deleteProfileImage } from '../api';
+import ProfileImage from './ProfileImage';
 
 interface ProfileImageUploaderProps {
     hasProfileImage: boolean;
@@ -23,8 +24,10 @@ export default function ProfileImageUploader({
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Generate profile image URL with cache-busting
-    const profileImageUrl = hasProfileImage ? getProfileImageUrl() : null;
+    // Log when hasProfileImage changes
+    useEffect(() => {
+        console.log('ProfileImageUploader hasProfileImage:', hasProfileImage);
+    }, [hasProfileImage]);
 
     // Handle file selection
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -62,16 +65,21 @@ export default function ProfileImageUploader({
     // Handle image upload
     const handleUpload = async (file: File) => {
         try {
+            console.log('Starting image upload');
             setIsUploading(true);
             setError(null);
 
-            await uploadProfileImage(file);
-            onImageUpdated(); // Refresh profile data
+            const result = await uploadProfileImage(file);
+            console.log('Upload result:', result);
 
             // Clear the file input
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
+
+            // Call the parent's callback to refresh profile data
+            console.log('Calling onImageUpdated callback');
+            onImageUpdated();
         } catch (err: any) {
             console.error('Upload error:', err);
             setError(err.message || 'Failed to upload image');
@@ -89,11 +97,17 @@ export default function ProfileImageUploader({
     // Handle image deletion
     const handleDelete = async () => {
         try {
+            console.log('Starting image deletion');
             setIsUploading(true);
             setError(null);
 
             await deleteProfileImage();
-            onImageUpdated(); // Refresh profile data
+            console.log('Image deleted successfully');
+
+            // Call the parent's callback to refresh profile data
+            console.log('Calling onImageUpdated callback after deletion');
+            onImageUpdated();
+
             setIsDeleteDialogOpen(false);
         } catch (err: any) {
             console.error('Delete error:', err);
@@ -103,26 +117,22 @@ export default function ProfileImageUploader({
         }
     };
 
+    // Handle image load error
+    const handleImageError = () => {
+        console.warn('Profile image failed to load');
+    };
+
     return (
         <div className={className}>
             {/* Profile Image */}
             <div className="relative">
                 <div className="h-24 w-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mb-3 overflow-hidden">
-                    {profileImageUrl ? (
-                        <img
-                            src={profileImageUrl}
-                            alt="Profile"
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                                // Fallback if image fails to load
-                                e.currentTarget.src = '';
-                                e.currentTarget.style.display = 'none';
-                                console.error('Failed to load profile image');
-                            }}
-                        />
-                    ) : (
-                        <User className="h-12 w-12 text-gray-500 dark:text-gray-400" />
-                    )}
+                    <ProfileImage
+                        hasProfileImage={hasProfileImage}
+                        className="h-full w-full"
+                        size="lg"
+                        onLoadError={handleImageError}
+                    />
                 </div>
 
                 {/* Edit button overlay */}

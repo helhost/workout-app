@@ -5,6 +5,7 @@ export { default as ProfileSection } from './components/ProfileSection';
 export { default as ProfileCard } from './components/ProfileCard';
 export { default as ProfileInfoItem } from './components/ProfileInfoItem';
 export { default as ProfileImageUploader } from './components/ProfileImageUploader';
+export { default as ProfileImage } from './components/ProfileImage';
 
 // Export types
 export * from './types';

@@ -104,16 +104,6 @@ export const deleteProfileImage = async (): Promise<{ message: string }> => {
     }
 };
 
-// Get the profile image URL
-export const getProfileImageUrl = (): string => {
-    // Add a timestamp to prevent caching
-    return `${api.defaults.baseURL}/profile/image?t=${new Date().getTime()}`;
-};
-
-
-
-
-
 // API functions for measurements
 export const getLatestMeasurements = async (): Promise<{
     message: string;

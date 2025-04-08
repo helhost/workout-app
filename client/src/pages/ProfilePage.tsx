@@ -31,6 +31,7 @@ export default function ProfilePage() {
     const [profileData, setProfileData] = useState<ProfileUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [forceRefreshKey, setForceRefreshKey] = useState(0);
 
     // Dialog state
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -44,12 +45,16 @@ export default function ProfilePage() {
     // New value for editing
     const [newValue, setNewValue] = useState("");
 
-    // Fetch profile data on page load
+    // Fetch profile data on page load or when forceRefreshKey changes
     const fetchProfileData = async () => {
         try {
             setIsLoading(true);
             setError(null);
+            console.log('Fetching profile data...');
             const response = await getProfile();
+            console.log('Profile data received:', response.profile);
+            console.log('Has profile image:', response.profile.hasProfileImage);
+
             setProfileData(response.profile);
         } catch (err: any) {
             setError(err.message || "Failed to load profile data");
@@ -61,7 +66,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         fetchProfileData();
-    }, []);
+    }, [forceRefreshKey]);
 
     // Open dialog for editing a field
     const openEditDialog = (title: string, field: string, value: string, section: string) => {
@@ -74,6 +79,17 @@ export default function ProfilePage() {
     const formatMeasurement = (measurement: MeasurementData | null, unit: string): string => {
         if (!measurement) return "Not set";
         return `${measurement.value} ${unit}`;
+    };
+
+    // Handle profile image update - force a complete refresh
+    const handleProfileImageUpdated = async () => {
+        console.log('Image updated callback triggered');
+
+        // Force a complete refresh of profile data
+        await fetchProfileData();
+
+        // Force a component refresh by updating the key
+        setForceRefreshKey(prev => prev + 1);
     };
 
     // Handle saving the new value
@@ -214,13 +230,14 @@ export default function ProfilePage() {
             )}
 
             <ProfileSection title="Profile">
-                {/* Use the updated ProfileCard component */}
+                {/* Use the updated ProfileCard component with key to force re-render */}
                 <ProfileCard
+                    key={`profile-card-${forceRefreshKey}`}
                     name={profileData?.name || ""}
                     email={profileData?.email || ""}
                     bio={profileData?.bio}
                     hasProfileImage={profileData?.hasProfileImage || false}
-                    onImageUpdated={fetchProfileData}
+                    onImageUpdated={handleProfileImageUpdated}
                     onEditName={() => openEditDialog("Edit Name", "name", profileData?.name || "", "profile")}
                     onEditBio={() => openEditDialog("Edit Bio", "bio", profileData?.bio || "", "profile")}
                 />
