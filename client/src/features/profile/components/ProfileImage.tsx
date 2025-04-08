@@ -8,19 +8,23 @@ interface ProfileImageProps {
     className?: string;
     size?: 'sm' | 'md' | 'lg';
     onLoadError?: () => void;
+    // Add a imageUrl prop to control when to refetch
+    imageUrl?: string | null;
 }
 
 export default function ProfileImage({
     hasProfileImage,
     className,
     size = 'md',
-    onLoadError
+    onLoadError,
+    // Allow passing a pre-fetched image URL
+    imageUrl: propImageUrl = null
 }: ProfileImageProps) {
-    const [imageSrc, setImageSrc] = useState<string | null>(null);
+    const [imageSrc, setImageSrc] = useState<string | null>(propImageUrl);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
 
-    // Load the image when hasProfileImage changes
+    // Load the image only when hasProfileImage changes or imageVersion changes
     useEffect(() => {
         let isMounted = true;
 
@@ -30,12 +34,18 @@ export default function ProfileImage({
             return;
         }
 
+        // If we already have the image URL and it hasn't changed, don't refetch
+        if (imageSrc && propImageUrl === null) {
+            return;
+        }
+
         const loadImage = async () => {
             try {
                 setIsLoading(true);
                 setError(false);
 
-                const imageUrl = await getProfileImageUrl(true); // Force refresh
+                // Use a timestamp query parameter to force the browser to load a fresh image
+                const imageUrl = await getProfileImageUrl(false);
 
                 if (isMounted) {
                     setImageSrc(imageUrl);
@@ -61,7 +71,7 @@ export default function ProfileImage({
                 URL.revokeObjectURL(imageSrc);
             }
         };
-    }, [hasProfileImage, onLoadError]);
+    }, [hasProfileImage, propImageUrl, onLoadError]);
 
     // Determine icon size based on the size prop
     const getIconSize = () => {

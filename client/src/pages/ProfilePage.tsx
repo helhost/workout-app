@@ -31,7 +31,6 @@ export default function ProfilePage() {
     const [profileData, setProfileData] = useState<ProfileUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [forceRefreshKey, setForceRefreshKey] = useState(0);
 
     // Dialog state
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -45,7 +44,7 @@ export default function ProfilePage() {
     // New value for editing
     const [newValue, setNewValue] = useState("");
 
-    // Fetch profile data on page load or when forceRefreshKey changes
+    // Fetch profile data on page load
     const fetchProfileData = async () => {
         try {
             setIsLoading(true);
@@ -66,7 +65,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         fetchProfileData();
-    }, [forceRefreshKey]);
+    }, []);
 
     // Open dialog for editing a field
     const openEditDialog = (title: string, field: string, value: string, section: string) => {
@@ -81,15 +80,13 @@ export default function ProfilePage() {
         return `${measurement.value} ${unit}`;
     };
 
-    // Handle profile image update - force a complete refresh
+    // Handle profile image update - only update the hasProfileImage flag
     const handleProfileImageUpdated = async () => {
         console.log('Image updated callback triggered');
 
-        // Force a complete refresh of profile data
-        await fetchProfileData();
-
-        // Force a component refresh by updating the key
-        setForceRefreshKey(prev => prev + 1);
+        // Just fetch the profile data to update the hasProfileImage flag
+        // but don't trigger a full component remount
+        fetchProfileData();
     };
 
     // Handle saving the new value
@@ -230,9 +227,8 @@ export default function ProfilePage() {
             )}
 
             <ProfileSection title="Profile">
-                {/* Use the updated ProfileCard component with key to force re-render */}
+                {/* Use the ProfileCard component without the key prop for forcing re-renders */}
                 <ProfileCard
-                    key={`profile-card-${forceRefreshKey}`}
                     name={profileData?.name || ""}
                     email={profileData?.email || ""}
                     bio={profileData?.bio}
