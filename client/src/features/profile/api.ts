@@ -47,7 +47,7 @@ export interface MeasurementHistory {
     date: string;
 }
 
-// API functions for profile data
+// get profile
 export const getProfile = async (): Promise<{ message: string; profile: ProfileUser }> => {
     try {
         const response = await api.get<{ message: string; profile: ProfileUser }>('/profile');
@@ -57,6 +57,7 @@ export const getProfile = async (): Promise<{ message: string; profile: ProfileU
     }
 };
 
+// Update name
 export const updateName = async (name: string): Promise<{ message: string; user: { id: string; name: string } }> => {
     try {
         const response = await api.patch<{ message: string; user: { id: string; name: string } }>('/profile/name', { name });
@@ -66,6 +67,7 @@ export const updateName = async (name: string): Promise<{ message: string; user:
     }
 };
 
+// Udpate Bio
 export const updateBio = async (bio: string): Promise<{ message: string; user: { id: string; bio: string } }> => {
     try {
         const response = await api.patch<{ message: string; user: { id: string; bio: string } }>('/profile/bio', { bio });
@@ -75,22 +77,7 @@ export const updateBio = async (bio: string): Promise<{ message: string; user: {
     }
 };
 
-export const updateProfilePicture = async (profilePicture: string): Promise<{
-    message: string;
-    user: { id: string; profilePicture: string }
-}> => {
-    try {
-        const response = await api.patch<{
-            message: string;
-            user: { id: string; profilePicture: string }
-        }>('/profile/profile-picture', { profilePicture });
-        return response.data;
-    } catch (error) {
-        throw handleApiError(error);
-    }
-};
-
-// New profile image API functions
+// Upload profile image
 export const uploadProfileImage = async (file: File): Promise<{ message: string; image: any }> => {
     try {
         const formData = new FormData();
@@ -107,6 +94,7 @@ export const uploadProfileImage = async (file: File): Promise<{ message: string;
     }
 };
 
+// Delete profile image
 export const deleteProfileImage = async (): Promise<{ message: string }> => {
     try {
         const response = await api.delete<{ message: string }>('/profile/image');
@@ -116,16 +104,15 @@ export const deleteProfileImage = async (): Promise<{ message: string }> => {
     }
 };
 
-// Get the profile image URL (this will be used in image tags)
+// Get the profile image URL
 export const getProfileImageUrl = (): string => {
     // Add a timestamp to prevent caching
     return `${api.defaults.baseURL}/profile/image?t=${new Date().getTime()}`;
 };
 
-// Get profile image URL for a specific user (for viewing others' profiles)
-export const getUserProfileImageUrl = (userId: string): string => {
-    return `${api.defaults.baseURL}/profile/image/${userId}?t=${new Date().getTime()}`;
-};
+
+
+
 
 // API functions for measurements
 export const getLatestMeasurements = async (): Promise<{

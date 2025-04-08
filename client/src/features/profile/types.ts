@@ -15,7 +15,9 @@ export interface ProfileSectionProps {
 export interface ProfileCardProps {
     name: string;
     email: string;
-    avatar?: ReactNode;
+    hasProfileImage?: boolean;
+    onEditName?: () => void;
+    onEditImage?: () => void;
     className?: string;
 }
 
