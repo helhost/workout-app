@@ -1,12 +1,11 @@
-// client/src/pages/ProfilePage.tsx
 import { useState, useEffect } from "react";
 import {
     ProfileLayout,
     ProfileSection,
     ProfileInfoItem,
-    ProfileImageUploader
+    ProfileCard
 } from "@/features/profile";
-import { Scale, Ruler, Percent, Pencil } from "lucide-react";
+import { Scale, Ruler, Percent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -215,49 +214,16 @@ export default function ProfilePage() {
             )}
 
             <ProfileSection title="Profile">
-                {/* Profile Card with Profile Image Uploader */}
-                <div className="relative">
-                    {/* Custom display instead of using ProfileCard to have better control over layout */}
-                    <div className="flex flex-col items-center mb-6">
-                        {/* Profile Image Uploader Component */}
-                        <ProfileImageUploader
-                            hasProfileImage={profileData?.hasProfileImage || false}
-                            onImageUpdated={fetchProfileData}
-                        />
-
-                        {/* Name with inline edit button */}
-                        <div className="flex items-center gap-2 mt-2">
-                            <h2 className="text-xl font-semibold">{profileData?.name}</h2>
-                            <button
-                                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                                onClick={() => openEditDialog("Edit Name", "name", profileData?.name || "", "profile")}
-                                aria-label="Edit name"
-                                disabled={isLoading}
-                            >
-                                <Pencil className="h-4 w-4" />
-                            </button>
-                        </div>
-
-                        <p className="text-gray-500 dark:text-gray-400">{profileData?.email}</p>
-                    </div>
-
-                    <div className="py-4">
-                        <div className="flex justify-between items-center mb-2">
-                            <h3 className="font-medium">About Me</h3>
-                            <button
-                                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
-                                onClick={() => openEditDialog("Edit Bio", "bio", profileData?.bio || "", "profile")}
-                                aria-label="Edit bio"
-                                disabled={isLoading}
-                            >
-                                <Pencil className="h-4 w-4" />
-                            </button>
-                        </div>
-                        <p className="text-gray-600 dark:text-gray-300">
-                            {profileData?.bio || "No bio added yet."}
-                        </p>
-                    </div>
-                </div>
+                {/* Use the updated ProfileCard component */}
+                <ProfileCard
+                    name={profileData?.name || ""}
+                    email={profileData?.email || ""}
+                    bio={profileData?.bio}
+                    hasProfileImage={profileData?.hasProfileImage || false}
+                    onImageUpdated={fetchProfileData}
+                    onEditName={() => openEditDialog("Edit Name", "name", profileData?.name || "", "profile")}
+                    onEditBio={() => openEditDialog("Edit Bio", "bio", profileData?.bio || "", "profile")}
+                />
             </ProfileSection>
 
             <ProfileSection

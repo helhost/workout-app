@@ -15,9 +15,11 @@ export interface ProfileSectionProps {
 export interface ProfileCardProps {
     name: string;
     email: string;
-    hasProfileImage?: boolean;
+    bio?: string;
+    hasProfileImage: boolean;
+    onImageUpdated: () => void;
     onEditName?: () => void;
-    onEditImage?: () => void;
+    onEditBio?: () => void;
     className?: string;
 }
 
