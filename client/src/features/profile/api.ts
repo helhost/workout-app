@@ -104,6 +104,21 @@ export const deleteProfileImage = async (): Promise<{ message: string }> => {
     }
 };
 
+export const getProfileImageUrl = async (forceRefresh = false): Promise<string> => {
+    try {
+        // Add a timestamp query parameter to bust cache if needed
+        const timestamp = forceRefresh ? new Date().getTime() : '';
+        const response = await api.get(`/profile/image${forceRefresh ? `?t=${timestamp}` : ''}`, {
+            responseType: 'blob',
+        });
+
+        // Convert blob to an object URL
+        return URL.createObjectURL(response.data);
+    } catch (error) {
+        throw handleApiError(error);
+    }
+};
+
 // API functions for measurements
 export const getLatestMeasurements = async (): Promise<{
     message: string;

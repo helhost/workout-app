@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { User } from 'lucide-react';
-import api from '@/lib/api/axios';
 import { cn } from '@/lib/utils';
+import { getProfileImageUrl } from '../api';
 
 interface ProfileImageProps {
     hasProfileImage: boolean;
@@ -19,73 +19,49 @@ export default function ProfileImage({
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
-    const [fetchKey, setFetchKey] = useState(0); // Used to force re-fetch
 
-    // Reset image state when hasProfileImage changes
+    // Load the image when hasProfileImage changes
     useEffect(() => {
-        console.log('ProfileImage hasProfileImage changed:', hasProfileImage);
+        let isMounted = true;
+
         if (!hasProfileImage) {
             setImageSrc(null);
             setError(false);
-        } else {
-            // Force a re-fetch when hasProfileImage becomes true
-            setFetchKey(prev => prev + 1);
+            return;
         }
-    }, [hasProfileImage]);
 
-    useEffect(() => {
-        if (hasProfileImage && !imageSrc && !error) {
-            setIsLoading(true);
-            console.log('Fetching profile image...');
+        const loadImage = async () => {
+            try {
+                setIsLoading(true);
+                setError(false);
 
-            // Use axios to fetch the image as a blob with timestamp for cache busting
-            const timestamp = new Date().getTime();
-            api.get(`/profile/image?t=${timestamp}`, {
-                responseType: 'blob',
-                headers: {
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache',
-                    'Expires': '0',
+                const imageUrl = await getProfileImageUrl(true); // Force refresh
+
+                if (isMounted) {
+                    setImageSrc(imageUrl);
+                    setIsLoading(false);
                 }
-            })
-                .then(response => {
-                    console.log('Image response received, status:', response.status);
-                    console.log('Image blob size:', response.data.size, 'bytes');
-                    console.log('Content type:', response.headers['content-type']);
-
-                    // Only proceed if we got actual data
-                    if (response.data.size > 0) {
-                        // Convert blob to a data URL
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            console.log('Image converted to data URL');
-                            setImageSrc(reader.result as string);
-                            setIsLoading(false);
-                        };
-                        reader.onerror = () => {
-                            console.error('FileReader error:', reader.error);
-                            setError(true);
-                            setIsLoading(false);
-                            if (onLoadError) onLoadError();
-                        };
-                        reader.readAsDataURL(response.data);
-                    } else {
-                        console.warn('Image response was empty');
-                        setError(true);
-                        setIsLoading(false);
-                        if (onLoadError) onLoadError();
-                    }
-                })
-                .catch(err => {
-                    console.error('Failed to load profile image:', err);
+            } catch (err) {
+                console.error('Failed to load profile image:', err);
+                if (isMounted) {
                     setError(true);
                     setIsLoading(false);
-                    if (onLoadError) {
-                        onLoadError();
-                    }
-                });
-        }
-    }, [hasProfileImage, imageSrc, error, onLoadError, fetchKey]);
+                    if (onLoadError) onLoadError();
+                }
+            }
+        };
+
+        loadImage();
+
+        // Clean up function to handle component unmounting
+        return () => {
+            isMounted = false;
+            // Revoke any object URLs to prevent memory leaks
+            if (imageSrc && imageSrc.startsWith('blob:')) {
+                URL.revokeObjectURL(imageSrc);
+            }
+        };
+    }, [hasProfileImage, onLoadError]);
 
     // Determine icon size based on the size prop
     const getIconSize = () => {
@@ -109,7 +85,6 @@ export default function ProfileImage({
     }
 
     if (!hasProfileImage || error || !imageSrc) {
-        console.log('Showing default icon. hasProfileImage:', hasProfileImage, 'error:', error, 'imageSrc exists:', !!imageSrc);
         return (
             <div className={cn(
                 "bg-gray-200 dark:bg-gray-700 flex items-center justify-center",
@@ -120,13 +95,16 @@ export default function ProfileImage({
         );
     }
 
-    console.log('Showing actual image');
     return (
         <div className={cn("overflow-hidden", className)}>
             <img
                 src={imageSrc}
                 alt="Profile"
                 className="w-full h-full object-cover"
+                onError={() => {
+                    setError(true);
+                    if (onLoadError) onLoadError();
+                }}
             />
         </div>
     );

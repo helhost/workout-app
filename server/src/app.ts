@@ -14,7 +14,7 @@ import {
 const app = express();
 
 // Read allowed origins from .env
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
 
 // CORS Configuration
 const corsOptions = {
