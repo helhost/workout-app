@@ -35,8 +35,11 @@ api.interceptors.response.use(
     async (error: AxiosError) => {
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
+        const isAuthEndpoint = originalRequest.url?.includes('/auth/login') ||
+            originalRequest.url?.includes('/auth/register');
+
         // If error is 401 and we haven't retried yet and not already refreshing
-        if (error.response?.status === 401 && !originalRequest._retry && !refreshFailure) {
+        if (error.response?.status === 401 && !originalRequest._retry && !refreshFailure && !isAuthEndpoint) {
             // Only try to refresh if we're not already doing so
             if (!isRefreshing) {
                 isRefreshing = true;

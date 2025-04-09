@@ -11,21 +11,25 @@ export default function LoginPage() {
 
     // Handle login form submission
     const handleLogin = async (email: string, password: string, rememberMe: boolean) => {
-        if (isSubmitting) return; // Prevent double submission
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+        setLoginError(null);
 
         try {
-            setIsSubmitting(true);
-            setLoginError(null);
-
-            // Call the login function from auth context
+            console.log("LoginPage: Calling login function");
             await login(email, password, rememberMe);
-
-            // Navigate to home page on successful login
+            console.log("LoginPage: Login successful, navigating...");
             navigate("/");
         } catch (err) {
-            // Error is already handled by auth context, but we can set our own message too
-            setLoginError("Login failed. Please check your credentials and try again.");
+            console.error("LoginPage: Error caught:", err);
+            if (err instanceof Error) {
+                setLoginError(err.message);
+            } else {
+                setLoginError("An unexpected error occurred during login");
+            }
         } finally {
+            console.log("LoginPage: Setting isSubmitting to false");
             setIsSubmitting(false);
         }
     };

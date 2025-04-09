@@ -20,7 +20,9 @@ export class ApiError extends Error {
     static fromAxiosError(error: AxiosError): ApiError {
         const status = error.response?.status || 500;
         const data = error.response?.data as ApiErrorResponse | undefined;
-        const message = data?.error || error.message || 'Unknown API error';
+
+        // Try to get the most specific error message possible
+        const message = data?.message || data?.error || error.message || 'Unknown API error';
 
         return new ApiError(message, status, data || null);
     }
