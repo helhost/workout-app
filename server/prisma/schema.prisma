@@ -40,17 +40,14 @@ model ProfileImage {
 }
 
 model UserSettings {
-  id                 String   @id @default(uuid())
-  userId             String   @unique
-  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  darkMode           Boolean  @default(false)
-  highContrast       Boolean  @default(false)
-  emailNotifications Boolean  @default(true)
-  pushNotifications  Boolean  @default(true)
-  notificationSound  Boolean  @default(true)
-  language           String   @default("en")
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                     String   @id @default(uuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  darkMode               Boolean  @default(false)
+  language               String   @default("en")
+  defaultMeasurementUnit String   @default("metric") // "metric" or "imperial"
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 }
 
 // Main user measurements container
