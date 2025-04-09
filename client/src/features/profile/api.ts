@@ -22,12 +22,9 @@ export interface ProfileUser {
 }
 
 export interface UserSettings {
-    language: string;
     darkMode: boolean;
-    highContrast: boolean;
-    emailNotifications: boolean;
-    pushNotifications: boolean;
-    notificationSound: boolean;
+    language: string;
+    defaultMeasurementUnit: string; // This was missing in the original interface
 }
 
 export interface UserMeasurements {

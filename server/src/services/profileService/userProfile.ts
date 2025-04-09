@@ -83,3 +83,34 @@ export const updateUserProfilePicture = async (userId: string, profilePicture: s
         }
     });
 };
+
+export const updateUserSettings = async (userId: string, settingsData: {
+    darkMode?: boolean;
+    language?: string;
+    defaultMeasurementUnit?: string;
+}) => {
+    // Validate input data to ensure we only update existing fields
+    const validUpdates: any = {};
+
+    if (typeof settingsData.darkMode === 'boolean') {
+        validUpdates.darkMode = settingsData.darkMode;
+    }
+
+    if (typeof settingsData.language === 'string') {
+        validUpdates.language = settingsData.language;
+    }
+
+    if (typeof settingsData.defaultMeasurementUnit === 'string') {
+        validUpdates.defaultMeasurementUnit = settingsData.defaultMeasurementUnit;
+    }
+
+    return prisma.userSettings.update({
+        where: { userId },
+        data: validUpdates,
+        select: {
+            darkMode: true,
+            language: true,
+            defaultMeasurementUnit: true
+        }
+    });
+};

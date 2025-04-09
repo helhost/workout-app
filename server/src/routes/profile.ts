@@ -13,7 +13,8 @@ import {
     uploadProfileImage,
     getProfileImage,
     removeProfileImage,
-    upload
+    upload,
+    updateSettings
 } from '../controllers/profileController';
 
 const router = express.Router();
@@ -26,6 +27,7 @@ router.get('/', getProfile);
 router.patch('/name', updateName);
 router.patch('/bio', updateBio);
 router.patch('/profile-picture', updateProfilePicture);
+router.patch('/settings', updateSettings);
 
 // Profile image routes
 router.post('/image', upload.single('image'), uploadProfileImage);

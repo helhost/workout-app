@@ -7,5 +7,8 @@ export { default as SettingSlider } from './components/SettingSlider';
 export { default as SettingSelect } from './components/SettingSelect';
 export { default as SettingSubmenu } from './components/SettingSubmenu';
 
+// Export API
+export * from './api';
+
 // Export types
 export * from './types';

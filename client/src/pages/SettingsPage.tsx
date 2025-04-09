@@ -1,134 +1,171 @@
-import { useState } from "react";
-import { setDarkMode, isDarkModeEnabled } from "@/features/theme/themeUtils";
-import {
-    SettingsLayout,
-    SettingsSection,
-    SettingToggle,
-    SettingSlider,
-    SettingSelect,
-    SettingSubmenu
-} from "@/features/settings";
+import { useState, useEffect } from "react";
+import { setDarkMode } from "@/features/theme/themeUtils";
+import SettingsLayout from "@/features/settings/components/SettingsLayout";
+import SettingsSection from "@/features/settings/components/SettingsSection";
+import SettingToggle from "@/features/settings/components/SettingToggle";
+import SettingSelect from "@/features/settings/components/SettingSelect";
+import { getProfile } from "@/features/profile/api";
+import { Button } from "@/components/ui/button";
+import { UserSettings, updateSettings } from "@/features/settings/api";
+
 
 export default function SettingsPage() {
-    // Theme settings
-    const [darkMode, setDarkModeState] = useState(isDarkModeEnabled());
-    const [highContrast, setHighContrast] = useState(false);
+    // Settings state based on the actual fields from the database
+    const [settings, setSettings] = useState<UserSettings>({
+        darkMode: false,
+        language: "en",
+        defaultMeasurementUnit: "metric"
+    });
 
-    // Notification settings
-    const [emailNotifications, setEmailNotifications] = useState(true);
-    const [pushNotifications, setPushNotifications] = useState(true);
-    const [notificationSound, setNotificationSound] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveMessage, setSaveMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
-    // Volume settings
-    const [volume, setVolume] = useState(75);
-    const [microphoneVolume, setMicrophoneVolume] = useState(50);
+    // Fetch user settings on component mount
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
 
-    // Language setting
-    const [language, setLanguage] = useState<string>("en");
+                const response = await getProfile();
+                if (response && response.profile && response.profile.settings) {
+                    // Extract only the fields we need and use type assertion to ensure 
+                    // we're handling the correct structure
+                    const profileSettings = response.profile.settings;
 
-    // Theme toggle handler
+                    setSettings({
+                        darkMode: !!profileSettings.darkMode,
+                        language: profileSettings.language || "en",
+                        defaultMeasurementUnit: profileSettings.defaultMeasurementUnit || "metric"
+                    });
+                }
+            } catch (err: any) {
+                console.error("Error fetching settings:", err);
+                setError(err.message || "Failed to load settings");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchSettings();
+    }, []);
+
+    // Update dark mode in both state and UI
     const toggleDarkMode = (checked: boolean) => {
-        setDarkModeState(checked);
-        setDarkMode(checked);
+        setSettings(prev => ({ ...prev, darkMode: checked }));
+        setDarkMode(checked); // Update UI immediately
     };
+
+    // Save settings to the server
+    const saveSettings = async () => {
+        try {
+            setIsSaving(true);
+            setSaveMessage(null);
+
+            // Call API to update settings
+            await updateSettings(settings);
+
+            // Show success message
+            setSaveMessage({
+                text: "Settings saved successfully",
+                type: "success"
+            });
+
+            // Clear success message after 3 seconds
+            setTimeout(() => setSaveMessage(null), 3000);
+        } catch (err: any) {
+            console.error("Error saving settings:", err);
+            setSaveMessage({
+                text: err.message || "Failed to save settings",
+                type: "error"
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <SettingsLayout>
+                <div className="flex justify-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400">Loading settings...</p>
+                </div>
+            </SettingsLayout>
+        );
+    }
+
+    if (error) {
+        return (
+            <SettingsLayout>
+                <div className="bg-red-100 dark:bg-red-900 p-4 rounded-md text-red-700 dark:text-red-200">
+                    <h2 className="font-semibold mb-2">Error Loading Settings</h2>
+                    <p>{error}</p>
+                    <Button
+                        className="mt-4"
+                        onClick={() => window.location.reload()}
+                    >
+                        Try Again
+                    </Button>
+                </div>
+            </SettingsLayout>
+        );
+    }
 
     return (
         <SettingsLayout>
+            {saveMessage && (
+                <div className={`mb-4 p-3 rounded ${saveMessage.type === 'success'
+                    ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
+                    : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
+                    }`}>
+                    {saveMessage.text}
+                </div>
+            )}
+
             <SettingsSection title="Appearance" description="Customize how the app looks and feels">
                 <SettingToggle
                     label="Dark Mode"
                     description="Enable dark mode for the application"
-                    checked={darkMode}
+                    checked={settings.darkMode}
                     onChange={toggleDarkMode}
                 />
-
-                <SettingToggle
-                    label="High Contrast"
-                    description="Increase contrast for better visibility"
-                    checked={highContrast}
-                    onChange={setHighContrast}
-                />
             </SettingsSection>
 
-            <SettingsSection title="Notifications" description="Manage your notification preferences">
-                <SettingToggle
-                    label="Email Notifications"
-                    description="Receive notifications via email"
-                    checked={emailNotifications}
-                    onChange={setEmailNotifications}
-                />
-
-                <SettingToggle
-                    label="Push Notifications"
-                    description="Receive notifications on your device"
-                    checked={pushNotifications}
-                    onChange={setPushNotifications}
-                />
-
-                <SettingToggle
-                    label="Notification Sounds"
-                    description="Play a sound when notifications arrive"
-                    checked={notificationSound}
-                    onChange={setNotificationSound}
-                />
-            </SettingsSection>
-
-            <SettingsSection title="Audio" description="Configure audio settings">
-                <SettingSlider
-                    label="Main Volume"
-                    description="Set the overall volume level"
-                    value={volume}
-                    onChange={setVolume}
-                    valueFormatter={(value) => `${value}%`}
-                />
-
-                <SettingSlider
-                    label="Microphone Volume"
-                    description="Set the microphone input level"
-                    value={microphoneVolume}
-                    onChange={setMicrophoneVolume}
-                    valueFormatter={(value) => `${value}%`}
-                />
-            </SettingsSection>
-
-            <SettingsSection title="Advanced Settings" description="Configure advanced application settings">
-                <SettingSubmenu
+            <SettingsSection title="Preferences" description="Set your application preferences">
+                <SettingSelect
                     label="Language"
-                    description="Select your preferred language"
-                >
-                    <SettingSelect
-                        label="Display Language"
-                        value={language}
-                        onChange={setLanguage}
-                        options={[
-                            { label: "English", value: "en" },
-                            { label: "Spanish", value: "es" },
-                            { label: "French", value: "fr" },
-                            { label: "German", value: "de" },
-                            { label: "Chinese", value: "zh" }
-                        ]}
-                    />
-                </SettingSubmenu>
+                    value={settings.language}
+                    onChange={(value) => setSettings(prev => ({ ...prev, language: value }))}
+                    options={[
+                        { label: "English", value: "en" },
+                        { label: "Spanish", value: "es" },
+                        { label: "French", value: "fr" },
+                        { label: "German", value: "de" },
+                        { label: "Chinese", value: "zh" }
+                    ]}
+                />
 
-                <SettingSubmenu
-                    label="Storage"
-                    description="Manage your data and storage preferences"
-                >
-                    <SettingToggle
-                        label="Auto-save"
-                        description="Automatically save your progress"
-                        checked={true}
-                        onChange={() => { }}
-                    />
-
-                    <SettingToggle
-                        label="Cloud Sync"
-                        description="Sync your data across devices"
-                        checked={true}
-                        onChange={() => { }}
-                    />
-                </SettingSubmenu>
+                <SettingSelect
+                    label="Measurement Unit"
+                    value={settings.defaultMeasurementUnit}
+                    onChange={(value) => setSettings(prev => ({ ...prev, defaultMeasurementUnit: value }))}
+                    options={[
+                        { label: "Metric (kg, cm)", value: "metric" },
+                        { label: "Imperial (lb, in)", value: "imperial" }
+                    ]}
+                />
             </SettingsSection>
+
+            <div className="flex justify-end mt-6">
+                <Button
+                    onClick={saveSettings}
+                    disabled={isSaving}
+                >
+                    {isSaving ? "Saving..." : "Save Settings"}
+                </Button>
+            </div>
         </SettingsLayout>
     );
 }
