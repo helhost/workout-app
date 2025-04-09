@@ -36,7 +36,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                         setUser(profile);
                     } catch (err) {
                         // User is not authenticated, that's okay for public routes
-                        console.log('User not authenticated');
                         setUser(null);
                     }
                 }
@@ -52,9 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             setIsLoading(true);
             setError(null);
-            console.log("Attempting login...");
             const { user } = await authApi.login({ email, password, rememberMe });
-            console.log("Login successful", user);
             setUser(user);
         } catch (err) {
             console.error("Login error in auth context:", err);
@@ -63,7 +60,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setError(errorMessage);
             throw err; // Still throw so LoginPage can handle it
         } finally {
-            console.log("Login attempt completed, setting isLoading to false");
             setIsLoading(false);
         }
     };

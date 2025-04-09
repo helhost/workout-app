@@ -17,9 +17,7 @@ export default function LoginPage() {
         setLoginError(null);
 
         try {
-            console.log("LoginPage: Calling login function");
             await login(email, password, rememberMe);
-            console.log("LoginPage: Login successful, navigating...");
             navigate("/");
         } catch (err) {
             console.error("LoginPage: Error caught:", err);
@@ -29,14 +27,12 @@ export default function LoginPage() {
                 setLoginError("An unexpected error occurred during login");
             }
         } finally {
-            console.log("LoginPage: Setting isSubmitting to false");
             setIsSubmitting(false);
         }
     };
 
     // Handle Google login (not implemented yet)
     const handleGoogleLogin = () => {
-        console.log("Google login clicked - Not implemented yet");
         // In production, you would authenticate via Google here
     };
 

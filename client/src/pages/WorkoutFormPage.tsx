@@ -24,9 +24,6 @@ export default function WorkoutFormPage() {
     }, [workoutId, isEditMode]);
 
     const handleSave = (updatedWorkout: Workout) => {
-        // In production, you would save the workout to an API
-        console.log("Saving workout:", updatedWorkout);
-
         // Navigate back to the detail page if editing, or to the list if creating
         if (isEditMode) {
             navigate(`/workouts/${updatedWorkout.id}`);

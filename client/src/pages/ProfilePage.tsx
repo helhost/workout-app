@@ -49,10 +49,7 @@ export default function ProfilePage() {
         try {
             setIsLoading(true);
             setError(null);
-            console.log('Fetching profile data...');
             const response = await getProfile();
-            console.log('Profile data received:', response.profile);
-            console.log('Has profile image:', response.profile.hasProfileImage);
 
             setProfileData(response.profile);
         } catch (err: any) {
@@ -82,8 +79,6 @@ export default function ProfilePage() {
 
     // Handle profile image update - only update the hasProfileImage flag
     const handleProfileImageUpdated = async () => {
-        console.log('Image updated callback triggered');
-
         // Just fetch the profile data to update the hasProfileImage flag
         // but don't trigger a full component remount
         fetchProfileData();

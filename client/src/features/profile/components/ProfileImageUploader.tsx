@@ -24,11 +24,6 @@ export default function ProfileImageUploader({
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Log when hasProfileImage changes
-    useEffect(() => {
-        console.log('ProfileImageUploader hasProfileImage:', hasProfileImage);
-    }, [hasProfileImage]);
-
     // Handle file selection
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -65,12 +60,10 @@ export default function ProfileImageUploader({
     // Handle image upload
     const handleUpload = async (file: File) => {
         try {
-            console.log('Starting image upload');
             setIsUploading(true);
             setError(null);
 
             const result = await uploadProfileImage(file);
-            console.log('Upload result:', result);
 
             // Clear the file input
             if (fileInputRef.current) {
@@ -78,7 +71,6 @@ export default function ProfileImageUploader({
             }
 
             // Call the parent's callback to refresh profile data
-            console.log('Calling onImageUpdated callback');
             onImageUpdated();
         } catch (err: any) {
             console.error('Upload error:', err);
@@ -97,15 +89,12 @@ export default function ProfileImageUploader({
     // Handle image deletion
     const handleDelete = async () => {
         try {
-            console.log('Starting image deletion');
             setIsUploading(true);
             setError(null);
 
             await deleteProfileImage();
-            console.log('Image deleted successfully');
 
             // Call the parent's callback to refresh profile data
-            console.log('Calling onImageUpdated callback after deletion');
             onImageUpdated();
 
             setIsDeleteDialogOpen(false);
