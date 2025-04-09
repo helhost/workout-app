@@ -24,12 +24,12 @@ export default function ProfileCard({
                     onImageUpdated={onImageUpdated}
                 />
 
-                {/* Name with inline edit button */}
-                <div className="flex items-center gap-2 mt-2">
+                {/* Name section with improved centering */}
+                <div className="relative mt-2 flex justify-center w-full">
                     <h2 className="text-xl font-semibold">{name}</h2>
                     {onEditName && (
                         <button
-                            className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+                            className="absolute right-0 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
                             onClick={onEditName}
                             aria-label="Edit name"
                         >
@@ -40,6 +40,9 @@ export default function ProfileCard({
 
                 <p className="text-gray-500 dark:text-gray-400">{email}</p>
             </div>
+
+            {/* Horizontal rule for separation */}
+            <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
 
             {/* Bio Section */}
             <div className="py-4">
