@@ -22,7 +22,6 @@ export default function SettingsPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [saveMessage, setSaveMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
-    // Fetch user settings on component mount
     useEffect(() => {
         const fetchSettings = async () => {
             try {
@@ -35,8 +34,13 @@ export default function SettingsPage() {
                     // we're handling the correct structure
                     const profileSettings = response.profile.settings;
 
+                    const darkModeSetting = !!profileSettings.darkMode;
+
+                    // Apply dark mode immediately when settings are loaded
+                    setDarkMode(darkModeSetting);
+
                     setSettings({
-                        darkMode: !!profileSettings.darkMode,
+                        darkMode: darkModeSetting,
                         language: profileSettings.language || "en",
                         defaultMeasurementUnit: profileSettings.defaultMeasurementUnit || "metric"
                     });

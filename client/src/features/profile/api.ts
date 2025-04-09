@@ -1,48 +1,6 @@
-// client/src/features/profile/api.ts
 import api from '@/lib/api/axios';
 import { handleApiError } from '@/lib/api/errors';
-
-// Types
-export interface ProfileUser {
-    id: string;
-    name: string;
-    email: string;
-    bio?: string;
-    profilePicture?: string;
-    createdAt: string;
-    settings: UserSettings;
-    measurements: UserMeasurements;
-    hasProfileImage: boolean;
-    profileImage?: {
-        id: string;
-        filename: string;
-        mimeType: string;
-        size: number;
-    };
-}
-
-export interface UserSettings {
-    darkMode: boolean;
-    language: string;
-    defaultMeasurementUnit: string; // This was missing in the original interface
-}
-
-export interface UserMeasurements {
-    weight: MeasurementData | null;
-    height: MeasurementData | null;
-    bodyFat: MeasurementData | null;
-}
-
-export interface MeasurementData {
-    value: number;
-    date: string;
-}
-
-export interface MeasurementHistory {
-    id: string;
-    value: number;
-    date: string;
-}
+import { ProfileUser, UserMeasurements, MeasurementHistory } from '@/features/auth/api'
 
 // get profile
 export const getProfile = async (): Promise<{ message: string; profile: ProfileUser }> => {

@@ -1,5 +1,5 @@
 // client/src/features/profile/components/ProfileImageUploader.tsx
-import { useState, useRef, ChangeEvent, useEffect } from 'react';
+import { useState, useRef, ChangeEvent } from 'react';
 import { Upload, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -20,7 +20,6 @@ export default function ProfileImageUploader({
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -42,7 +41,6 @@ export default function ProfileImageUploader({
         }
 
         setError(null);
-        setSelectedFile(file);
 
         // Create preview URL
         const objectUrl = URL.createObjectURL(file);
@@ -63,7 +61,7 @@ export default function ProfileImageUploader({
             setIsUploading(true);
             setError(null);
 
-            const result = await uploadProfileImage(file);
+            await uploadProfileImage(file);
 
             // Clear the file input
             if (fileInputRef.current) {
@@ -82,7 +80,6 @@ export default function ProfileImageUploader({
                 URL.revokeObjectURL(previewUrl);
                 setPreviewUrl(null);
             }
-            setSelectedFile(null);
         }
     };
 
