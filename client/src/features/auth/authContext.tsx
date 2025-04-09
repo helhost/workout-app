@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     try {
                         const { profile } = await authApi.getProfile();
                         setUser(profile);
+                        console.log(profile)
                     } catch (err) {
                         // User is not authenticated, that's okay for public routes
                         setUser(null);

@@ -27,10 +27,7 @@ export const getUserProfileById = async (userId: string) => {
                 select: {
                     language: true,
                     darkMode: true,
-                    highContrast: true,
-                    emailNotifications: true,
-                    pushNotifications: true,
-                    notificationSound: true
+                    defaultMeasurementUnit: true,
                 }
             }
         }
