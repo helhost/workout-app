@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import counterRoutes from "./routes/counter";
 import authRoutes from "./routes/auth";
 import profileRoutes from "./routes/profile"; // Import profile routes
+import workoutRoutes from "./routes/workouts";  // Add this import
 import {
     rateLimiter,
     securityMiddleware,
@@ -46,6 +47,7 @@ app.use(securityMiddleware);
 // Routes
 app.use("/api/counter", counterRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/profile", profileRoutes); // Add profile routes
+app.use("/api/profile", profileRoutes);
+app.use("/api/workouts", workoutRoutes);
 
 export default app;
