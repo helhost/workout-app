@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { setDarkMode } from "@/features/theme/themeUtils";
 import SettingsLayout from "@/features/settings/components/SettingsLayout";
 import SettingsSection from "@/features/settings/components/SettingsSection";
@@ -8,9 +9,8 @@ import { getProfile } from "@/features/profile/api";
 import { Button } from "@/components/ui/button";
 import { UserSettings, updateSettings } from "@/features/settings/api";
 
-
 export default function SettingsPage() {
-    // Settings state based on the actual fields from the database
+    // Settings state
     const [settings, setSettings] = useState<UserSettings>({
         darkMode: false,
         language: "en",
@@ -19,8 +19,6 @@ export default function SettingsPage() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
-    const [saveMessage, setSaveMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -30,8 +28,7 @@ export default function SettingsPage() {
 
                 const response = await getProfile();
                 if (response && response.profile && response.profile.settings) {
-                    // Extract only the fields we need and use type assertion to ensure 
-                    // we're handling the correct structure
+                    // Extract settings from profile
                     const profileSettings = response.profile.settings;
 
                     const darkModeSetting = !!profileSettings.darkMode;
@@ -56,37 +53,41 @@ export default function SettingsPage() {
         fetchSettings();
     }, []);
 
-    // Update dark mode in both state and UI
-    const toggleDarkMode = (checked: boolean) => {
-        setSettings(prev => ({ ...prev, darkMode: checked }));
-        setDarkMode(checked); // Update UI immediately
-    };
-
-    // Save settings to the server
-    const saveSettings = async () => {
+    // Update a specific setting directly via API
+    const updateSetting = async <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => {
         try {
-            setIsSaving(true);
-            setSaveMessage(null);
+            // Create updated settings object
+            const updatedSettings = {
+                ...settings,
+                [key]: value
+            };
 
-            // Call API to update settings
-            await updateSettings(settings);
+            // If this is the dark mode setting, apply it immediately to the UI
+            if (key === 'darkMode') {
+                setDarkMode(value as boolean);
+            }
 
-            // Show success message
-            setSaveMessage({
-                text: "Settings saved successfully",
-                type: "success"
+            // Update local state immediately for responsive UI
+            setSettings(updatedSettings);
+
+            // Show loading toast
+            const toastId = toast.loading("Updating setting...");
+
+            // Send update to server
+            await updateSettings(updatedSettings);
+
+            // Show success toast
+            toast.success("Setting updated", {
+                id: toastId,
+                description: `${key.charAt(0).toUpperCase() + key.slice(1)} has been updated`,
             });
 
-            // Clear success message after 3 seconds
-            setTimeout(() => setSaveMessage(null), 3000);
         } catch (err: any) {
-            console.error("Error saving settings:", err);
-            setSaveMessage({
-                text: err.message || "Failed to save settings",
-                type: "error"
+            console.error(`Error updating ${key} setting:`, err);
+            // Show error toast
+            toast.error("Failed to update setting", {
+                description: err.message || `There was a problem updating ${key}`,
             });
-        } finally {
-            setIsSaving(false);
         }
     };
 
@@ -119,21 +120,12 @@ export default function SettingsPage() {
 
     return (
         <SettingsLayout>
-            {saveMessage && (
-                <div className={`mb-4 p-3 rounded ${saveMessage.type === 'success'
-                    ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300'
-                    : 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300'
-                    }`}>
-                    {saveMessage.text}
-                </div>
-            )}
-
             <SettingsSection title="Appearance" description="Customize how the app looks and feels">
                 <SettingToggle
                     label="Dark Mode"
                     description="Enable dark mode for the application"
                     checked={settings.darkMode}
-                    onChange={toggleDarkMode}
+                    onChange={(checked) => updateSetting('darkMode', checked)}
                 />
             </SettingsSection>
 
@@ -141,7 +133,7 @@ export default function SettingsPage() {
                 <SettingSelect
                     label="Language"
                     value={settings.language}
-                    onChange={(value) => setSettings(prev => ({ ...prev, language: value }))}
+                    onChange={(value) => updateSetting('language', value)}
                     options={[
                         { label: "English", value: "en" },
                         { label: "Spanish", value: "es" },
@@ -154,22 +146,13 @@ export default function SettingsPage() {
                 <SettingSelect
                     label="Measurement Unit"
                     value={settings.defaultMeasurementUnit}
-                    onChange={(value) => setSettings(prev => ({ ...prev, defaultMeasurementUnit: value }))}
+                    onChange={(value) => updateSetting('defaultMeasurementUnit', value)}
                     options={[
                         { label: "Metric (kg, cm)", value: "metric" },
                         { label: "Imperial (lb, in)", value: "imperial" }
                     ]}
                 />
             </SettingsSection>
-
-            <div className="flex justify-end mt-6">
-                <Button
-                    onClick={saveSettings}
-                    disabled={isSaving}
-                >
-                    {isSaving ? "Saving..." : "Save Settings"}
-                </Button>
-            </div>
         </SettingsLayout>
     );
 }
