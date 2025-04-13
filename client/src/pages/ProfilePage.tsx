@@ -21,10 +21,12 @@ import {
     addWeightMeasurement,
     addHeightMeasurement,
     addBodyFatMeasurement,
+} from "@/features/profile/api";
+import {
     ProfileUser,
     MeasurementData,
     UserMeasurements
-} from "@/features/profile/api";
+} from "@/features/auth/api";
 
 export default function ProfilePage() {
     // State to hold profile data
