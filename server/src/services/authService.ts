@@ -57,15 +57,34 @@ export const createUser = async (userData: {
     });
 };
 
+// In src/services/authService.ts
 export const loginUser = async (email: string, password: string) => {
-    // Find user by email
+    // Find user by email with expanded profile information
     const user = await prisma.user.findUnique({
         where: { email },
         select: {
             id: true,
             email: true,
             name: true,
-            password: true // Include password to verify
+            password: true, // Include password to verify
+            bio: true,
+            profilePicture: true,
+            createdAt: true,
+            profileImage: {
+                select: {
+                    id: true,
+                    filename: true,
+                    mimeType: true,
+                    size: true
+                }
+            },
+            settings: {
+                select: {
+                    language: true,
+                    darkMode: true,
+                    defaultMeasurementUnit: true,
+                }
+            }
         }
     });
 
@@ -81,7 +100,37 @@ export const loginUser = async (email: string, password: string) => {
         throw new Error('Invalid credentials');
     }
 
+    // Get latest measurements
+    const measurements = await prisma.userMeasurements.findUnique({
+        where: { userId: user.id },
+        include: {
+            weights: {
+                orderBy: { date: 'desc' },
+                take: 1,
+            },
+            heights: {
+                orderBy: { date: 'desc' },
+                take: 1,
+            },
+            bodyFats: {
+                orderBy: { date: 'desc' },
+                take: 1,
+            }
+        }
+    });
+
+    // Format latest measurements
+    const latestMeasurements = {
+        weight: measurements?.weights[0] ? { value: measurements.weights[0].value, date: measurements.weights[0].date } : null,
+        height: measurements?.heights[0] ? { value: measurements.heights[0].value, date: measurements.heights[0].date } : null,
+        bodyFat: measurements?.bodyFats[0] ? { value: measurements.bodyFats[0].value, date: measurements.bodyFats[0].date } : null
+    };
+
     // Return user without password
     const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return {
+        ...userWithoutPassword,
+        measurements: latestMeasurements,
+        hasProfileImage: !!user.profileImage
+    };
 };

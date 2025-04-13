@@ -95,7 +95,7 @@ export const registerUser = async (req: Request, res: Response) => {
 };
 
 
-// Login controller
+// login controller
 export const loginController = async (req: Request, res: Response) => {
     try {
         const { email, password, rememberMe = false } = req.body;
@@ -154,14 +154,10 @@ export const loginController = async (req: Request, res: Response) => {
             maxAge: 60 * 60 * 1000, // 1 hour
         });
 
-        // Return user data without tokens
+        // Return the complete user object
         res.status(200).json({
             message: 'Login successful',
-            user: {
-                id: user.id,
-                email: user.email,
-                name: user.name
-            }
+            user: user // Return the full user object
         });
     } catch (error: any) {
         // Handle specific error types

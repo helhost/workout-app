@@ -17,8 +17,9 @@ export default function LoginPage() {
         setLoginError(null);
 
         try {
-            await login(email, password, rememberMe);
-            navigate("/");
+            await login(email, password, rememberMe, () => {
+                navigate("/");
+            });
         } catch (err) {
             console.error("LoginPage: Error caught:", err);
             if (err instanceof Error) {

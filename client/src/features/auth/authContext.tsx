@@ -2,14 +2,15 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import * as authApi from './api';
 import { ProfileUser } from './api';
 import { ApiError } from '@/lib/api/errors';
+const { setDarkMode } = await import('@/features/theme/themeUtils');
 
 interface AuthContextType {
     user: ProfileUser | null;
     isLoading: boolean;
     error: string | null;
-    login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
-    register: (name: string, email: string, password: string) => Promise<void>;
-    logout: () => Promise<void>;
+    login: (email: string, password: string, rememberMe?: boolean, onSuccess?: () => void) => Promise<void>;
+    register: (name: string, email: string, password: string, onSuccess?: () => void) => Promise<void>;
+    logout: (onSuccess?: () => void) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,48 +22,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Check if user is already logged in
     useEffect(() => {
-
-        const checkAuthStatus = async () => {
-            try {
-                setIsLoading(true);
-
-                // Check if we're on a public route (login or register)
-                const isPublicRoute = window.location.pathname === '/login' ||
-                    window.location.pathname === '/register';
-
-                // Skip profile check if we're on a public route
-                if (!isPublicRoute) {
-                    try {
-                        const { profile } = await authApi.getProfile();
-                        setUser(profile);
-
-                        // Apply dark mode setting if it exists in the profile
-                        if (profile.settings && profile.settings.darkMode !== undefined) {
-                            // Import setDarkMode from themeUtils
-                            const { setDarkMode } = await import('@/features/theme/themeUtils');
-                            setDarkMode(profile.settings.darkMode);
-                        }
-
-                        console.log(profile)
-                    } catch (err) {
-                        // User is not authenticated, that's okay for public routes
-                        setUser(null);
-                    }
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         checkAuthStatus();
     }, []);
 
-    const login = async (email: string, password: string, rememberMe = false) => {
+    const checkAuthStatus = async () => {
+        try {
+            setIsLoading(true);
+
+            // Check if we're on a public route (login or register)
+            const isPublicRoute = window.location.pathname === '/login' ||
+                window.location.pathname === '/register';
+
+            // Skip profile check if we're on a public route
+
+            if (!isPublicRoute) {
+                try {
+                    const { profile } = await authApi.getProfile();
+                    setUser(profile);
+
+                    // Apply dark mode setting if it exists in the profile
+                    if (profile.settings && profile.settings.darkMode !== undefined) {
+                        // Import setDarkMode from themeUtils
+                        setDarkMode(profile.settings.darkMode);
+                    } else {
+                    }
+
+                } catch (err) {
+                    // User is not authenticated, that's okay for public routes
+                    setUser(null);
+                }
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const login = async (email: string, password: string, rememberMe = false, onSuccess?: () => void) => {
         try {
             setIsLoading(true);
             setError(null);
             const { user } = await authApi.login({ email, password, rememberMe });
             setUser(user);
+            if (onSuccess) {
+                onSuccess();
+            }
+            checkAuthStatus(); // Refresh user profile after login
         } catch (err) {
             console.error("Login error in auth context:", err);
             const apiError = err as ApiError;
@@ -74,7 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const register = async (name: string, email: string, password: string) => {
+    const register = async (name: string, email: string, password: string, onSuccess?: () => void) => {
         try {
             setIsLoading(true);
             setError(null);
@@ -85,6 +89,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 agreeToTerms: true
             });
             setUser(user);
+            if (onSuccess) {
+                onSuccess();
+            }
         } catch (err) {
             const apiError = err as ApiError;
             setError(apiError.message);
@@ -94,11 +101,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const logout = async () => {
+    const logout = async (onSuccess?: () => void) => {
         try {
             setIsLoading(true);
             await authApi.logout();
             setUser(null);
+            if (onSuccess) {
+                onSuccess();
+            }
         } catch (err) {
             const apiError = err as ApiError;
             setError(apiError.message);
