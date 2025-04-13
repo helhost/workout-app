@@ -24,6 +24,7 @@ model User {
   settings       UserSettings?
   measurements   UserMeasurements?
   profileImage   ProfileImage? // New relation to profile image
+  Workout        Workout[]
 }
 
 // New model for storing profile images
@@ -97,4 +98,89 @@ model BodyFatMeasurement {
   updatedAt          DateTime         @updatedAt
 
   @@index([userMeasurementsId, date])
+}
+
+// Workout schema
+model Workout {
+  id        String     @id @default(uuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  date      DateTime // Planned date
+  startTime DateTime? // Actual start time when user begins the workout
+  endTime   DateTime? // Actual end time when user completes the workout
+  notes     String?
+  completed Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  exercises Exercise[]
+  supersets Superset[]
+
+  @@index([userId, date])
+}
+
+// Exercise schema
+model Exercise {
+  id          String        @id @default(uuid())
+  name        String
+  muscleGroup String // 'chest', 'back', 'shoulders', etc.
+  notes       String?
+  isDropSet   Boolean       @default(false) // Flag to indicate if this is a dropset
+  sets        ExerciseSet[]
+  workoutId   String?
+  workout     Workout?      @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  supersetId  String?
+  superset    Superset?     @relation(fields: [supersetId], references: [id], onDelete: Cascade)
+  order       Int // To maintain the order within a workout or superset
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([workoutId])
+  @@index([supersetId])
+}
+
+// ExerciseSet schema
+model ExerciseSet {
+  id         String   @id @default(uuid())
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  weight     Float // Weight in kg or lbs
+  reps       Int
+  completed  Boolean  @default(false)
+  notes      String?
+  order      Int // To maintain the order of sets within an exercise
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  subSets    SubSet[] // Relation for dropset sub-sets
+
+  @@index([exerciseId])
+}
+
+// SubSet schema for dropsets
+model SubSet {
+  id            String      @id @default(uuid())
+  exerciseSetId String
+  exerciseSet   ExerciseSet @relation(fields: [exerciseSetId], references: [id], onDelete: Cascade)
+  weight        Float // Reduced weight for this dropset portion
+  reps          Int // Reps performed at this weight
+  completed     Boolean     @default(false)
+  order         Int // Order within the dropset sequence
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([exerciseSetId])
+}
+
+// Superset schema
+model Superset {
+  id        String     @id @default(uuid())
+  workoutId String
+  workout   Workout    @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  notes     String?
+  exercises Exercise[]
+  order     Int // To maintain the order within a workout
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([workoutId])
 }
