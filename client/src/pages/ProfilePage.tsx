@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
     ProfileLayout,
     ProfileSection,
@@ -57,6 +58,11 @@ export default function ProfilePage() {
         } catch (err: any) {
             setError(err.message || "Failed to load profile data");
             console.error("Error fetching profile data:", err);
+
+            // Show toast for fetch error
+            toast.error("Failed to load profile data", {
+                description: err.message || "Please try again later."
+            });
         } finally {
             setIsLoading(false);
         }
@@ -81,6 +87,7 @@ export default function ProfilePage() {
 
     // Handle profile image update - only update the hasProfileImage flag
     const handleProfileImageUpdated = async () => {
+        toast.success("Profile image updated");
         // Just fetch the profile data to update the hasProfileImage flag
         // but don't trigger a full component remount
         fetchProfileData();
@@ -88,6 +95,9 @@ export default function ProfilePage() {
 
     // Handle saving the new value
     const handleSaveEdit = async () => {
+        // Create a toast ID to reference for loading/success/error states
+        const toastId = toast.loading("Saving changes...");
+
         try {
             setIsLoading(true);
 
@@ -100,6 +110,7 @@ export default function ProfilePage() {
                             name: response.user.name
                         });
                     }
+                    toast.success("Name updated successfully", { id: toastId });
                 } else if (dialogConfig.field === "bio") {
                     const response = await updateBio(newValue);
                     if (profileData) {
@@ -108,16 +119,22 @@ export default function ProfilePage() {
                             bio: response.user.bio
                         });
                     }
+                    toast.success("Bio updated successfully", { id: toastId });
                 }
             } else if (dialogConfig.section === "measurements") {
                 const value = parseFloat(newValue);
 
                 if (isNaN(value)) {
+                    toast.error("Invalid input", {
+                        id: toastId,
+                        description: "Please enter a valid number"
+                    });
                     setError("Please enter a valid number");
                     return;
                 }
 
                 let updatedMeasurements: UserMeasurements = { ...profileData?.measurements } as UserMeasurements;
+                let measurementType = "";
 
                 if (dialogConfig.field === "weight") {
                     const response = await addWeightMeasurement(value);
@@ -125,18 +142,21 @@ export default function ProfilePage() {
                         value: response.measurement.value,
                         date: response.measurement.date
                     };
+                    measurementType = "Weight";
                 } else if (dialogConfig.field === "height") {
                     const response = await addHeightMeasurement(value);
                     updatedMeasurements.height = {
                         value: response.measurement.value,
                         date: response.measurement.date
                     };
+                    measurementType = "Height";
                 } else if (dialogConfig.field === "bodyFat") {
                     const response = await addBodyFatMeasurement(value);
                     updatedMeasurements.bodyFat = {
                         value: response.measurement.value,
                         date: response.measurement.date
                     };
+                    measurementType = "Body fat";
                 }
 
                 if (profileData) {
@@ -145,12 +165,18 @@ export default function ProfilePage() {
                         measurements: updatedMeasurements
                     });
                 }
+
+                toast.success(`${measurementType} updated successfully`, { id: toastId });
             }
 
             setDialogOpen(false);
         } catch (err: any) {
-            setError(err.message || "Failed to update data");
             console.error("Error updating data:", err);
+            toast.error("Failed to save changes", {
+                id: toastId,
+                description: err.message || "Please try again later"
+            });
+            setError(err.message || "Failed to update data");
         } finally {
             setIsLoading(false);
         }
@@ -181,6 +207,10 @@ export default function ProfilePage() {
             month: 'long',
             day: 'numeric'
         });
+    };
+
+    const dismissError = () => {
+        setError(null);
     };
 
     if (isLoading && !profileData) {
@@ -216,7 +246,7 @@ export default function ProfilePage() {
                     <Button
                         variant="ghost"
                         className="ml-2 p-1 h-auto text-red-700 dark:text-red-200"
-                        onClick={() => setError(null)}
+                        onClick={dismissError}
                     >
                         ✕
                     </Button>
