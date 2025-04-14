@@ -63,9 +63,19 @@ export const getUserWorkoutsController = async (req: Request, res: Response) => 
         let startDate, endDate;
         if (req.query.startDate) {
             startDate = new Date(req.query.startDate as string);
+            // Check if date is valid
+            if (isNaN(startDate.getTime())) {
+                res.status(400).json({ error: 'Invalid startDate format' });
+                return;
+            }
         }
         if (req.query.endDate) {
             endDate = new Date(req.query.endDate as string);
+            // Check if date is valid
+            if (isNaN(endDate.getTime())) {
+                res.status(400).json({ error: 'Invalid endDate format' });
+                return;
+            }
         }
 
         const result = await getUserWorkouts(userId, {
@@ -82,6 +92,12 @@ export const getUserWorkoutsController = async (req: Request, res: Response) => 
         });
     } catch (error) {
         console.error('Get workouts error:', error);
+        // Log more detailed error information
+        if (error instanceof Error) {
+            console.error('Error name:', error.name);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+        }
         res.status(500).json({ error: 'Failed to retrieve workouts' });
     }
 };

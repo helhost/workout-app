@@ -76,53 +76,58 @@ export const getUserWorkouts = async (userId: string, {
     startDate?: Date;
     endDate?: Date;
 } = {}) => {
-    // Build where conditions
-    const where: any = { userId };
+    try {
+        // Build where conditions
+        const where: any = { userId };
 
-    // Filter by completion status if specified
-    if (completed !== undefined) {
-        where.completed = completed;
-    }
-
-    // Filter by date range if specified
-    if (startDate || endDate) {
-        where.date = {};
-        if (startDate) where.date.gte = startDate;
-        if (endDate) where.date.lte = endDate;
-    }
-
-    // Get total count for pagination
-    const totalCount = await prisma.workout.count({ where });
-
-    // Get paginated workouts
-    const workouts = await prisma.workout.findMany({
-        where,
-        include: {
-            exercises: {
-                select: { id: true },
-            },
-            supersets: {
-                select: { id: true },
-                include: {
-                    exercises: {
-                        select: { id: true }
-                    }
-                }
-            }
-        },
-        orderBy: { date: 'desc' },
-        skip: offset,
-        take: limit
-    });
-
-    return {
-        workouts,
-        pagination: {
-            total: totalCount,
-            offset,
-            limit
+        // Filter by completion status if specified
+        if (completed !== undefined) {
+            where.completed = completed;
         }
-    };
+
+        // Filter by date range if specified
+        if (startDate || endDate) {
+            where.date = {};
+            if (startDate) {
+                where.date.gte = startDate;
+            }
+            if (endDate) {
+                where.date.lte = endDate;
+            }
+        }
+
+        // Get total count for pagination
+        const totalCount = await prisma.workout.count({ where });
+
+        // Get paginated workouts - simplified query for testing
+        const workouts = await prisma.workout.findMany({
+            where,
+            select: {
+                id: true,
+                name: true,
+                date: true,
+                completed: true,
+                startTime: true,
+                endTime: true,
+                notes: true
+            },
+            orderBy: { date: 'desc' },
+            skip: offset,
+            take: limit
+        });
+
+        return {
+            workouts,
+            pagination: {
+                total: totalCount,
+                offset,
+                limit
+            }
+        };
+    } catch (error) {
+        console.error('getUserWorkouts service error:', error);
+        throw error;
+    }
 };
 
 // Update workout details
