@@ -1,3 +1,4 @@
+import { CheckCircle, XCircle } from "lucide-react";
 import { Set } from "../../types";
 import { cn } from "@/lib/utils";
 
@@ -32,12 +33,11 @@ export function SetList({ sets }: SetListProps) {
                             </td>
                             <td className="p-2 text-center">{set.reps}</td>
                             <td className="p-2 text-center">
-                                <div
-                                    className={`size-4 rounded-full inline-block ${set.completed
-                                        ? 'bg-green-500'
-                                        : 'bg-gray-300 dark:bg-gray-600'
-                                        }`}
-                                ></div>
+                                {set.completed ? (
+                                    <CheckCircle className="mx-auto h-5 w-5 text-green-500" />
+                                ) : (
+                                    <XCircle className="mx-auto h-5 w-5 text-red-500" />
+                                )}
                             </td>
                         </tr>
                     ))}

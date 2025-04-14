@@ -6,9 +6,6 @@ interface ExerciseItemProps {
 }
 
 export function ExerciseItem({ exercise }: ExerciseItemProps) {
-    // Check if all sets are completed
-    const isExerciseCompleted = exercise.sets.every(set => set.completed);
-
     return (
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
             <div className="flex justify-between items-center mb-2">
@@ -18,14 +15,6 @@ export function ExerciseItem({ exercise }: ExerciseItemProps) {
                         {exercise.muscleGroup}
                     </span>
                 </div>
-
-                {/* Completed Indicator */}
-                <div
-                    className={`size-4 rounded-full ${isExerciseCompleted
-                        ? 'bg-green-500'
-                        : 'bg-gray-300 dark:bg-gray-600'
-                        }`}
-                ></div>
             </div>
 
             {exercise.notes && (
