@@ -57,3 +57,9 @@ export interface WorkoutsListProps {
     onWorkoutClick?: (workout: Workout) => void;
     className?: string;
 }
+
+export interface WorkoutItemProps {
+    workout: Workout;
+    onClick?: (workout: Workout) => void;
+    className?: string;
+}

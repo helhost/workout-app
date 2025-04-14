@@ -1,12 +1,6 @@
 import { CheckCircle, Calendar, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Workout, isSuperset } from "../../types";
-
-interface WorkoutItemProps {
-    workout: Workout;
-    onClick?: (workout: Workout) => void;
-    className?: string;
-}
+import { WorkoutItemProps, isSuperset } from "../../types";
 
 export default function WorkoutItem({
     workout,
@@ -65,7 +59,7 @@ export default function WorkoutItem({
         <div
             className={cn(
                 "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow transition-shadow",
-                workout.completed ? "border-l-4 border-l-green-500" : "",
+                workout.completed ? "border-l-4 border-l-green-500 dark:border-l-green-500" : "",
                 onClick && "cursor-pointer",
                 className
             )}
