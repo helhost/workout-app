@@ -1,12 +1,22 @@
+import { cn } from "@/lib/utils";
+
 interface WorkoutNotesProps {
     notes: string;
+    className?: string;
 }
 
-export function WorkoutNotes({ notes }: WorkoutNotesProps) {
+export function WorkoutNotes({ notes, className }: WorkoutNotesProps) {
     return (
-        <div className="mt-4 bg-slate-50 dark:bg-gray-700 p-3 rounded-md mx-6 mb-6">
-            <h3 className="font-medium text-sm text-gray-600 dark:text-gray-300 mb-1">Notes</h3>
-            <p className="text-gray-700 dark:text-gray-300">{notes}</p>
+        <div className={cn(
+            "bg-white dark:bg-gray-800 p-4 rounded-lg",
+            className
+        )}>
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
+                Notes
+            </h3>
+            <p className="text-gray-700 dark:text-gray-300">
+                {notes}
+            </p>
         </div>
     );
 }

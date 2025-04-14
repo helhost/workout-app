@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { WorkoutDetail, sampleWorkouts, Workout } from "@/features/workouts";
+import { Workout, isSuperset } from "@/features/workouts/types";
+import {
+    BackButton,
+    EditButton,
+    ExerciseItem,
+    SupersetItem,
+    WorkoutHeader,
+    WorkoutNotes
+} from "@/features/workouts/components/workout-detail";
+import { sampleWorkouts } from "@/features/workouts/data/sampleWorkouts";
 
 export default function WorkoutDetailPage() {
     const { workoutId } = useParams<{ workoutId: string }>();
@@ -27,7 +36,11 @@ export default function WorkoutDetailPage() {
     };
 
     if (loading) {
-        return <div className="flex justify-center p-8">Loading...</div>;
+        return (
+            <div className="flex justify-center items-center min-h-[50vh]">
+                <p className="text-gray-500 dark:text-gray-400">Loading workout...</p>
+            </div>
+        );
     }
 
     if (!workout) {
@@ -46,12 +59,33 @@ export default function WorkoutDetailPage() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto">
-            <WorkoutDetail
-                workout={workout}
-                onBack={handleBack}
-                onEdit={() => handleEdit(workout)}
+        <div className="max-w-2xl mx-auto space-y-4">
+            <div className="flex justify-between items-center">
+                <BackButton onBack={handleBack} />
+                <EditButton workout={workout} onEdit={handleEdit} />
+            </div>
+
+            <WorkoutHeader
+                workout={{
+                    name: workout.name,
+                    date: workout.date,
+                    duration: workout.duration,
+                    completed: workout.completed
+                }}
             />
+
+            {workout.notes && <WorkoutNotes notes={workout.notes} />}
+
+            <div className="space-y-4">
+                <h2 className="text-lg font-semibold">Exercises</h2>
+                {workout.items.map((item) =>
+                    isSuperset(item) ? (
+                        <SupersetItem key={item.id} superset={item} />
+                    ) : (
+                        <ExerciseItem key={item.id} exercise={item} />
+                    )
+                )}
+            </div>
         </div>
     );
 }

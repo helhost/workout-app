@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Workout } from "../types";
+import { Workout } from "../../types";
 
 interface EditButtonProps {
     workout: Workout;
