@@ -7,7 +7,7 @@ interface ExerciseItemProps {
 
 export function ExerciseItem({ exercise }: ExerciseItemProps) {
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
             <div className="flex justify-between items-center mb-2">
                 <div className="flex items-center gap-2">
                     <h3 className="font-medium">{exercise.name}</h3>

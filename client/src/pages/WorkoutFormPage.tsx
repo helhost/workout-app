@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-import { Dumbbell } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Import workout components and types
@@ -148,10 +148,10 @@ export default function WorkoutFormPage() {
     }
 
     return (
-        <div className="max-w-3xl mx-auto px-4 py-6">
+        <div className="max-w-2xl mx-auto px-4 py-6">
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Workout Details Section */}
-                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm">
                     <h2 className="text-xl font-semibold mb-4">
                         {isEditMode ? "Edit Workout" : "Create Workout"}
                     </h2>
@@ -166,27 +166,19 @@ export default function WorkoutFormPage() {
                 </div>
 
                 {/* Exercises and Supersets Section */}
-                <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold">Exercises</h2>
+                <div>
+                    <div className="mb-4">
+                        <h2 className="text-lg font-semibold">Exercises</h2>
                     </div>
 
                     {formData.items.length === 0 ? (
-                        <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md">
+                        <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md mb-4">
                             <p className="text-gray-500 dark:text-gray-400 mb-4">
-                                No exercises added yet. Click "Add Exercise" to get started.
+                                No exercises added yet. Add your first exercise to get started.
                             </p>
-                            <Button
-                                type="button"
-                                onClick={addExercise}
-                                className="flex items-center gap-2 mx-auto"
-                            >
-                                <Dumbbell className="h-4 w-4" />
-                                Add Exercise
-                            </Button>
                         </div>
                     ) : (
-                        <div className="space-y-6">
+                        <div className="space-y-4">
                             {formData.items.map((item, index) => (
                                 <div key={item.id}>
                                     {isSuperset(item) ? (
@@ -205,20 +197,20 @@ export default function WorkoutFormPage() {
                                     )}
                                 </div>
                             ))}
-
-                            {/* Add Exercise button */}
-                            <div className="mt-6 text-center">
-                                <Button
-                                    type="button"
-                                    onClick={addExercise}
-                                    className="flex items-center gap-2 mx-auto"
-                                >
-                                    <Dumbbell className="h-4 w-4" />
-                                    Add Exercise
-                                </Button>
-                            </div>
                         </div>
                     )}
+
+                    <div className="mt-6 text-center">
+                        <Button
+                            type="button"
+                            onClick={addExercise}
+                            className="flex items-center gap-2 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-800 shadow-sm text-blue-700 dark:text-blue-100"
+                            size="sm"
+                        >
+                            <PlusCircle className="h-4 w-4" />
+                            Add Exercise
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Form Actions */}

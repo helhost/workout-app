@@ -8,7 +8,7 @@ interface SupersetItemProps {
 
 export function SupersetItem({ superset }: SupersetItemProps) {
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
             <div className="flex items-center gap-2 bg-blue-100 dark:bg-blue-950 p-3 mb-4">
                 <ArrowLeftRight className="size-5 text-blue-600 dark:text-blue-400" />
                 <h3 className="font-semibold text-blue-800 dark:text-blue-300">Superset</h3>

@@ -56,23 +56,20 @@ const SupersetForm = ({
     };
 
     return (
-        <div className={cn(
-            "rounded-lg overflow-hidden shadow-sm border border-blue-300 dark:border-blue-700",
-            className
-        )}>
-            <div className="bg-blue-100 dark:bg-blue-950 p-4 flex justify-between items-center">
-                <h3 className="font-semibold flex items-center text-blue-800 dark:text-blue-300">
-                    <ArrowLeftRight className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
-                    Superset
-                </h3>
-                <div className="flex space-x-3">
+        <div className={cn("bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm", className)}>
+            {/* Superset Header - Styled to match SupersetItem */}
+            <div className="flex items-center gap-2 bg-blue-100 dark:bg-blue-950 p-3 mb-4">
+                <ArrowLeftRight className="size-5 text-blue-600 dark:text-blue-400" />
+                <h3 className="font-semibold text-blue-800 dark:text-blue-300">Superset</h3>
+
+                <div className="ml-auto flex space-x-3">
                     {/* Add Exercise to Superset Button */}
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={addExerciseToSuperset}
-                        className="flex items-center gap-1 bg-white dark:bg-gray-800 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-400"
+                        className="flex items-center gap-1 text-blue-700 dark:text-blue-400"
                     >
                         <PlusCircle className="h-4 w-4" />
                         <span className="hidden sm:inline">Add Exercise</span>
@@ -81,10 +78,10 @@ const SupersetForm = ({
                     {/* Remove Superset Button */}
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={onRemove}
-                        className="bg-white dark:bg-gray-800 border-red-300 dark:border-red-700 text-red-600 dark:text-red-400"
+                        className="text-red-600 dark:text-red-400 p-1"
                     >
                         <Trash2 className="h-4 w-4" />
                         <span className="sr-only">Remove Superset</span>
@@ -92,17 +89,17 @@ const SupersetForm = ({
                 </div>
             </div>
 
-            <div className="p-5 space-y-4 bg-white dark:bg-gray-900">
+            <div className="px-4 pb-4 space-y-4">
                 {superset.exercises.map((exercise, exerciseIndex) => (
-                    <ExerciseForm
-                        key={exercise.id}
-                        exercise={exercise}
-                        exerciseIndex={exerciseIndex}
-                        isInSuperset={true}
-                        onUpdate={(updatedExercise) => updateExerciseInSuperset(exerciseIndex, updatedExercise)}
-                        onRemove={() => removeExerciseFromSuperset(exerciseIndex)}
-                        className="bg-white dark:bg-gray-800"
-                    />
+                    <div key={exercise.id} className="border-b last:border-b-0 border-gray-200 dark:border-gray-700 pb-4 last:pb-0">
+                        <ExerciseForm
+                            exercise={exercise}
+                            exerciseIndex={exerciseIndex}
+                            isInSuperset={true}
+                            onUpdate={(updatedExercise) => updateExerciseInSuperset(exerciseIndex, updatedExercise)}
+                            onRemove={() => removeExerciseFromSuperset(exerciseIndex)}
+                        />
+                    </div>
                 ))}
             </div>
 
@@ -114,7 +111,7 @@ const SupersetForm = ({
                 <textarea
                     value={superset.notes || ""}
                     onChange={(e) => onUpdate({ ...superset, notes: e.target.value })}
-                    className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="text-sm text-gray-600 dark:text-gray-400 italic mb-2 w-full bg-transparent border-none p-0 focus:outline-none focus:ring-0 resize-none h-8"
                     rows={2}
                     placeholder="Add any notes about this superset..."
                 />

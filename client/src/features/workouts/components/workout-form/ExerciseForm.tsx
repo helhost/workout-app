@@ -61,49 +61,47 @@ const ExerciseForm = ({
 
     return (
         <div className={cn(
-            "rounded-lg overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700",
-            isInSuperset ? "mb-4" : "",
+            "bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm",
+            isInSuperset ? "" : "p-4",
             className
         )}>
             {/* Exercise Header */}
-            <div className={cn(
-                "p-4 flex flex-wrap gap-4 justify-between items-center border-b border-gray-200 dark:border-gray-700",
-                isInSuperset
-                    ? "bg-slate-100 dark:bg-gray-800/60"
-                    : "bg-white dark:bg-gray-800"
-            )}>
-                <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {isInSuperset ? `Exercise ${exerciseIndex! + 1}` : "Exercise Name"}
-                    </label>
-                    <input
-                        type="text"
-                        value={exercise.name}
-                        placeholder="Enter exercise name"
-                        onChange={(e) => updateField("name", e.target.value)}
-                        required
-                        className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                    />
-                </div>
-
-                <div className="w-48">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Muscle Group
-                    </label>
+            <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-2">
+                    {!isInSuperset ? (
+                        <input
+                            type="text"
+                            value={exercise.name}
+                            placeholder="Enter exercise name"
+                            onChange={(e) => updateField("name", e.target.value)}
+                            required
+                            className="font-medium bg-transparent border-none p-0 focus:outline-none focus:ring-0 text-gray-900 dark:text-gray-100 w-full max-w-[180px]"
+                        />
+                    ) : (
+                        <input
+                            type="text"
+                            value={exercise.name}
+                            placeholder={`Exercise ${exerciseIndex! + 1}`}
+                            onChange={(e) => updateField("name", e.target.value)}
+                            required
+                            className="font-medium bg-transparent border-none p-0 focus:outline-none focus:ring-0 text-gray-900 dark:text-gray-100 w-full max-w-[180px]"
+                        />
+                    )}
                     <MuscleGroupSelect
                         value={exercise.muscleGroup}
                         onChange={(value) => updateField("muscleGroup", value)}
+                        className="text-xs text-gray-500 dark:text-gray-400 capitalize bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded border-none"
                     />
                 </div>
 
-                <div className="flex flex-shrink-0 space-x-2">
+                <div className="flex space-x-2">
                     {!isInSuperset && onConvertToSuperset && (
                         <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             size="sm"
                             onClick={onConvertToSuperset}
-                            className="flex items-center gap-1 bg-white dark:bg-gray-800 text-blue-600 border-blue-300 dark:border-blue-700 dark:text-blue-400"
+                            className="flex items-center gap-1 text-blue-600 dark:text-blue-400"
                             title="Convert to superset"
                         >
                             <ArrowLeftRight className="h-4 w-4" />
@@ -113,10 +111,10 @@ const ExerciseForm = ({
 
                     <Button
                         type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={onRemove}
-                        className="bg-white dark:bg-gray-800 text-red-600 border-red-300 dark:border-red-700 dark:text-red-400"
+                        className="text-red-600 dark:text-red-400 p-1"
                         title={isInSuperset ? "Remove from superset" : "Remove exercise"}
                     >
                         <Trash2 className="h-4 w-4" />
@@ -125,60 +123,50 @@ const ExerciseForm = ({
                 </div>
             </div>
 
-            {/* Sets */}
-            <div className="p-4">
-                <div className="mb-4 flex justify-between items-center">
-                    <h4 className="font-medium text-gray-800 dark:text-gray-200">Sets</h4>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={addSet}
-                        className="flex items-center gap-1 bg-white dark:bg-gray-800 text-green-600 border-green-300 dark:border-green-700 dark:text-green-400"
-                    >
-                        <PlusCircle className="h-4 w-4" />
-                        Add Set
-                    </Button>
-                </div>
+            {/* Exercise Notes */}
+            <textarea
+                value={exercise.notes || ""}
+                onChange={(e) => updateField("notes", e.target.value)}
+                className="text-sm text-gray-600 dark:text-gray-400 italic mb-2 w-full bg-transparent border-none p-0 focus:outline-none focus:ring-0 resize-none h-8"
+                placeholder="Add any notes about this exercise..."
+            />
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                                <th className="p-2 text-left">Set</th>
-                                <th className="p-2 text-center">Weight</th>
-                                <th className="p-2 text-center">Reps</th>
-                                <th className="p-2 text-center">Completed</th>
-                                <th className="p-2 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {exercise.sets.map((set, index) => (
-                                <SetForm
-                                    key={set.id}
-                                    set={set}
-                                    index={index}
-                                    onChange={(updatedSet) => updateSet(index, updatedSet)}
-                                    onRemove={() => removeSet(index)}
-                                    canDelete={exercise.sets.length > 1}
-                                />
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Exercise Notes (Optional)
-                    </label>
-                    <textarea
-                        value={exercise.notes || ""}
-                        onChange={(e) => updateField("notes", e.target.value)}
-                        className="w-full rounded-md border border-gray-300 dark:border-gray-600 py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                        rows={2}
-                        placeholder="Add any notes about this exercise..."
-                    />
-                </div>
+            {/* Sets Table */}
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                            <th className="p-2 text-center">Weight</th>
+                            <th className="p-2 text-center">Reps</th>
+                            <th className="p-2 text-center">Status</th>
+                            <th className="p-2 text-right">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={addSet}
+                                    className="text-green-600 hover:text-green-700 dark:text-green-400 p-1"
+                                    title="Add set"
+                                >
+                                    <PlusCircle className="h-4 w-4" />
+                                    <span className="sr-only">Add Set</span>
+                                </Button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {exercise.sets.map((set, index) => (
+                            <SetForm
+                                key={set.id}
+                                set={set}
+                                index={index}
+                                onChange={(updatedSet) => updateSet(index, updatedSet)}
+                                onRemove={() => removeSet(index)}
+                                canDelete={exercise.sets.length > 1}
+                            />
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

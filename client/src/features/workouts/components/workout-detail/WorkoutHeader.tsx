@@ -20,7 +20,7 @@ export function WorkoutHeader({
 
     return (
         <div className={cn(
-            "bg-white dark:bg-gray-800 p-4 rounded-lg",
+            "bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm",
             className
         )}>
             <div className="flex justify-between items-start">

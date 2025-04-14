@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/select";
 import { MuscleGroup } from "../../types";
 import { muscleGroupOptions } from "./form-utils";
+import { cn } from "@/lib/utils";
 
 interface MuscleGroupSelectProps {
     value: MuscleGroup;
@@ -24,7 +25,10 @@ const MuscleGroupSelect = ({
             value={value}
             onValueChange={(value) => onChange(value as MuscleGroup)}
         >
-            <SelectTrigger className={`w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 ${className}`}>
+            <SelectTrigger className={cn(
+                "text-xs text-gray-500 dark:text-gray-400 capitalize bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded h-auto min-h-0 w-auto border-none",
+                className
+            )}>
                 <SelectValue />
             </SelectTrigger>
             <SelectContent>
