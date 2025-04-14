@@ -30,7 +30,6 @@ export const createWorkoutController = async (req: Request, res: Response) => {
             name,
             date: new Date(date),
             notes,
-            completed: false
         });
 
         res.status(201).json({

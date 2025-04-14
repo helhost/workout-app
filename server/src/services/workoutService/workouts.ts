@@ -7,7 +7,6 @@ export const createWorkout = async (userId: string, workoutData: {
     name: string;
     date: Date;
     notes?: string;
-    completed?: boolean;
 }) => {
     return prisma.workout.create({
         data: {
@@ -15,7 +14,7 @@ export const createWorkout = async (userId: string, workoutData: {
             name: workoutData.name,
             date: workoutData.date,
             notes: workoutData.notes,
-            completed: workoutData.completed || false,
+            completed: false,
         }
     });
 };
