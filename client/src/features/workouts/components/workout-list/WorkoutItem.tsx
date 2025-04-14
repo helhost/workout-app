@@ -1,6 +1,7 @@
 import { CheckCircle, Calendar, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { WorkoutItemProps, isSuperset } from "../../types";
+import { WorkoutItemProps } from "../../types";
+import { calculateExerciseCount, calculateSetCount } from '../../utils';
 
 export default function WorkoutItem({
     workout,
@@ -27,29 +28,9 @@ export default function WorkoutItem({
         });
     };
 
-    // Calculate exercise and set counts
-    const exerciseCount = workout.items.reduce((count, item) => {
-        if (isSuperset(item)) {
-            // Count both exercises in the superset
-            return count + item.exercises.length;
-        } else {
-            // Count the single exercise
-            return count + 1;
-        }
-    }, 0);
-
-    const setCount = workout.items.reduce((total, item) => {
-        if (isSuperset(item)) {
-            // Count sets from both exercises in the superset
-            return total + item.exercises.reduce(
-                (subTotal, exercise) => subTotal + exercise.sets.length,
-                0
-            );
-        } else {
-            // Count sets from the single exercise
-            return total + item.sets.length;
-        }
-    }, 0);
+    // Calculate exercise and set counts using utility functions
+    const exerciseCount = calculateExerciseCount(workout);
+    const setCount = calculateSetCount(workout);
 
     // Format date and time for display
     const formattedDate = formatDate(workout.date);

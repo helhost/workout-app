@@ -13,6 +13,7 @@ export interface Exercise {
     muscleGroup: MuscleGroup;
     sets: Set[];
     notes?: string;
+    type: 'exercise'; // Type discriminator to differentiate from SuperSet
 }
 
 // WorkoutItem can be either a single Exercise or a SuperSet
