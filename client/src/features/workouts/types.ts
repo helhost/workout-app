@@ -16,7 +16,7 @@ export interface Exercise {
 }
 
 // WorkoutItem can be either a single Exercise or a SuperSet
-export type WorkoutItem = Exercise | SuperSet;
+export type WorkoutItemType = Exercise | SuperSet;
 
 export interface SuperSet {
     id: string;
@@ -29,7 +29,7 @@ export interface Workout {
     id: string;
     name: string;
     date: string; // ISO date string
-    items: WorkoutItem[]; // Unified list of exercises and supersets
+    items: WorkoutItemType[]; // Unified list of exercises and supersets
     duration?: number; // in minutes
     notes?: string;
     completed: boolean;
@@ -47,7 +47,7 @@ export type MuscleGroup =
     | 'fullBody';
 
 // Helper function to check if a workout item is a superset
-export function isSuperset(item: WorkoutItem): item is SuperSet {
+export function isSuperset(item: WorkoutItemType): item is SuperSet {
     return 'type' in item && item.type === 'superset';
 }
 

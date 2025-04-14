@@ -6,39 +6,29 @@ import {
     SelectValue
 } from "@/components/ui/select";
 import { MuscleGroup } from "../../types";
+import { muscleGroupOptions } from "./form-utils";
 
 interface MuscleGroupSelectProps {
     value: MuscleGroup;
-    onChange: (value: string) => void;
+    onChange: (value: MuscleGroup) => void;
+    className?: string;
 }
 
-export function MuscleGroupSelect({
+const MuscleGroupSelect = ({
     value,
-    onChange
-}: MuscleGroupSelectProps) {
-    // Available muscle groups
-    const muscleGroups: { label: string; value: MuscleGroup }[] = [
-        { label: "Chest", value: "chest" },
-        { label: "Back", value: "back" },
-        { label: "Shoulders", value: "shoulders" },
-        { label: "Biceps", value: "biceps" },
-        { label: "Triceps", value: "triceps" },
-        { label: "Legs", value: "legs" },
-        { label: "Core", value: "core" },
-        { label: "Cardio", value: "cardio" },
-        { label: "Full Body", value: "fullBody" }
-    ];
-
+    onChange,
+    className
+}: MuscleGroupSelectProps) => {
     return (
         <Select
             value={value}
-            onValueChange={onChange}
+            onValueChange={(value) => onChange(value as MuscleGroup)}
         >
-            <SelectTrigger className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600">
+            <SelectTrigger className={`w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 ${className}`}>
                 <SelectValue />
             </SelectTrigger>
             <SelectContent>
-                {muscleGroups.map((group) => (
+                {muscleGroupOptions.map((group) => (
                     <SelectItem key={group.value} value={group.value}>
                         {group.label}
                     </SelectItem>
@@ -46,4 +36,6 @@ export function MuscleGroupSelect({
             </SelectContent>
         </Select>
     );
-}
+};
+
+export default MuscleGroupSelect;
