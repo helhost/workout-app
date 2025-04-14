@@ -5,6 +5,17 @@ import { Exercise, Set } from "../../types";
 import { createDefaultSet } from "./form-utils";
 import MuscleGroupSelect from "./MuscleGroupSelect";
 import SetForm from "./SetForm";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
 
 interface ExerciseFormProps {
     exercise: Exercise;
@@ -96,30 +107,69 @@ const ExerciseForm = ({
 
                 <div className="flex space-x-2">
                     {!isInSuperset && onConvertToSuperset && (
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={onConvertToSuperset}
-                            className="flex items-center gap-1 text-blue-600 dark:text-blue-400"
-                            title="Convert to superset"
-                        >
-                            <ArrowLeftRight className="h-4 w-4" />
-                            <span className="hidden sm:inline">Superset</span>
-                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="flex items-center gap-1 text-blue-600 dark:text-blue-400"
+                                >
+                                    <ArrowLeftRight className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Superset</span>
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Convert to Superset</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to convert this exercise to a superset?
+                                        This will create a new exercise alongside the current one.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={onConvertToSuperset}>
+                                        Convert to Superset
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     )}
 
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={onRemove}
-                        className="text-red-600 dark:text-red-400 p-1"
-                        title={isInSuperset ? "Remove from superset" : "Remove exercise"}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Remove</span>
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 dark:text-red-400 p-1"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Remove</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    {isInSuperset ? "Remove Exercise from Superset" : "Remove Exercise"}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Are you sure you want to {isInSuperset
+                                        ? "remove this exercise from the superset"
+                                        : "remove this exercise"
+                                    }?
+                                    This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={onRemove}>
+                                    {isInSuperset ? "Remove Exercise" : "Remove"}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
 
@@ -145,7 +195,7 @@ const ExerciseForm = ({
                                     variant="ghost"
                                     size="sm"
                                     onClick={addSet}
-                                    className="text-green-600 hover:text-green-700 dark:text-green-400 p-1"
+                                    className="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 p-1"
                                     title="Add set"
                                 >
                                     <PlusCircle className="h-4 w-4" />
