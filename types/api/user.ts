@@ -1,7 +1,7 @@
 // User related API types (non-auth)
 import { Models } from '..';
 
-export namespace UserAPI {
+export namespace User {
     // Request types
     export interface UpdateNameRequest {
         name: string;

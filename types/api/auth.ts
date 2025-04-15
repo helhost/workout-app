@@ -1,7 +1,7 @@
 // Auth related API types
 import { Models } from '..';
 
-export namespace AuthAPI {
+export namespace Auth {
     // Request types
     export interface LoginRequest {
         email: string;
