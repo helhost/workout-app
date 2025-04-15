@@ -1,4 +1,4 @@
-export namespace WorkoutModels {
+export namespace Workout {
     export interface Set {
         id: string;
         weight: number;
@@ -10,18 +10,18 @@ export namespace WorkoutModels {
     export interface Exercise {
         id: string;
         name: string;
-        muscleGroup: WorkoutModels.MuscleGroup;
-        sets: WorkoutModels.Set[];
+        muscleGroup: Workout.MuscleGroup;
+        sets: Workout.Set[];
         notes?: string;
         type: 'exercise';
     }
 
-    export type WorkoutItem = WorkoutModels.Exercise | WorkoutModels.SuperSet;
+    export type WorkoutItem = Workout.Exercise | Workout.SuperSet;
 
     export interface SuperSet {
         id: string;
         type: 'superset';
-        exercises: WorkoutModels.Exercise[];
+        exercises: Workout.Exercise[];
         notes?: string;
     }
 
@@ -29,7 +29,7 @@ export namespace WorkoutModels {
         id: string;
         name: string;
         date: string;
-        items: WorkoutModels.WorkoutItem[];
+        items: Workout.WorkoutItem[];
         duration?: number;
         notes?: string;
         completed: boolean;
@@ -59,6 +59,6 @@ export namespace WorkoutModels {
 }
 
 // Helper function to check if a workout item is a superset
-export function isSuperset(item: WorkoutModels.WorkoutItem): item is WorkoutModels.SuperSet {
+export function isSuperset(item: Workout.WorkoutItem): item is Workout.SuperSet {
     return 'type' in item && item.type === 'superset';
 }

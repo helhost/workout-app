@@ -1,5 +1,5 @@
 // Auth related API types
-import { UserModels } from '../models/user';
+import { Models } from '..';
 
 export namespace AuthAPI {
     // Request types
@@ -19,7 +19,7 @@ export namespace AuthAPI {
     // Response types
     export interface AuthResponse {
         message: string;
-        user: UserModels.User;
+        user: Models.User.User;
     }
 
     export interface LogoutResponse {
@@ -32,6 +32,6 @@ export namespace AuthAPI {
 
     export interface ProfileResponse {
         message: string;
-        profile: UserModels.User;
+        profile: Models.User.User;
     }
 }

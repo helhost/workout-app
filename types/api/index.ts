@@ -3,7 +3,7 @@ export * from './user';
 export * from './workout';
 
 // Common API response types
-export namespace API {
+export namespace util {
     export interface PaginationParams {
         limit?: number;
         offset?: number;

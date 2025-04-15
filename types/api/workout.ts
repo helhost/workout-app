@@ -1,11 +1,10 @@
 // Workout related API types
-import { WorkoutModels } from '../models/workout';
-import { UserModels } from '../models';
-import { API } from './index';
+import { Models } from '..';
+import { API } from '..';
 
 export namespace WorkoutAPI {
     // Request parameters
-    export interface GetWorkoutsParams extends API.PaginationParams {
+    export interface GetWorkoutsParams extends API.util.PaginationParams {
         completed?: boolean;
         startDate?: Date;
         endDate?: Date;
@@ -27,7 +26,7 @@ export namespace WorkoutAPI {
 
     export interface AddExerciseRequest {
         name: string;
-        muscleGroup: WorkoutModels.MuscleGroup;
+        muscleGroup: Models.Workout.MuscleGroup;
         notes?: string;
         isDropSet?: boolean;
         order: number;
@@ -35,7 +34,7 @@ export namespace WorkoutAPI {
 
     export interface UpdateExerciseRequest {
         name?: string;
-        muscleGroup?: WorkoutModels.MuscleGroup;
+        muscleGroup?: Models.Workout.MuscleGroup;
         notes?: string;
         isDropSet?: boolean;
         order?: number;
@@ -80,18 +79,18 @@ export namespace WorkoutAPI {
     // Response types
     export interface GetWorkoutsResponse {
         message: string;
-        workouts: WorkoutModels.WorkoutSummary[];
-        pagination: API.PaginationMeta;
+        workouts: Models.Workout.WorkoutSummary[];
+        pagination: API.util.PaginationMeta;
     }
 
     export interface GetWorkoutByIdResponse {
         message: string;
-        workout: WorkoutModels.Workout;
+        workout: Models.Workout.Workout;
     }
 
     export interface WorkoutActionResponse {
         message: string;
-        workout: WorkoutModels.Workout;
+        workout: Models.Workout.Workout;
     }
 
     export interface WorkoutDeleteResponse {
@@ -100,7 +99,7 @@ export namespace WorkoutAPI {
 
     export interface ExerciseResponse {
         message: string;
-        exercise: WorkoutModels.Exercise;
+        exercise: Models.Workout.Exercise;
     }
 
     export interface ExerciseDeleteResponse {
@@ -109,7 +108,7 @@ export namespace WorkoutAPI {
 
     export interface SupersetResponse {
         message: string;
-        superset: WorkoutModels.SuperSet;
+        superset: Models.Workout.SuperSet;
     }
 
     export interface SupersetDeleteResponse {
@@ -118,7 +117,7 @@ export namespace WorkoutAPI {
 
     export interface SetResponse {
         message: string;
-        set: WorkoutModels.Set;
+        set: Models.Workout.Set;
     }
 
     export interface SetDeleteResponse {
@@ -127,16 +126,16 @@ export namespace WorkoutAPI {
 
     export interface LatestMeasurementsResponse {
         message: string;
-        measurements: UserModels.UserMeasurements;
+        measurements: Models.User.UserMeasurements;
     }
 
     export interface MeasurementHistoryResponse {
         message: string;
-        history: UserModels.MeasurementHistory[];
+        history: Models.User.MeasurementHistory[];
     }
 
     export interface AddMeasurementResponse {
         message: string;
-        measurement: UserModels.MeasurementHistory;
+        measurement: Models.User.MeasurementHistory;
     }
 }

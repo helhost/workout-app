@@ -1,5 +1,5 @@
 // User related API types (non-auth)
-import { UserModels } from '../models/user';
+import { Models } from '..';
 
 export namespace UserAPI {
     // Request types
@@ -38,7 +38,7 @@ export namespace UserAPI {
 
     export interface UpdateSettingsResponse {
         message: string;
-        settings: UserModels.UserSettings;
+        settings: Models.User.UserSettings;
     }
 
     export interface ProfileImageUploadResponse {

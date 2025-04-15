@@ -1,4 +1,4 @@
-export namespace UserModels {
+export namespace User {
     export interface MeasurementData {
         value: number;
         date: string;
