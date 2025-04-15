@@ -6,6 +6,11 @@
     "outDir": "./dist",
     "esModuleInterop": true,
     "strict": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "paths": {
+      "@shared/*": [
+        "../types/*"
+      ]
+    },
   }
 }
