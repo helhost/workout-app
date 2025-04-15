@@ -13,18 +13,17 @@ model Counter {
 }
 
 model User {
-  id             String            @id @default(uuid())
-  name           String
-  email          String            @unique
-  password       String
-  bio            String?
-  profilePicture String? // Profile picture URL
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  settings       UserSettings?
-  measurements   UserMeasurements?
-  profileImage   ProfileImage? // New relation to profile image
-  Workout        Workout[]
+  id           String            @id @default(uuid())
+  name         String
+  email        String            @unique
+  password     String
+  bio          String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  settings     UserSettings?
+  measurements UserMeasurements?
+  profileImage ProfileImage? // New relation to profile image
+  Workout      Workout[]
 }
 
 // New model for storing profile images
