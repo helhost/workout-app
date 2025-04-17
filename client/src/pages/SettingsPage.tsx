@@ -5,7 +5,7 @@ import SettingsLayout from "@/features/settings/components/SettingsLayout";
 import SettingsSection from "@/features/settings/components/SettingsSection";
 import SettingToggle from "@/features/settings/components/SettingToggle";
 import SettingSelect from "@/features/settings/components/SettingSelect";
-import { getProfile } from "@/features/profile/api";
+import { getUser } from "@/features/auth/api"
 import { Button } from "@/components/ui/button";
 import { UserSettings, updateSettings } from "@/features/settings/api";
 
@@ -26,7 +26,7 @@ export default function SettingsPage() {
                 setIsLoading(true);
                 setError(null);
 
-                const response = await getProfile();
+                const response = await getUser();
                 if (response && response.profile && response.profile.settings) {
                     // Extract settings from profile
                     const profileSettings = response.profile.settings;
