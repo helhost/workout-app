@@ -45,7 +45,7 @@ app.use(securityMiddleware);
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/profile", userRotues);
+app.use("/api/user", userRotues);
 app.use("/api/workouts", workoutRoutes);
 
 export default app;
