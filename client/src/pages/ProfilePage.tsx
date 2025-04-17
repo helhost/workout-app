@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { ProfileLayout, ProfileCard, ProfileSection, ProfileInfoItem } from '@/features/profile';
@@ -16,7 +15,6 @@ export default function ProfilePage() {
     const [editingBio, setEditingBio] = useState(false);
     const [nameInput, setNameInput] = useState('');
     const [bioInput, setBioInput] = useState('');
-    const navigate = useNavigate();
 
     // Fetch user profile and measurements
     useEffect(() => {

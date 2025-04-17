@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { User } from '@shared';
 import { User as LucideUser } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getProfileImageMetadata } from '../api';
+import { getProfileImageAsBlob } from '../api';
 
 interface ProfileImageProps {
     hasProfileImage: boolean;
@@ -22,11 +21,10 @@ export default function ProfileImage({
     const [imageSrc, setImageSrc] = useState<string | null>(propImageUrl);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
-    const [imageMetadata, setImageMetadata] = useState<Omit<User.ProfileImage, 'data'> | null>(null);
 
-    // Load the image metadata when hasProfileImage changes
     useEffect(() => {
         let isMounted = true;
+        let objectUrl: string | null = null;
 
         if (!hasProfileImage) {
             setImageSrc(null);
@@ -34,25 +32,20 @@ export default function ProfileImage({
             return;
         }
 
-        // If we already have the image URL and it hasn't changed, don't refetch
-        if (imageSrc && propImageUrl === null) {
-            return;
-        }
-
-        const loadImageMetadata = async () => {
+        const loadProfileImage = async () => {
             try {
                 setIsLoading(true);
                 setError(false);
 
-                // Fetch image metadata
-                const { profileImage } = await getProfileImageMetadata();
+                // Use the API function to get the image blob URL
+                objectUrl = await getProfileImageAsBlob();
 
                 if (isMounted) {
-                    setImageMetadata(profileImage);
+                    setImageSrc(objectUrl);
                     setIsLoading(false);
                 }
             } catch (err) {
-                console.error('Failed to load profile image metadata:', err);
+                console.error('Failed to load profile image:', err);
                 if (isMounted) {
                     setError(true);
                     setIsLoading(false);
@@ -61,13 +54,15 @@ export default function ProfileImage({
             }
         };
 
-        loadImageMetadata();
+        loadProfileImage();
 
         // Clean up function to handle component unmounting
         return () => {
             isMounted = false;
+            // Revoke the object URL to avoid memory leaks
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
         };
-    }, [hasProfileImage, propImageUrl, onLoadError]);
+    }, [hasProfileImage, onLoadError]);
 
     // Determine icon size based on the size prop
     const getIconSize = () => {
@@ -90,7 +85,7 @@ export default function ProfileImage({
         );
     }
 
-    if (!hasProfileImage || error || !imageMetadata) {
+    if (!hasProfileImage || error || !imageSrc) {
         return (
             <div className={cn(
                 "bg-gray-200 dark:bg-gray-700 flex items-center justify-center",
@@ -104,13 +99,9 @@ export default function ProfileImage({
     return (
         <div className={cn("overflow-hidden", className)}>
             <img
-                src={`/api/user/image?t=${imageMetadata.id}`} // Use ID as cache-busting param
+                src={imageSrc}
                 alt="Profile"
                 className="w-full h-full object-cover"
-                onError={() => {
-                    setError(true);
-                    if (onLoadError) onLoadError();
-                }}
             />
         </div>
     );

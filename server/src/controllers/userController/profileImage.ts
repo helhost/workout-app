@@ -83,12 +83,12 @@ export const handleGetProfileImage: Controller = async (req, res) => {
         try {
             const profileImage = await getProfileImage(userId);
 
-            // Set appropriate headers for image delivery
+            // Fix: Set appropriate headers for image delivery without charset
             res.set('Content-Type', profileImage.mimeType);
             res.set('Content-Disposition', `inline; filename="${profileImage.filename}"`);
 
-            // Send the binary image data
-            res.send(profileImage.data);
+            // Send the binary image data without text encoding
+            res.end(profileImage.data, 'binary');
         } catch (error: any) {
             if (error.message === 'Profile image not found') {
                 res.status(404).json({ error: 'Profile image not found' });

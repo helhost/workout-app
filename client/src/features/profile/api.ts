@@ -110,6 +110,27 @@ export const getProfileImageMetadata = async (): Promise<{
 };
 
 /**
+ * Retrieves the profile image as a blob URL that can be used directly in an img tag
+ * @returns Promise with object URL for the profile image
+ * @throws Error if the image cannot be retrieved
+ */
+export const getProfileImageAsBlob = async (): Promise<string> => {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/user/image?t=${Date.now()}`, {
+            credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch profile image');
+
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+    } catch (error) {
+        console.error('Failed to get profile image as blob:', error);
+        throw error;
+    }
+};
+
+/**
  * Retrieves the latest body measurements for the authenticated user
  * @returns Latest measurements across weight, height, and body fat
  * @throws {ApiError} If retrieval fails or user is not authenticated
