@@ -1,14 +1,17 @@
+// client/src/pages/SettingsPage.tsx
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { setDarkMode } from "@/features/theme/themeUtils";
-import SettingsLayout from "@/features/settings/components/SettingsLayout";
-import SettingsSection from "@/features/settings/components/SettingsSection";
-import SettingToggle from "@/features/settings/components/SettingToggle";
-import SettingSelect from "@/features/settings/components/SettingSelect";
-import { getUser } from "@/features/auth/api"
+import { SettingsLayout, SettingsSection, SettingToggle, SettingSelect } from "@/features/settings";
+import { getUser } from "@/features/auth/api";
 import { Button } from "@/components/ui/button";
-import { UserSettings, updateSettings } from "@/features/settings/api";
+import { updateSettings } from "@/features/settings/api";
+import { UserSettings } from "@/types";
 
+/**
+ * Settings page component allowing users to customize application preferences
+ * @returns Settings page UI
+ */
 export default function SettingsPage() {
     // Settings state
     const [settings, setSettings] = useState<UserSettings>({
@@ -20,6 +23,7 @@ export default function SettingsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Fetch user settings on component mount
     useEffect(() => {
         const fetchSettings = async () => {
             try {
@@ -53,7 +57,11 @@ export default function SettingsPage() {
         fetchSettings();
     }, []);
 
-    // Update a specific setting directly via API
+    /**
+     * Updates a specific setting and persists it to the backend
+     * @param key The setting key to update
+     * @param value The new value for the setting
+     */
     const updateSetting = async <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => {
         try {
             // Create updated settings object
@@ -91,6 +99,7 @@ export default function SettingsPage() {
         }
     };
 
+    // Loading state
     if (isLoading) {
         return (
             <SettingsLayout>
@@ -101,6 +110,7 @@ export default function SettingsPage() {
         );
     }
 
+    // Error state
     if (error) {
         return (
             <SettingsLayout>
@@ -118,6 +128,7 @@ export default function SettingsPage() {
         );
     }
 
+    // Main settings form
     return (
         <SettingsLayout>
             <SettingsSection title="Appearance" description="Customize how the app looks and feels">

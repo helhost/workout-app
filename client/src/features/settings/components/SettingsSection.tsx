@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { SettingsSectionProps } from "../types";
+import { SettingsSectionProps } from "@/types";
 
 export default function SettingsSection({
     title,

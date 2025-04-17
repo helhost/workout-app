@@ -1,8 +1,12 @@
-// Import Switch from Shadcn UI
 import { Switch } from "@/components/ui/switch";
-import { SettingToggleProps } from "../types";
+import { SettingToggleProps } from "@/types";
 import SettingOption from "./SettingOption";
 
+/**
+ * A toggle switch setting component
+ * @param props Component properties
+ * @returns A rendered setting option with a toggle switch
+ */
 export default function SettingToggle({
     label,
     description,

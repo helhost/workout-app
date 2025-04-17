@@ -1,6 +1,6 @@
 // Import Slider from Shadcn UI
 import { Slider } from "@/components/ui/slider";
-import { SettingSliderProps } from "../types";
+import { SettingSliderProps } from "@/types";
 import SettingOption from "./SettingOption";
 
 export default function SettingSlider({

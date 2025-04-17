@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { SettingOptionProps } from "../types";
+import { SettingOptionProps } from "@/types";
 
 export default function SettingOption({
     label,

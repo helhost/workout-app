@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { SettingSubmenuProps } from "../types";
+import { SettingSubmenuProps } from "@/types";
 import { cn } from "@/lib/utils";
 
 export default function SettingSubmenu({

@@ -1,4 +1,4 @@
-// Import Select components from Shadcn UI
+// client/src/features/settings/components/SettingSelect.tsx
 import {
     Select,
     SelectContent,
@@ -6,9 +6,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { SettingSelectProps } from "../types";
+import { SettingSelectProps } from "@/types";
 import SettingOption from "./SettingOption";
 
+/**
+ * A dropdown select setting component
+ * @param props Component properties
+ * @returns A rendered setting option with a select dropdown
+ */
 export default function SettingSelect<T extends string | number>({
     label,
     description,

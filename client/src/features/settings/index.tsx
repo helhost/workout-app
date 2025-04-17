@@ -9,6 +9,3 @@ export { default as SettingSubmenu } from './components/SettingSubmenu';
 
 // Export API
 export * from './api';
-
-// Export types
-export * from './types';

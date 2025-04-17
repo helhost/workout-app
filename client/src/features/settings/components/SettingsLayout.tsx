@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { SettingsLayoutProps } from "../types";
+import { SettingsLayoutProps } from "@/types";
 
 export default function SettingsLayout({
     children,
