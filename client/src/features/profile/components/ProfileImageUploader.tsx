@@ -1,7 +1,7 @@
 import { useState, useRef, ChangeEvent } from 'react';
 import { Upload, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { uploadProfileImage, deleteProfileImage } from '../api';
 import ProfileImage from './ProfileImage';
 import { toast } from 'sonner';
@@ -160,6 +160,9 @@ export default function ProfileImageUploader({
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Delete Profile Picture</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete your profile picture? This action cannot be undone.
+                        </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
                         <p>Are you sure you want to delete your profile picture?</p>
