@@ -5,10 +5,18 @@ import {
     addWeightMeasurement,
     addHeightMeasurement,
     addBodyFatMeasurement
-} from '../../services/profileService';
+} from 'src/services/userService';
+import { Controller } from 'types';
 
-// Get latest measurements
-export const getLatestMeasurementData = async (req: Request, res: Response) => {
+/**
+ * Retrieves the latest measurements for the authenticated user
+ * @param req Express request object containing authenticated user details
+ * @param res Express response object
+ * @returns Latest measurements data if successful
+ * @throws 401 if user is not authenticated
+ * @throws 500 if server encounters an error
+ */
+export const handleGetLatestMeasurements: Controller = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
             res.status(401).json({ error: 'Unauthorized' });
@@ -18,7 +26,7 @@ export const getLatestMeasurementData = async (req: Request, res: Response) => {
         const userId = req.user.id;
         const measurements = await getLatestMeasurements(userId);
 
-        res.json({
+        res.status(200).json({
             message: 'Latest measurements retrieved successfully',
             measurements
         });
@@ -28,8 +36,15 @@ export const getLatestMeasurementData = async (req: Request, res: Response) => {
     }
 };
 
-// Get measurement history for a specific type
-export const getMeasurementHistoryData = async (req: Request, res: Response) => {
+/**
+ * Retrieves measurement history for the authenticated user
+ * @param req Express request object with optional limit query parameter
+ * @param res Express response object
+ * @returns Measurement history data if successful
+ * @throws 401 if user is not authenticated
+ * @throws 500 if server encounters an error
+ */
+export const handleGetMeasurementHistory: Controller = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
             res.status(401).json({ error: 'Unauthorized' });
@@ -37,23 +52,15 @@ export const getMeasurementHistoryData = async (req: Request, res: Response) => 
         }
 
         const userId = req.user.id;
-        const { type } = req.params;
         const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-
-        // Validate measurement type
-        if (!['weight', 'height', 'bodyFat'].includes(type)) {
-            res.status(400).json({ error: 'Invalid measurement type' });
-            return
-        }
 
         const history = await getMeasurementHistory(
             userId,
-            type as 'weight' | 'height' | 'bodyFat',
             limit
         );
 
-        res.json({
-            message: `${type} measurement history retrieved successfully`,
+        res.status(200).json({
+            message: 'Measurement history retrieved successfully',
             history
         });
     } catch (error) {
@@ -62,16 +69,24 @@ export const getMeasurementHistoryData = async (req: Request, res: Response) => 
     }
 };
 
-// Add a weight measurement
-export const addWeight = async (req: Request, res: Response) => {
+/**
+ * Adds a new weight measurement for the authenticated user
+ * @param req Express request object with weight value in body
+ * @param res Express response object
+ * @returns Created measurement data if successful
+ * @throws 401 if user is not authenticated
+ * @throws 400 if weight value is invalid
+ * @throws 500 if server encounters an error
+ */
+export const handleAddWeightMeasurement: Controller = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
             res.status(401).json({ error: 'Unauthorized' });
             return
         }
 
+        const { value } = req.body;
         const userId = req.user.id;
-        const { value, date } = req.body;
 
         // Validate weight value
         if (value === undefined || typeof value !== 'number' || value <= 0) {
@@ -79,17 +94,7 @@ export const addWeight = async (req: Request, res: Response) => {
             return
         }
 
-        // Parse date if provided
-        let measurementDate: Date | undefined = undefined;
-        if (date) {
-            measurementDate = new Date(date);
-            if (isNaN(measurementDate.getTime())) {
-                res.status(400).json({ error: 'Invalid date format' });
-                return
-            }
-        }
-
-        const measurement = await addWeightMeasurement(userId, value, measurementDate);
+        const measurement = await addWeightMeasurement(userId, value);
 
         res.status(201).json({
             message: 'Weight measurement added successfully',
@@ -101,16 +106,24 @@ export const addWeight = async (req: Request, res: Response) => {
     }
 };
 
-// Add a height measurement
-export const addHeight = async (req: Request, res: Response) => {
+/**
+ * Adds a new height measurement for the authenticated user
+ * @param req Express request object with height value in body
+ * @param res Express response object
+ * @returns Created measurement data if successful
+ * @throws 401 if user is not authenticated
+ * @throws 400 if height value is invalid
+ * @throws 500 if server encounters an error
+ */
+export const handleAddHeightMeasurement: Controller = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
             res.status(401).json({ error: 'Unauthorized' });
             return
         }
 
+        const { value } = req.body;
         const userId = req.user.id;
-        const { value, date } = req.body;
 
         // Validate height value
         if (value === undefined || typeof value !== 'number' || value <= 0) {
@@ -118,18 +131,7 @@ export const addHeight = async (req: Request, res: Response) => {
             return
         }
 
-        // Parse date if provided
-        let measurementDate: Date | undefined = undefined;
-        if (date) {
-            measurementDate = new Date(date);
-            if (isNaN(measurementDate.getTime())) {
-                res.status(400).json({ error: 'Invalid date format' });
-                return
-            }
-        }
-
-        const measurement = await addHeightMeasurement(userId, value, measurementDate);
-
+        const measurement = await addHeightMeasurement(userId, value);
         res.status(201).json({
             message: 'Height measurement added successfully',
             measurement
@@ -140,34 +142,32 @@ export const addHeight = async (req: Request, res: Response) => {
     }
 };
 
-// Add a body fat measurement
-export const addBodyFat = async (req: Request, res: Response) => {
+/**
+ * Adds a new body fat measurement for the authenticated user
+ * @param req Express request object with body fat percentage value in body
+ * @param res Express response object
+ * @returns Created measurement data if successful
+ * @throws 401 if user is not authenticated
+ * @throws 400 if body fat value is invalid
+ * @throws 500 if server encounters an error
+ */
+export const handleAddBodyFatMeasurement: Controller = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
             res.status(401).json({ error: 'Unauthorized' });
             return
         }
 
+        const { value } = req.body;
         const userId = req.user.id;
-        const { value, date } = req.body;
 
         // Validate body fat value
         if (value === undefined || typeof value !== 'number' || value < 0 || value > 100) {
-            res.status(400).json({ error: 'Body fat must be between 0 and 100' });
+            res.status(400).json({ error: 'Valid body fat percentage (0-100) is required' });
             return
         }
 
-        // Parse date if provided
-        let measurementDate: Date | undefined = undefined;
-        if (date) {
-            measurementDate = new Date(date);
-            if (isNaN(measurementDate.getTime())) {
-                res.status(400).json({ error: 'Invalid date format' });
-                return
-            }
-        }
-
-        const measurement = await addBodyFatMeasurement(userId, value, measurementDate);
+        const measurement = await addBodyFatMeasurement(userId, value);
 
         res.status(201).json({
             message: 'Body fat measurement added successfully',

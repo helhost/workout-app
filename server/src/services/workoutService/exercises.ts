@@ -1,19 +1,22 @@
 import { PrismaClient } from '@prisma/client';
+import { Workout } from '@shared';
+import e from 'express';
 
 const prisma = new PrismaClient();
 
-// Add an exercise to a workout
+/**
+ * Adds an exercise to a workout
+ * @param workoutId The workout's unique identifier
+ * @param userId User ID for permission verification
+ * @param exerciseData Data for the new exercise
+ * @returns Created exercise
+ * @throws Error if workout not found or doesn't belong to user
+ */
 export const addExerciseToWorkout = async (
     workoutId: string,
     userId: string,
-    exerciseData: {
-        name: string;
-        muscleGroup: string;
-        notes?: string;
-        isDropSet?: boolean;
-        order: number;
-    }
-) => {
+    exerciseData: Workout.ExerciseData
+): Promise<Workout.Exercise> => {
     // Verify workout belongs to user
     const workout = await prisma.workout.findUnique({
         where: { id: workoutId },
@@ -24,64 +27,40 @@ export const addExerciseToWorkout = async (
         throw new Error('Workout not found');
     }
 
-    return prisma.exercise.create({
+    const exercise = await prisma.exercise.create({
         data: {
             workoutId,
             name: exerciseData.name,
             muscleGroup: exerciseData.muscleGroup,
             notes: exerciseData.notes,
-            isDropSet: exerciseData.isDropSet || false,
             order: exerciseData.order,
+        },
+        include: {
+            sets: true,
+            dropsets: {
+                include: {
+                    subSets: true
+                }
+            }
         }
     });
+
+    return { ...exercise, type: 'exercise' }
 };
 
-// Add an exercise to a superset
-export const addExerciseToSuperset = async (
-    supersetId: string,
-    userId: string,
-    exerciseData: {
-        name: string;
-        muscleGroup: string;
-        notes?: string;
-        isDropSet?: boolean;
-        order: number;
-    }
-) => {
-    // Verify superset belongs to user's workout
-    const superset = await prisma.superset.findUnique({
-        where: { id: supersetId },
-        include: { workout: { select: { userId: true } } }
-    });
-
-    if (!superset || superset.workout.userId !== userId) {
-        throw new Error('Superset not found');
-    }
-
-    return prisma.exercise.create({
-        data: {
-            supersetId,
-            name: exerciseData.name,
-            muscleGroup: exerciseData.muscleGroup,
-            notes: exerciseData.notes,
-            isDropSet: exerciseData.isDropSet || false,
-            order: exerciseData.order,
-        }
-    });
-};
-
-// Update an exercise
+/**
+ * Updates an exercise
+ * @param exerciseId The exercise's unique identifier
+ * @param userId User ID for permission verification
+ * @param data Updated exercise data
+ * @returns Updated exercise
+ * @throws Error if exercise not found or doesn't belong to user
+ */
 export const updateExercise = async (
     exerciseId: string,
     userId: string,
-    data: {
-        name?: string;
-        muscleGroup?: string;
-        notes?: string;
-        isDropSet?: boolean;
-        order?: number;
-    }
-) => {
+    data: Partial<Workout.ExerciseData>
+): Promise<Workout.Exercise> => {
     // Verify exercise belongs to user
     const exercise = await prisma.exercise.findUnique({
         where: { id: exerciseId },
@@ -101,14 +80,29 @@ export const updateExercise = async (
         throw new Error('Exercise not found');
     }
 
-    return prisma.exercise.update({
+    const updated_exercise = await prisma.exercise.update({
         where: { id: exerciseId },
-        data
+        data,
+        include: {
+            sets: true,
+            dropsets: {
+                include: {
+                    subSets: true
+                }
+            }
+        }
     });
+
+    return { ...updated_exercise, type: 'exercise' };
 };
 
-// Delete an exercise
-export const deleteExercise = async (exerciseId: string, userId: string) => {
+/**
+ * Deletes an exercise
+ * @param exerciseId The exercise's unique identifier
+ * @param userId User ID for permission verification
+ * @throws Error if exercise not found or doesn't belong to user
+ */
+export const deleteExercise = async (exerciseId: string, userId: string): Promise<void> => {
     // Verify exercise belongs to user
     const exercise = await prisma.exercise.findUnique({
         where: { id: exerciseId },
@@ -128,7 +122,7 @@ export const deleteExercise = async (exerciseId: string, userId: string) => {
         throw new Error('Exercise not found');
     }
 
-    return prisma.exercise.delete({
+    await prisma.exercise.delete({
         where: { id: exerciseId }
     });
 };

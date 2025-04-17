@@ -7,32 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Counter {
-  id    Int @id @default(autoincrement())
-  value Int
-}
-
 model User {
   id           String            @id @default(uuid())
   name         String
   email        String            @unique
   password     String
-  bio          String?
+  bio          String            @default("")
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   settings     UserSettings?
   measurements UserMeasurements?
-  profileImage ProfileImage? // New relation to profile image
+  profileImage ProfileImage?
   Workout      Workout[]
 }
 
-// New model for storing profile images
 model ProfileImage {
   id        String   @id @default(uuid())
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   filename  String
-  data      Bytes // Binary data of the image
+  data      Bytes
   mimeType  String
   size      Int
   createdAt DateTime @default(now())
@@ -45,12 +39,11 @@ model UserSettings {
   user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   darkMode               Boolean  @default(false)
   language               String   @default("en")
-  defaultMeasurementUnit String   @default("metric") // "metric" or "imperial"
+  defaultMeasurementUnit String   @default("metric")
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 }
 
-// Main user measurements container
 model UserMeasurements {
   id        String               @id @default(uuid())
   userId    String               @unique
@@ -58,56 +51,46 @@ model UserMeasurements {
   weights   WeightMeasurement[]
   heights   HeightMeasurement[]
   bodyFats  BodyFatMeasurement[]
-  createdAt DateTime             @default(now())
   updatedAt DateTime             @updatedAt
 }
 
-// Individual measurement types
 model WeightMeasurement {
   id                 String           @id @default(uuid())
   userMeasurementsId String
   userMeasurements   UserMeasurements @relation(fields: [userMeasurementsId], references: [id], onDelete: Cascade)
-  value              Float // Weight in kg
-  date               DateTime         @default(now())
+  value              Float
   createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
 
-  @@index([userMeasurementsId, date])
+  @@index([userMeasurementsId, createdAt])
 }
 
 model HeightMeasurement {
   id                 String           @id @default(uuid())
   userMeasurementsId String
   userMeasurements   UserMeasurements @relation(fields: [userMeasurementsId], references: [id], onDelete: Cascade)
-  value              Float // Height in cm
-  date               DateTime         @default(now())
+  value              Float
   createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
 
-  @@index([userMeasurementsId, date])
+  @@index([userMeasurementsId, createdAt])
 }
 
 model BodyFatMeasurement {
   id                 String           @id @default(uuid())
   userMeasurementsId String
   userMeasurements   UserMeasurements @relation(fields: [userMeasurementsId], references: [id], onDelete: Cascade)
-  value              Float // Body fat percentage
-  date               DateTime         @default(now())
+  value              Float
   createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
 
-  @@index([userMeasurementsId, date])
+  @@index([userMeasurementsId, createdAt])
 }
 
-// Workout schema
 model Workout {
   id        String     @id @default(uuid())
   userId    String
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   name      String
-  date      DateTime // Planned date
-  startTime DateTime? // Actual start time when user begins the workout
-  endTime   DateTime? // Actual end time when user completes the workout
+  startTime DateTime?
+  endTime   DateTime?
   notes     String?
   completed Boolean    @default(false)
   createdAt DateTime   @default(now())
@@ -115,22 +98,21 @@ model Workout {
   exercises Exercise[]
   supersets Superset[]
 
-  @@index([userId, date])
+  @@index([userId, startTime])
 }
 
-// Exercise schema
 model Exercise {
   id          String        @id @default(uuid())
   name        String
-  muscleGroup String // 'chest', 'back', 'shoulders', etc.
+  muscleGroup MuscleGroup
   notes       String?
-  isDropSet   Boolean       @default(false) // Flag to indicate if this is a dropset
   sets        ExerciseSet[]
+  dropsets    Dropset[] // New relation to dropsets
   workoutId   String?
   workout     Workout?      @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   supersetId  String?
   superset    Superset?     @relation(fields: [supersetId], references: [id], onDelete: Cascade)
-  order       Int // To maintain the order within a workout or superset
+  order       Int
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -138,48 +120,71 @@ model Exercise {
   @@index([supersetId])
 }
 
-// ExerciseSet schema
+// Regular Exercise Set
 model ExerciseSet {
   id         String   @id @default(uuid())
   exerciseId String
   exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  weight     Float // Weight in kg or lbs
+  weight     Float
   reps       Int
-  completed  Boolean  @default(false)
   notes      String?
-  order      Int // To maintain the order of sets within an exercise
+  order      Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  subSets    SubSet[] // Relation for dropset sub-sets
 
   @@index([exerciseId])
 }
 
-// SubSet schema for dropsets
-model SubSet {
-  id            String      @id @default(uuid())
-  exerciseSetId String
-  exerciseSet   ExerciseSet @relation(fields: [exerciseSetId], references: [id], onDelete: Cascade)
-  weight        Float // Reduced weight for this dropset portion
-  reps          Int // Reps performed at this weight
-  completed     Boolean     @default(false)
-  order         Int // Order within the dropset sequence
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+// New Dropset model as an alternative to ExerciseSet
+model Dropset {
+  id         String          @id @default(uuid())
+  exerciseId String
+  exercise   Exercise        @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  notes      String?
+  order      Int // Order within the exercise
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  subSets    DropsetSubSet[] // The actual sets in the dropset
 
-  @@index([exerciseSetId])
+  @@index([exerciseId])
 }
 
-// Superset schema
+// SubSets within a dropset
+model DropsetSubSet {
+  id        String   @id @default(uuid())
+  dropsetId String
+  dropset   Dropset  @relation(fields: [dropsetId], references: [id], onDelete: Cascade)
+  weight    Float
+  reps      Int
+  order     Int // Order within the dropset sequence
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dropsetId])
+}
+
 model Superset {
   id        String     @id @default(uuid())
   workoutId String
   workout   Workout    @relation(fields: [workoutId], references: [id], onDelete: Cascade)
   notes     String?
   exercises Exercise[]
-  order     Int // To maintain the order within a workout
+  order     Int
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
   @@index([workoutId])
+}
+
+enum MuscleGroup {
+  chest
+  back
+  shoulders
+  biceps
+  triceps
+  legs
+  quads
+  core
+  cardio
+  fullBody
 }

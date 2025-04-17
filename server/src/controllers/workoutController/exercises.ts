@@ -1,169 +1,157 @@
-import { Request, Response } from 'express';
 import {
     addExerciseToWorkout,
-    addExerciseToSuperset,
     updateExercise,
     deleteExercise
-} from '../../services/workoutService';
+} from 'src/services/workoutService/exercises';
+import { Controller } from 'types';
+import { Workout } from '@shared';
 
-// Add exercise to workout
-export const addExerciseToWorkoutController = async (req: Request, res: Response) => {
+/**
+ * Adds an exercise to a workout
+ * @param req Express request object with workoutId and exercise data
+ * @param res Express response object
+ * @returns Created exercise information if successful
+ * @throws 401 if user is not authenticated
+ * @throws 400 if required data is missing or invalid
+ * @throws 404 if workout is not found
+ * @throws 500 if server encounters an error
+ */
+export const handleAddExerciseToWorkout: Controller = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
             res.status(401).json({ error: 'Unauthorized' });
-            return
+            return;
         }
 
         const userId = req.user.id;
         const { workoutId } = req.params;
-        const { name, muscleGroup, notes, isDropSet, order } = req.body;
+        const exerciseData: Workout.ExerciseData = req.body;
 
-        // Basic validation
-        if (!name || !muscleGroup || order === undefined) {
-            res.status(400).json({ error: 'Exercise name, muscle group, and order are required' });
-            return
+        if (!workoutId) {
+            res.status(400).json({ error: 'Workout ID is required' });
+            return;
         }
 
-        try {
-            const exercise = await addExerciseToWorkout(workoutId, userId, {
-                name,
-                muscleGroup,
-                notes,
-                isDropSet: isDropSet || false,
-                order
+        if (!exerciseData || typeof exerciseData !== 'object' ||
+            !exerciseData.name || !exerciseData.muscleGroup ||
+            exerciseData.order === undefined) {
+            res.status(400).json({
+                error: 'Valid exercise data with name, muscleGroup, and order is required'
             });
-
-            res.status(201).json({
-                message: 'Exercise added to workout successfully',
-                exercise
-            });
-        } catch (error: any) {
-            if (error.message === 'Workout not found') {
-                res.status(404).json({ error: 'Workout not found' });
-                return
-            }
-            throw error;
+            return;
         }
-    } catch (error) {
+
+        const newExercise = await addExerciseToWorkout(workoutId, userId, exerciseData);
+
+        res.status(201).json({
+            message: 'Exercise added successfully',
+            exercise: newExercise
+        });
+        return;
+    } catch (error: any) {
         console.error('Add exercise error:', error);
-        res.status(500).json({ error: 'Failed to add exercise to workout' });
+
+        if (error.message === 'Workout not found') {
+            res.status(404).json({ error: 'Workout not found' });
+            return;
+        }
+
+        res.status(500).json({ error: 'Failed to add exercise' });
+        return;
     }
 };
 
-// Add exercise to superset
-export const addExerciseToSupersetController = async (req: Request, res: Response) => {
+/**
+ * Updates an existing exercise
+ * @param req Express request object with exerciseId and update data
+ * @param res Express response object
+ * @returns Updated exercise information if successful
+ * @throws 401 if user is not authenticated
+ * @throws 400 if required data is missing or invalid
+ * @throws 404 if exercise is not found
+ * @throws 500 if server encounters an error
+ */
+export const handleUpdateExercise: Controller = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
             res.status(401).json({ error: 'Unauthorized' });
-            return
-        }
-
-        const userId = req.user.id;
-        const { supersetId } = req.params;
-        const { name, muscleGroup, notes, isDropSet, order } = req.body;
-
-        // Basic validation
-        if (!name || !muscleGroup || order === undefined) {
-            res.status(400).json({ error: 'Exercise name, muscle group, and order are required' });
-            return
-        }
-
-        try {
-            const exercise = await addExerciseToSuperset(supersetId, userId, {
-                name,
-                muscleGroup,
-                notes,
-                isDropSet: isDropSet || false,
-                order
-            });
-
-            res.status(201).json({
-                message: 'Exercise added to superset successfully',
-                exercise
-            });
-        } catch (error: any) {
-            if (error.message === 'Superset not found') {
-                res.status(404).json({ error: 'Superset not found' });
-                return
-            }
-            throw error;
-        }
-    } catch (error) {
-        console.error('Add exercise to superset error:', error);
-        res.status(500).json({ error: 'Failed to add exercise to superset' });
-    }
-};
-
-// Update exercise
-export const updateExerciseController = async (req: Request, res: Response) => {
-    try {
-        if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return
+            return;
         }
 
         const userId = req.user.id;
         const { exerciseId } = req.params;
-        const { name, muscleGroup, notes, isDropSet, order } = req.body;
+        const updateData: Partial<Workout.ExerciseData> = req.body;
 
-        // At least one field should be provided for update
-        if (!name && muscleGroup === undefined && notes === undefined &&
-            isDropSet === undefined && order === undefined) {
-            res.status(400).json({ error: 'At least one field to update is required' });
-            return
+        if (!exerciseId) {
+            res.status(400).json({ error: 'Exercise ID is required' });
+            return;
         }
 
-        const updateData: any = {};
-        if (name !== undefined) updateData.name = name;
-        if (muscleGroup !== undefined) updateData.muscleGroup = muscleGroup;
-        if (notes !== undefined) updateData.notes = notes;
-        if (isDropSet !== undefined) updateData.isDropSet = isDropSet;
-        if (order !== undefined) updateData.order = order;
-
-        try {
-            const exercise = await updateExercise(exerciseId, userId, updateData);
-            res.json({
-                message: 'Exercise updated successfully',
-                exercise
-            });
-        } catch (error: any) {
-            if (error.message === 'Exercise not found') {
-                res.status(404).json({ error: 'Exercise not found' });
-                return
-            }
-            throw error;
+        if (!updateData || typeof updateData !== 'object') {
+            res.status(400).json({ error: 'Valid update data is required' });
+            return;
         }
-    } catch (error) {
+
+        const updatedExercise = await updateExercise(exerciseId, userId, updateData);
+
+        res.status(200).json({
+            message: 'Exercise updated successfully',
+            exercise: updatedExercise
+        });
+        return;
+    } catch (error: any) {
         console.error('Update exercise error:', error);
+
+        if (error.message === 'Exercise not found') {
+            res.status(404).json({ error: 'Exercise not found' });
+            return;
+        }
+
         res.status(500).json({ error: 'Failed to update exercise' });
+        return;
     }
 };
 
-// Delete exercise
-export const deleteExerciseController = async (req: Request, res: Response) => {
+/**
+ * Deletes an exercise
+ * @param req Express request object with exerciseId
+ * @param res Express response object
+ * @returns Success message if deletion is successful
+ * @throws 401 if user is not authenticated
+ * @throws 400 if exerciseId is missing
+ * @throws 404 if exercise is not found
+ * @throws 500 if server encounters an error
+ */
+export const handleDeleteExercise: Controller = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
             res.status(401).json({ error: 'Unauthorized' });
-            return
+            return;
         }
 
         const userId = req.user.id;
         const { exerciseId } = req.params;
 
-        try {
-            await deleteExercise(exerciseId, userId);
-            res.json({
-                message: 'Exercise deleted successfully'
-            });
-        } catch (error: any) {
-            if (error.message === 'Exercise not found') {
-                res.status(404).json({ error: 'Exercise not found' });
-                return
-            }
-            throw error;
+        if (!exerciseId) {
+            res.status(400).json({ error: 'Exercise ID is required' });
+            return;
         }
-    } catch (error) {
+
+        await deleteExercise(exerciseId, userId);
+
+        res.status(200).json({
+            message: 'Exercise deleted successfully'
+        });
+        return;
+    } catch (error: any) {
         console.error('Delete exercise error:', error);
+
+        if (error.message === 'Exercise not found') {
+            res.status(404).json({ error: 'Exercise not found' });
+            return;
+        }
+
         res.status(500).json({ error: 'Failed to delete exercise' });
+        return;
     }
 };

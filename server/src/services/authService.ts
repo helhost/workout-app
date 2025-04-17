@@ -3,16 +3,17 @@ import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-export const createUser = async (userData: {
-    email: string;
-    password: string;
-    name: string;
-    bio?: string;
-    profilePicture?: string;
-}) => {
+
+/**
+ * Creates a new user with the provided data
+ * @param userData The user's data
+ * @returns The created user's ID if successful
+ * @throws Error if user already exists or if there is an issue creating the user
+ */
+export const register = async (name: string, email: string, password: string): Promise<{ id: string }> => {
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-        where: { email: userData.email }
+        where: { email: email }
     });
 
     if (existingUser) {
@@ -21,18 +22,16 @@ export const createUser = async (userData: {
 
     // Hash password
     const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     // Create user with all the related data in a transaction
     return prisma.$transaction(async (tx) => {
         // Create the user
         const user = await tx.user.create({
             data: {
-                email: userData.email,
+                email: email,
                 password: hashedPassword,
-                name: userData.name,
-                bio: userData.bio,
-                profilePicture: userData.profilePicture,
+                name: name,
                 settings: {
                     create: {} // Creates default UserSettings
                 }
@@ -46,45 +45,27 @@ export const createUser = async (userData: {
             }
         });
 
-        // Return user without password
+        // Return only the fields specified in UserRegistrationResponse
         return {
             id: user.id,
-            email: user.email,
-            name: user.name,
-            bio: user.bio,
-            profilePicture: user.profilePicture
         };
     });
 };
 
-// In src/services/authService.ts
-export const loginUser = async (email: string, password: string) => {
-    // Find user by email with expanded profile information
+/**
+ * Authenticates a user with email and password
+ * @param email The user's email
+ * @param password The user's plaintext password
+ * @returns The user's ID if authentication is successful
+ * @throws Error if credentials are invalid
+ */
+export const login = async (email: string, password: string): Promise<{ id: string }> => {
+    // Find user by email with minimal data for authentication
     const user = await prisma.user.findUnique({
         where: { email },
         select: {
             id: true,
-            email: true,
-            name: true,
-            password: true, // Include password to verify
-            bio: true,
-            profilePicture: true,
-            createdAt: true,
-            profileImage: {
-                select: {
-                    id: true,
-                    filename: true,
-                    mimeType: true,
-                    size: true
-                }
-            },
-            settings: {
-                select: {
-                    language: true,
-                    darkMode: true,
-                    defaultMeasurementUnit: true,
-                }
-            }
+            password: true,
         }
     });
 
@@ -100,37 +81,6 @@ export const loginUser = async (email: string, password: string) => {
         throw new Error('Invalid credentials');
     }
 
-    // Get latest measurements
-    const measurements = await prisma.userMeasurements.findUnique({
-        where: { userId: user.id },
-        include: {
-            weights: {
-                orderBy: { date: 'desc' },
-                take: 1,
-            },
-            heights: {
-                orderBy: { date: 'desc' },
-                take: 1,
-            },
-            bodyFats: {
-                orderBy: { date: 'desc' },
-                take: 1,
-            }
-        }
-    });
-
-    // Format latest measurements
-    const latestMeasurements = {
-        weight: measurements?.weights[0] ? { value: measurements.weights[0].value, date: measurements.weights[0].date } : null,
-        height: measurements?.heights[0] ? { value: measurements.heights[0].value, date: measurements.heights[0].date } : null,
-        bodyFat: measurements?.bodyFats[0] ? { value: measurements.bodyFats[0].value, date: measurements.bodyFats[0].date } : null
-    };
-
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user;
-    return {
-        ...userWithoutPassword,
-        measurements: latestMeasurements,
-        hasProfileImage: !!user.profileImage
-    };
+    // Only return the user ID
+    return { id: user.id };
 };

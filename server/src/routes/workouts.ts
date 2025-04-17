@@ -1,26 +1,34 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/authMiddleware';
 import {
-    createWorkoutController,
-    getUserWorkoutsController,
-    getWorkoutByIdController,
-    updateWorkoutController,
-    startWorkoutController,
-    endWorkoutController,
-    deleteWorkoutController,
-    addExerciseToWorkoutController,
-    addExerciseToSupersetController,
-    updateExerciseController,
-    deleteExerciseController,
-    addSupersetToWorkoutController,
-    updateSupersetController,
-    deleteSupersetController,
-    addSetToExerciseController,
-    updateSetController,
-    deleteSetController,
-    addSubSetToSetController,
-    updateSubSetController,
-    deleteSubSetController
+    // workouts
+    handleCreateWorkout,
+    handleGetWorkoutsList,
+    handleGetWorkoutById,
+    handleUpdateWorkout,
+    handleStartWorkout,
+    handleEndWorkout,
+    handleDeleteWorkout,
+    //exercises
+    handleAddExerciseToWorkout,
+    handleUpdateExercise,
+    handleDeleteExercise,
+    // supersets
+    handleAddSupersetToWorkout,
+    handleUpdateSuperset,
+    handleDeleteSuperset,
+    handleAddExerciseToSuperset,
+    handleRemoveExerciseFromSuperset,
+    // sets
+    handleAddSetToExercise,
+    handleUpdateSet,
+    handleDeleteSet,
+    handleAddDropsetToExercise,
+    handleUpdateDropset,
+    handleDeleteDropset,
+    handleAddSubSetToDropset,
+    handleUpdateDropsetSubSet,
+    handleDeleteDropsetSubSet
 } from '../controllers/workoutController';
 
 const router = express.Router();
@@ -29,33 +37,39 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // Workout routes
-router.post('/', createWorkoutController);
-router.get('/', getUserWorkoutsController);
-router.get('/:workoutId', getWorkoutByIdController);
-router.patch('/:workoutId', updateWorkoutController);
-router.post('/:workoutId/start', startWorkoutController);
-router.post('/:workoutId/end', endWorkoutController);
-router.delete('/:workoutId', deleteWorkoutController);
+router.post('/', handleCreateWorkout);
+router.get('/', handleGetWorkoutsList);
+router.get('/:workoutId', handleGetWorkoutById);
+router.patch('/:workoutId', handleUpdateWorkout);
+router.post('/:workoutId/start', handleStartWorkout);
+router.post('/:workoutId/end', handleEndWorkout);
+router.delete('/:workoutId', handleDeleteWorkout);
 
 // Exercise routes
-router.post('/:workoutId/exercises', addExerciseToWorkoutController);
-router.patch('/exercises/:exerciseId', updateExerciseController);
-router.delete('/exercises/:exerciseId', deleteExerciseController);
+router.post('/:workoutId/exercises', handleAddExerciseToWorkout);
+router.patch('/exercises/:exerciseId', handleUpdateExercise);
+router.delete('/exercises/:exerciseId', handleDeleteExercise);
 
 // Superset routes
-router.post('/:workoutId/supersets', addSupersetToWorkoutController);
-router.post('/supersets/:supersetId/exercises', addExerciseToSupersetController);
-router.patch('/supersets/:supersetId', updateSupersetController);
-router.delete('/supersets/:supersetId', deleteSupersetController);
+router.post('/:workoutId/supersets', handleAddSupersetToWorkout);
+router.post('/supersets/:supersetId/exercises', handleAddExerciseToSuperset);
+router.delete('/supersets/:supersetId/exercises/:exerciseId', handleRemoveExerciseFromSuperset);
+router.patch('/supersets/:supersetId', handleUpdateSuperset);
+router.delete('/supersets/:supersetId', handleDeleteSuperset);
 
-// Set routes
-router.post('/exercises/:exerciseId/sets', addSetToExerciseController);
-router.patch('/sets/:setId', updateSetController);
-router.delete('/sets/:setId', deleteSetController);
+// Regular set routes
+router.post('/exercises/:exerciseId/sets', handleAddSetToExercise);
+router.patch('/sets/:setId', handleUpdateSet);
+router.delete('/sets/:setId', handleDeleteSet);
 
-// Subset routes (for dropsets)
-router.post('/sets/:setId/subsets', addSubSetToSetController);
-router.patch('/subsets/:subSetId', updateSubSetController);
-router.delete('/subsets/:subSetId', deleteSubSetController);
+// Dropset routes
+router.post('/exercises/:exerciseId/dropsets', handleAddDropsetToExercise);
+router.patch('/dropsets/:dropsetId', handleUpdateDropset);
+router.delete('/dropsets/:dropsetId', handleDeleteDropset);
+
+// Dropset subset routes
+router.post('/dropsets/:dropsetId/subsets', handleAddSubSetToDropset);
+router.patch('/subsets/:subSetId', handleUpdateDropsetSubSet);
+router.delete('/subsets/:subSetId', handleDeleteDropsetSubSet);
 
 export default router;

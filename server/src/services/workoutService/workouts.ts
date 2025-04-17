@@ -1,34 +1,58 @@
-import { PrismaClient, Workout } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { Workout } from '@shared';
 
 const prisma = new PrismaClient();
 
-// Create a new workout
-export const createWorkout = async (userId: string, workoutData: {
-    name: string;
-    date: Date;
-    notes?: string;
-}) => {
-    return prisma.workout.create({
+/**
+ * Creates a new workout for a user
+ * @param userId The user's unique identifier
+ * @param workoutData Data for the new workout
+ * @returns Created workout
+ */
+export const createWorkout = async (
+    userId: string,
+    workoutData: {
+        name: string;
+        notes?: string;
+    }
+): Promise<Workout.BaseWorkout> => {
+    return await prisma.workout.create({
         data: {
             userId,
             name: workoutData.name,
-            date: workoutData.date,
             notes: workoutData.notes,
             completed: false,
         }
     });
 };
 
-// Get a specific workout with all related data
-export const getWorkoutById = async (workoutId: string, userId: string) => {
+/**
+ * Gets a specific workout with all related data
+ * @param workoutId The workout's unique identifier
+ * @param userId User ID for permission verification
+ * @returns Complete workout with exercises, sets, and supersets
+ * @throws Error if workout not found or doesn't belong to user
+ */
+export const getWorkoutById = async (
+    workoutId: string,
+    userId: string
+): Promise<Workout.WorkoutFull> => {
     const workout = await prisma.workout.findUnique({
         where: { id: workoutId },
         include: {
             exercises: {
+                where: {
+                    supersetId: null
+                },
                 include: {
                     sets: {
+                        orderBy: { order: 'asc' }
+                    },
+                    dropsets: {
                         include: {
-                            subSets: true
+                            subSets: {
+                                orderBy: { order: 'asc' }
+                            }
                         },
                         orderBy: { order: 'asc' }
                     }
@@ -40,8 +64,13 @@ export const getWorkoutById = async (workoutId: string, userId: string) => {
                     exercises: {
                         include: {
                             sets: {
+                                orderBy: { order: 'asc' }
+                            },
+                            dropsets: {
                                 include: {
-                                    subSets: true
+                                    subSets: {
+                                        orderBy: { order: 'asc' }
+                                    }
                                 },
                                 orderBy: { order: 'asc' }
                             }
@@ -59,24 +88,95 @@ export const getWorkoutById = async (workoutId: string, userId: string) => {
         throw new Error('Workout not found');
     }
 
-    return workout;
+    // Transform to match Workout.WorkoutFull type
+    const workoutItems: Workout.WorkoutItem[] = [
+        ...workout.exercises.map(exercise => ({
+            ...exercise,
+            type: 'exercise' as const,
+            sets: exercise.sets.map(set => ({
+                weight: set.weight,
+                reps: set.reps,
+                notes: set.notes,
+                order: set.order
+            })),
+            dropsets: exercise.dropsets.map(dropset => ({
+                notes: dropset.notes,
+                order: dropset.order,
+                subSets: dropset.subSets.map(subset => ({
+                    weight: subset.weight,
+                    reps: subset.reps,
+                    order: subset.order
+                }))
+            }))
+        })),
+        ...workout.supersets.map(superset => ({
+            ...superset,
+            type: 'superset' as const,
+            exercises: superset.exercises.map(exercise => ({
+                ...exercise,
+                type: 'exercise' as const,
+                sets: exercise.sets.map(set => ({
+                    weight: set.weight,
+                    reps: set.reps,
+                    notes: set.notes,
+                    order: set.order
+                })),
+                dropsets: exercise.dropsets.map(dropset => ({
+                    notes: dropset.notes,
+                    order: dropset.order,
+                    subSets: dropset.subSets.map(subset => ({
+                        weight: subset.weight,
+                        reps: subset.reps,
+                        order: subset.order
+                    }))
+                }))
+            }))
+        }))
+    ];
+
+    return {
+        id: workout.id,
+        name: workout.name,
+        startTime: workout.startTime,
+        endTime: workout.endTime,
+        notes: workout.notes,
+        completed: workout.completed,
+        items: workoutItems
+    };
 };
 
-// Get all workouts for a user
-export const getUserWorkouts = async (userId: string, {
-    limit = 10,
-    offset = 0,
-    completed,
-    startDate,
-    endDate
-}: {
-    limit?: number;
-    offset?: number;
-    completed?: boolean;
-    startDate?: Date;
-    endDate?: Date;
-} = {}) => {
+/**
+ * Gets paginated list of workouts for a user
+ * @param userId The user's unique identifier
+ * @param options Pagination and filter options
+ * @returns Paginated list of workouts and pagination metadata
+ */
+export const getWorkoutsList = async (
+    userId: string,
+    options: {
+        limit?: number;
+        offset?: number;
+        completed?: boolean;
+        startDate?: Date;
+        endDate?: Date;
+    } = {}
+): Promise<{
+    workouts: Workout.WorkoutSummary[];
+    pagination: {
+        total: number;
+        offset: number;
+        limit: number;
+    };
+}> => {
     try {
+        const {
+            limit = 10,
+            offset = 0,
+            completed,
+            startDate,
+            endDate
+        } = options;
+
         // Build where conditions
         const where: any = { userId };
 
@@ -87,37 +187,59 @@ export const getUserWorkouts = async (userId: string, {
 
         // Filter by date range if specified
         if (startDate || endDate) {
-            where.date = {};
+            where.createdAt = {};
             if (startDate) {
-                where.date.gte = startDate;
+                where.createdAt.gte = startDate;
             }
             if (endDate) {
-                where.date.lte = endDate;
+                where.createdAt.lte = endDate;
             }
         }
 
         // Get total count for pagination
         const totalCount = await prisma.workout.count({ where });
 
-        // Get paginated workouts - simplified query for testing
+        // Get paginated workouts
         const workouts = await prisma.workout.findMany({
             where,
             select: {
                 id: true,
                 name: true,
-                date: true,
+                createdAt: true,
                 completed: true,
                 startTime: true,
                 endTime: true,
-                notes: true
+                _count: {
+                    select: {
+                        exercises: true
+                    }
+                }
             },
-            orderBy: { date: 'desc' },
+            orderBy: { createdAt: 'desc' },
             skip: offset,
             take: limit
         });
 
+        // Transform to match Workout.WorkoutSummary type
+        const workoutSummaries: Workout.WorkoutSummary[] = workouts.map(workout => {
+            // Calculate duration if workout has start and end times
+            let duration = undefined;
+            if (workout.startTime && workout.endTime) {
+                duration = workout.endTime.getTime() - workout.startTime.getTime();
+            }
+
+            return {
+                id: workout.id,
+                name: workout.name,
+                createdAt: workout.createdAt,
+                completed: workout.completed,
+                exerciseCount: workout._count.exercises,
+                duration
+            };
+        });
+
         return {
-            workouts,
+            workouts: workoutSummaries,
             pagination: {
                 total: totalCount,
                 offset,
@@ -125,18 +247,28 @@ export const getUserWorkouts = async (userId: string, {
             }
         };
     } catch (error) {
-        console.error('getUserWorkouts service error:', error);
+        console.error('getWorkoutsList service error:', error);
         throw error;
     }
 };
 
-// Update workout details
-export const updateWorkout = async (workoutId: string, userId: string, data: {
-    name?: string;
-    date?: Date;
-    notes?: string;
-    completed?: boolean;
-}) => {
+/**
+ * Updates workout details
+ * @param workoutId The workout's unique identifier
+ * @param userId User ID for permission verification
+ * @param data Updated workout data
+ * @returns Updated workout
+ * @throws Error if workout not found or doesn't belong to user
+ */
+export const updateWorkout = async (
+    workoutId: string,
+    userId: string,
+    data: {
+        name?: string;
+        notes?: string;
+        completed?: boolean;
+    }
+): Promise<Workout.BaseWorkout> => {
     // First check if workout exists and belongs to user
     const workout = await prisma.workout.findUnique({
         where: { id: workoutId },
@@ -147,14 +279,23 @@ export const updateWorkout = async (workoutId: string, userId: string, data: {
         throw new Error('Workout not found');
     }
 
-    return prisma.workout.update({
+    return await prisma.workout.update({
         where: { id: workoutId },
         data
     });
 };
 
-// Start a workout (set startTime)
-export const startWorkout = async (workoutId: string, userId: string) => {
+/**
+ * Starts a workout by setting the startTime
+ * @param workoutId The workout's unique identifier
+ * @param userId User ID for permission verification
+ * @returns Updated workout with startTime
+ * @throws Error if workout not found, doesn't belong to user, or has already been started
+ */
+export const startWorkout = async (
+    workoutId: string,
+    userId: string
+): Promise<Workout.BaseWorkout> => {
     const workout = await prisma.workout.findUnique({
         where: { id: workoutId },
         select: { userId: true, startTime: true }
@@ -168,7 +309,7 @@ export const startWorkout = async (workoutId: string, userId: string) => {
         throw new Error('Workout has already been started');
     }
 
-    return prisma.workout.update({
+    return await prisma.workout.update({
         where: { id: workoutId },
         data: {
             startTime: new Date(),
@@ -177,8 +318,17 @@ export const startWorkout = async (workoutId: string, userId: string) => {
     });
 };
 
-// End a workout (set endTime and mark as completed)
-export const endWorkout = async (workoutId: string, userId: string) => {
+/**
+ * Ends a workout by setting the endTime and marking as completed
+ * @param workoutId The workout's unique identifier
+ * @param userId User ID for permission verification
+ * @returns Updated workout with endTime and completed status
+ * @throws Error if workout not found, doesn't belong to user, hasn't been started, or has already ended
+ */
+export const endWorkout = async (
+    workoutId: string,
+    userId: string
+): Promise<Workout.BaseWorkout> => {
     const workout = await prisma.workout.findUnique({
         where: { id: workoutId },
         select: { userId: true, startTime: true, endTime: true }
@@ -196,7 +346,7 @@ export const endWorkout = async (workoutId: string, userId: string) => {
         throw new Error('Workout has already been ended');
     }
 
-    return prisma.workout.update({
+    return await prisma.workout.update({
         where: { id: workoutId },
         data: {
             endTime: new Date(),
@@ -205,8 +355,16 @@ export const endWorkout = async (workoutId: string, userId: string) => {
     });
 };
 
-// Delete a workout
-export const deleteWorkout = async (workoutId: string, userId: string) => {
+/**
+ * Deletes a workout
+ * @param workoutId The workout's unique identifier
+ * @param userId User ID for permission verification
+ * @throws Error if workout not found or doesn't belong to user
+ */
+export const deleteWorkout = async (
+    workoutId: string,
+    userId: string
+): Promise<void> => {
     const workout = await prisma.workout.findUnique({
         where: { id: workoutId },
         select: { userId: true }
@@ -216,7 +374,7 @@ export const deleteWorkout = async (workoutId: string, userId: string) => {
         throw new Error('Workout not found');
     }
 
-    return prisma.workout.delete({
+    await prisma.workout.delete({
         where: { id: workoutId }
     });
 };
