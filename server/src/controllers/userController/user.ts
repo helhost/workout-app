@@ -7,7 +7,7 @@ import {
 import { Controller } from 'types';
 
 /**
- * Retrieves the profile information of the authenticated user
+ * Retrieves the user information of the authenticated user
  * @param req Express request object containing authenticated user details
  * @param res Express response object to send back the profile data
  * @returns Profile information with latest measurements if successful
