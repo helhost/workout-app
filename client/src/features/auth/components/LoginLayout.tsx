@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { AuthLayout } from "../index";
-import { LoginLayoutProps } from "../types";
+import { LoginLayoutProps } from "@/types";
 
 // This is a wrapper around AuthLayout specifically for the login page
 export default function LoginLayout({ children, className }: LoginLayoutProps) {

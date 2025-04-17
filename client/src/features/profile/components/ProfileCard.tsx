@@ -1,7 +1,7 @@
 import { Pencil } from "lucide-react";
 import { ProfileImageUploader } from "@/features/profile";
 import { cn } from "@/lib/utils";
-import { ProfileCardProps } from "../types";
+import { ProfileCardProps } from "@/types/profile";
 
 export default function ProfileCard({
     name,

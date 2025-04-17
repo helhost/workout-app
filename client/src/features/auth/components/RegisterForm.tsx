@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
-import { RegisterFormProps } from "@/types/auth";
+import { RegisterFormProps } from "@/types";
 import { cn } from "@/lib/utils";
 
 export default function RegisterForm({ onSubmit, className, disabled = false }: RegisterFormProps) {

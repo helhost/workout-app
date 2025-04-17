@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { User } from 'lucide-react';
+import { User } from '@shared';
+import { User as LucideUser } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getProfileImageUrl } from '../api';
+import { getProfileImageMetadata } from '../api';
 
 interface ProfileImageProps {
     hasProfileImage: boolean;
     className?: string;
     size?: 'sm' | 'md' | 'lg';
     onLoadError?: () => void;
-    // Add a imageUrl prop to control when to refetch
     imageUrl?: string | null;
 }
 
@@ -17,14 +17,14 @@ export default function ProfileImage({
     className,
     size = 'md',
     onLoadError,
-    // Allow passing a pre-fetched image URL
     imageUrl: propImageUrl = null
 }: ProfileImageProps) {
     const [imageSrc, setImageSrc] = useState<string | null>(propImageUrl);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(false);
+    const [imageMetadata, setImageMetadata] = useState<Omit<User.ProfileImage, 'data'> | null>(null);
 
-    // Load the image only when hasProfileImage changes or imageVersion changes
+    // Load the image metadata when hasProfileImage changes
     useEffect(() => {
         let isMounted = true;
 
@@ -39,20 +39,20 @@ export default function ProfileImage({
             return;
         }
 
-        const loadImage = async () => {
+        const loadImageMetadata = async () => {
             try {
                 setIsLoading(true);
                 setError(false);
 
-                // Use a timestamp query parameter to force the browser to load a fresh image
-                const imageUrl = await getProfileImageUrl(false);
+                // Fetch image metadata
+                const { profileImage } = await getProfileImageMetadata();
 
                 if (isMounted) {
-                    setImageSrc(imageUrl);
+                    setImageMetadata(profileImage);
                     setIsLoading(false);
                 }
             } catch (err) {
-                console.error('Failed to load profile image:', err);
+                console.error('Failed to load profile image metadata:', err);
                 if (isMounted) {
                     setError(true);
                     setIsLoading(false);
@@ -61,15 +61,11 @@ export default function ProfileImage({
             }
         };
 
-        loadImage();
+        loadImageMetadata();
 
         // Clean up function to handle component unmounting
         return () => {
             isMounted = false;
-            // Revoke any object URLs to prevent memory leaks
-            if (imageSrc && imageSrc.startsWith('blob:')) {
-                URL.revokeObjectURL(imageSrc);
-            }
         };
     }, [hasProfileImage, propImageUrl, onLoadError]);
 
@@ -94,13 +90,13 @@ export default function ProfileImage({
         );
     }
 
-    if (!hasProfileImage || error || !imageSrc) {
+    if (!hasProfileImage || error || !imageMetadata) {
         return (
             <div className={cn(
                 "bg-gray-200 dark:bg-gray-700 flex items-center justify-center",
                 className
             )}>
-                <User className={cn("text-gray-500 dark:text-gray-400", getIconSize())} />
+                <LucideUser className={cn("text-gray-500 dark:text-gray-400", getIconSize())} />
             </div>
         );
     }
@@ -108,7 +104,7 @@ export default function ProfileImage({
     return (
         <div className={cn("overflow-hidden", className)}>
             <img
-                src={imageSrc}
+                src={`/api/user/image?t=${imageMetadata.id}`} // Use ID as cache-busting param
                 alt="Profile"
                 className="w-full h-full object-cover"
                 onError={() => {

@@ -1,4 +1,4 @@
-import { AuthLayoutProps } from "../types";
+import { AuthLayoutProps } from "@/types";
 import { cn } from "@/lib/utils";
 
 export default function AuthLayout({ children, title, subtitle, className }: AuthLayoutProps) {

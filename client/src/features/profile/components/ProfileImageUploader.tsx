@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { uploadProfileImage, deleteProfileImage } from '../api';
 import ProfileImage from './ProfileImage';
+import { toast } from 'sonner';
 
 interface ProfileImageUploaderProps {
     hasProfileImage: boolean;
@@ -19,7 +20,6 @@ export default function ProfileImageUploader({
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Handle file selection
@@ -29,17 +29,15 @@ export default function ProfileImageUploader({
 
         // Validate file type
         if (!file.type.startsWith('image/')) {
-            setError('Please select an image file (JPEG, PNG, etc.)');
+            toast.error('Please select an image file (JPEG, PNG, etc.)');
             return;
         }
 
         // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
-            setError('Image size must be less than 5MB');
+            toast.error('Image size must be less than 5MB');
             return;
         }
-
-        setError(null);
 
         // Create preview URL
         const objectUrl = URL.createObjectURL(file);
@@ -58,9 +56,8 @@ export default function ProfileImageUploader({
     const handleUpload = async (file: File) => {
         try {
             setIsUploading(true);
-            setError(null);
 
-            await uploadProfileImage(file);
+            const { message } = await uploadProfileImage(file);
 
             // Clear the file input
             if (fileInputRef.current) {
@@ -69,9 +66,12 @@ export default function ProfileImageUploader({
 
             // Call the parent's callback to refresh profile data
             onImageUpdated();
+
+            // Show success toast
+            toast.success(message);
         } catch (err: any) {
             console.error('Upload error:', err);
-            setError(err.message || 'Failed to upload image');
+            toast.error(err.message || 'Failed to upload image');
         } finally {
             setIsUploading(false);
             // Clear preview
@@ -86,25 +86,23 @@ export default function ProfileImageUploader({
     const handleDelete = async () => {
         try {
             setIsUploading(true);
-            setError(null);
 
-            await deleteProfileImage();
+            const { message } = await deleteProfileImage();
 
             // Call the parent's callback to refresh profile data
             onImageUpdated();
 
+            // Close delete dialog
             setIsDeleteDialogOpen(false);
+
+            // Show success toast
+            toast.success(message);
         } catch (err: any) {
             console.error('Delete error:', err);
-            setError(err.message || 'Failed to delete image');
+            toast.error(err.message || 'Failed to delete image');
         } finally {
             setIsUploading(false);
         }
-    };
-
-    // Handle image load error
-    const handleImageError = () => {
-        console.warn('Profile image failed to load');
     };
 
     return (
@@ -116,7 +114,6 @@ export default function ProfileImageUploader({
                         hasProfileImage={hasProfileImage}
                         className="h-full w-full"
                         size="lg"
-                        onLoadError={handleImageError}
                     />
                 </div>
 
@@ -157,9 +154,6 @@ export default function ProfileImageUploader({
                     disabled={isUploading}
                 />
             </div>
-
-            {/* Error message */}
-            {error && <div className="text-sm text-red-500 mt-2">{error}</div>}
 
             {/* Delete confirmation dialog */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

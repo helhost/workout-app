@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ProfileLayoutProps } from "../types";
+import { ProfileLayoutProps } from "@/types/profile";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/features/auth/authContext";

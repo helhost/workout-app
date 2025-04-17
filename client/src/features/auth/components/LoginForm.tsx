@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { LoginFormProps } from "@/types/auth";
+import { LoginFormProps } from "@/types";
 import { cn } from "@/lib/utils";
 
 export default function LoginForm({ onSubmit, className, disabled = false }: LoginFormProps) {

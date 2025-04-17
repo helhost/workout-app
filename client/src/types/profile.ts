@@ -1,5 +1,7 @@
+import { User } from '@shared';
 import { ReactNode } from 'react';
 
+// Profile-specific types
 export interface ProfileLayoutProps {
     children: ReactNode;
     className?: string;
@@ -30,4 +32,11 @@ export interface ProfileInfoItemProps {
     editable?: boolean;
     onEdit?: () => void;
     className?: string;
+}
+
+// Detailed Profile Types
+export interface ProfileMeasurements extends User.SimpleMeasurements { }
+
+export interface ProfileUserFull extends Omit<User.UserFull, 'measurements'> {
+    measurements: ProfileMeasurements;
 }

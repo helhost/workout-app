@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { SocialLoginProps } from "../types";
+import { SocialLoginProps } from "@/types";
 import { cn } from "@/lib/utils";
 
 export default function SocialLogin({ onGoogleLogin, className, registerMode = false, disabled = false }: SocialLoginProps) {

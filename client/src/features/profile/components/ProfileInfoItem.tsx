@@ -1,6 +1,6 @@
 import { Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ProfileInfoItemProps } from "../types";
+import { ProfileInfoItemProps } from "@/types/profile";
 
 export default function ProfileInfoItem({
     label,
