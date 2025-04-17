@@ -2,7 +2,7 @@ import {
     addExerciseToWorkout,
     updateExercise,
     deleteExercise
-} from 'src/services/workoutService/exercises';
+} from '@/services/workoutService/exercises';
 import { Controller } from 'types';
 import { Workout } from '@shared';
 

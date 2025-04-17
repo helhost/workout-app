@@ -1,10 +1,9 @@
-import { Request, Response } from 'express';
 import {
     getUserById,
     updateUsername,
     updateBio,
     updateSettings
-} from 'src/services/userService';
+} from '@/services/userService';
 import { Controller } from 'types';
 
 /**

@@ -4,7 +4,7 @@ import {
     getProfileImage,
     getProfileImageMetadata,
     deleteProfileImage
-} from 'src/services/userService';
+} from '@/services/userService';
 import { Controller } from 'types';
 
 /**

@@ -1,5 +1,3 @@
-// client/src/features/profile/components/ProfileCard.tsx
-
 import { Pencil } from "lucide-react";
 import { ProfileImageUploader } from "@/features/profile";
 import { cn } from "@/lib/utils";

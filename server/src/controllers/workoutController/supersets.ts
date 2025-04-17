@@ -4,7 +4,7 @@ import {
     deleteSuperset,
     addExerciseToSuperset,
     removeExerciseFromSuperset
-} from 'src/services/workoutService/supersets';
+} from '@/services/workoutService';
 import { Controller } from 'types';
 import { Workout } from '@shared';
 

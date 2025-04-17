@@ -8,7 +8,7 @@ import {
     addSubSetToDropset,
     updateDropsetSubSet,
     deleteDropsetSubSet
-} from 'src/services/workoutService/sets';
+} from '@/services/workoutService/sets';
 import { Controller } from 'types';
 import { Workout } from '@shared';
 

@@ -1,4 +1,3 @@
-// client/src/features/profile/components/ProfileImageUploader.tsx
 import { useState, useRef, ChangeEvent } from 'react';
 import { Upload, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

@@ -1,11 +1,10 @@
-import { Request, Response } from 'express';
 import {
     getLatestMeasurements,
     getMeasurementHistory,
     addWeightMeasurement,
     addHeightMeasurement,
     addBodyFatMeasurement
-} from 'src/services/userService';
+} from '@/services/userService';
 import { Controller } from 'types';
 
 /**

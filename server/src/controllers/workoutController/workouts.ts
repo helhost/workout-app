@@ -7,9 +7,8 @@ import {
     startWorkout,
     endWorkout,
     deleteWorkout
-} from 'src/services/workoutService/workouts';
+} from '@/services/workoutService';
 import { Controller } from 'types';
-import { Workout } from '@shared';
 
 /**
  * Creates a new workout for the authenticated user
