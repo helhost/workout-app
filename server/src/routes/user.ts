@@ -33,7 +33,7 @@ const upload = multer({
 // All profile routes require authentication
 router.use(authenticateToken);
 
-// Profile routes
+// User routes
 router.get('/', handleGetUserById);
 router.patch('/name', handleUpdateUsername);
 router.patch('/bio', handleUpdateBio);

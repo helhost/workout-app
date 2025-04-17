@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth";
-import profileRoutes from "./routes/user"; // Import profile routes
-import workoutRoutes from "./routes/workouts";  // Add this import
+import userRotues from "./routes/user";
+import workoutRoutes from "./routes/workouts";
 import {
     rateLimiter,
     securityMiddleware,
@@ -45,7 +45,7 @@ app.use(securityMiddleware);
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/profile", profileRoutes);
+app.use("/api/profile", userRotues);
 app.use("/api/workouts", workoutRoutes);
 
 export default app;
