@@ -1,11 +1,11 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import * as authApi from './api';
-import { ProfileUser } from './api';
 import { ApiError } from '@/lib/api/errors';
+import { AuthUser } from '@/types/auth';
 const { setDarkMode } = await import('@/features/theme/themeUtils');
 
 interface AuthContextType {
-    user: ProfileUser | null;
+    user: AuthUser | null;
     isLoading: boolean;
     error: string | null;
     login: (email: string, password: string, rememberMe?: boolean, onSuccess?: () => void) => Promise<void>;
@@ -16,7 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<ProfileUser | null>(null);
+    const [user, setUser] = useState<AuthUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -34,19 +34,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 window.location.pathname === '/register';
 
             // Skip profile check if we're on a public route
-
             if (!isPublicRoute) {
                 try {
-                    const { profile } = await authApi.getProfile();
+                    const { profile } = await authApi.getUser();
                     setUser(profile);
 
                     // Apply dark mode setting if it exists in the profile
                     if (profile.settings && profile.settings.darkMode !== undefined) {
-                        // Import setDarkMode from themeUtils
                         setDarkMode(profile.settings.darkMode);
-                    } else {
                     }
-
                 } catch (err) {
                     // User is not authenticated, that's okay for public routes
                     setUser(null);

@@ -5,5 +5,8 @@ export { default as SocialLogin } from './components/SocialLogin';
 export { default as LoginLayout } from './components/LoginLayout';
 export { default as AuthLayout } from './components/AuthLayout';
 
-// Export types
-export * from './types';
+// Export auth context and hook
+export { AuthProvider, useAuth } from './authContext';
+
+// Export API functions
+export * from './api';

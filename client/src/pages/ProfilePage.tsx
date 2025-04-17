@@ -1,360 +1,69 @@
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import {
-    ProfileLayout,
-    ProfileSection,
-    ProfileInfoItem,
-    ProfileCard
-} from "@/features/profile";
-import { Scale, Ruler, Percent } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import {
-    getProfile,
-    updateName,
-    updateBio,
-    addWeightMeasurement,
-    addHeightMeasurement,
-    addBodyFatMeasurement,
-} from "@/features/profile/api";
-import {
-    ProfileUser,
-    MeasurementData,
-    UserMeasurements
-} from "@/features/auth/api";
+import { useNavigate } from "react-router-dom";
+import { AuthLayout, RegisterForm, SocialLogin } from "@/features/auth";
+import { useAuth } from "@/features/auth/authContext";
+import { useState } from "react";
 
-export default function ProfilePage() {
-    // State to hold profile data
-    const [profileData, setProfileData] = useState<ProfileUser | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export default function RegisterPage() {
+    const navigate = useNavigate();
+    const { register, error } = useAuth();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [registrationError, setRegistrationError] = useState<string | null>(null);
 
-    // Dialog state
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [dialogConfig, setDialogConfig] = useState({
-        title: "",
-        field: "",
-        value: "",
-        section: ""
-    });
+    // Handle registration through auth context
+    const handleRegister = async (name: string, email: string, password: string, agreeToTerms: boolean) => {
+        if (isSubmitting) return; // Prevent double submission
 
-    // New value for editing
-    const [newValue, setNewValue] = useState("");
-
-    // Fetch profile data on page load
-    const fetchProfileData = async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
-            const response = await getProfile();
-
-            setProfileData(response.profile);
-        } catch (err: any) {
-            setError(err.message || "Failed to load profile data");
-            console.error("Error fetching profile data:", err);
-
-            // Show toast for fetch error
-            toast.error("Failed to load profile data", {
-                description: err.message || "Please try again later."
-            });
-        } finally {
-            setIsLoading(false);
+        if (!agreeToTerms) {
+            setRegistrationError("You must agree to the Terms of Service and Privacy Policy");
+            return;
         }
-    };
-
-    useEffect(() => {
-        fetchProfileData();
-    }, []);
-
-    // Open dialog for editing a field
-    const openEditDialog = (title: string, field: string, value: string, section: string) => {
-        setDialogConfig({ title, field, value, section });
-        setNewValue(value);
-        setDialogOpen(true);
-    };
-
-    // Format measurement for display
-    const formatMeasurement = (measurement: MeasurementData | null, unit: string): string => {
-        if (!measurement) return "Not set";
-        return `${measurement.value} ${unit}`;
-    };
-
-    // Handle profile image update - only update the hasProfileImage flag
-    const handleProfileImageUpdated = async () => {
-        toast.success("Profile image updated");
-        // Just fetch the profile data to update the hasProfileImage flag
-        // but don't trigger a full component remount
-        fetchProfileData();
-    };
-
-    // Handle saving the new value
-    const handleSaveEdit = async () => {
-        // Create a toast ID to reference for loading/success/error states
-        const toastId = toast.loading("Saving changes...");
 
         try {
-            setIsLoading(true);
+            setIsSubmitting(true);
+            setRegistrationError(null);
 
-            if (dialogConfig.section === "profile") {
-                if (dialogConfig.field === "name") {
-                    const response = await updateName(newValue);
-                    if (profileData) {
-                        setProfileData({
-                            ...profileData,
-                            name: response.user.name
-                        });
-                    }
-                    toast.success("Name updated successfully", { id: toastId });
-                } else if (dialogConfig.field === "bio") {
-                    const response = await updateBio(newValue);
-                    if (profileData) {
-                        setProfileData({
-                            ...profileData,
-                            bio: response.user.bio
-                        });
-                    }
-                    toast.success("Bio updated successfully", { id: toastId });
-                }
-            } else if (dialogConfig.section === "measurements") {
-                const value = parseFloat(newValue);
-
-                if (isNaN(value)) {
-                    toast.error("Invalid input", {
-                        id: toastId,
-                        description: "Please enter a valid number"
-                    });
-                    setError("Please enter a valid number");
-                    return;
-                }
-
-                let updatedMeasurements: UserMeasurements = { ...profileData?.measurements } as UserMeasurements;
-                let measurementType = "";
-
-                if (dialogConfig.field === "weight") {
-                    const response = await addWeightMeasurement(value);
-                    updatedMeasurements.weight = {
-                        value: response.measurement.value,
-                        date: response.measurement.date
-                    };
-                    measurementType = "Weight";
-                } else if (dialogConfig.field === "height") {
-                    const response = await addHeightMeasurement(value);
-                    updatedMeasurements.height = {
-                        value: response.measurement.value,
-                        date: response.measurement.date
-                    };
-                    measurementType = "Height";
-                } else if (dialogConfig.field === "bodyFat") {
-                    const response = await addBodyFatMeasurement(value);
-                    updatedMeasurements.bodyFat = {
-                        value: response.measurement.value,
-                        date: response.measurement.date
-                    };
-                    measurementType = "Body fat";
-                }
-
-                if (profileData) {
-                    setProfileData({
-                        ...profileData,
-                        measurements: updatedMeasurements
-                    });
-                }
-
-                toast.success(`${measurementType} updated successfully`, { id: toastId });
-            }
-
-            setDialogOpen(false);
-        } catch (err: any) {
-            console.error("Error updating data:", err);
-            toast.error("Failed to save changes", {
-                id: toastId,
-                description: err.message || "Please try again later"
+            await register(name, email, password, () => {
+                // Redirects on success
+                navigate("/");
             });
-            setError(err.message || "Failed to update data");
+        } catch (err) {
+            // Error handling is already done in the auth context
+            setRegistrationError("Registration failed. Please check your information and try again.");
         } finally {
-            setIsLoading(false);
+            setIsSubmitting(false);
         }
     };
 
-    // Get the last updated date for measurements
-    const getLastMeasurementDate = (): string => {
-        if (!profileData?.measurements) return "No data";
-
-        const dates: Date[] = [];
-
-        if (profileData.measurements.weight) {
-            dates.push(new Date(profileData.measurements.weight.date));
-        }
-        if (profileData.measurements.height) {
-            dates.push(new Date(profileData.measurements.height.date));
-        }
-        if (profileData.measurements.bodyFat) {
-            dates.push(new Date(profileData.measurements.bodyFat.date));
-        }
-
-        if (dates.length === 0) return "No measurements";
-
-        // Find the most recent date
-        const latestDate = new Date(Math.max(...dates.map(date => date.getTime())));
-        return latestDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+    // Handle Google sign up
+    const handleGoogleSignUp = () => {
+        // In production, you would authenticate via Google here
+        navigate("/");
     };
-
-    const dismissError = () => {
-        setError(null);
-    };
-
-    if (isLoading && !profileData) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <span className="text-gray-500 dark:text-gray-400">Loading profile data...</span>
-            </div>
-        );
-    }
-
-    if (error && !profileData) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="bg-red-100 dark:bg-red-900 p-4 rounded-md text-red-700 dark:text-red-200">
-                    <h2 className="font-semibold mb-2">Error Loading Profile</h2>
-                    <p>{error}</p>
-                    <Button
-                        className="mt-4"
-                        onClick={() => window.location.reload()}
-                    >
-                        Try Again
-                    </Button>
-                </div>
-            </div>
-        );
-    }
 
     return (
-        <ProfileLayout>
-            {error && (
-                <div className="mb-6 bg-red-100 dark:bg-red-900 p-3 rounded-md text-red-700 dark:text-red-200">
-                    {error}
-                    <Button
-                        variant="ghost"
-                        className="ml-2 p-1 h-auto text-red-700 dark:text-red-200"
-                        onClick={dismissError}
+        <AuthLayout
+            title="Create your account"
+            subtitle={
+                <>
+                    Already have an account?{" "}
+                    <button
+                        type="button"
+                        className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                        onClick={() => navigate("/login")}
                     >
-                        ✕
-                    </Button>
+                        Sign in
+                    </button>
+                </>
+            }
+        >
+            {(error || registrationError) && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {error || registrationError}
                 </div>
             )}
 
-            <ProfileSection title="Profile">
-                {/* Use the ProfileCard component without the key prop for forcing re-renders */}
-                <ProfileCard
-                    name={profileData?.name || ""}
-                    email={profileData?.email || ""}
-                    bio={profileData?.bio}
-                    hasProfileImage={profileData?.hasProfileImage || false}
-                    onImageUpdated={handleProfileImageUpdated}
-                    onEditName={() => openEditDialog("Edit Name", "name", profileData?.name || "", "profile")}
-                    onEditBio={() => openEditDialog("Edit Bio", "bio", profileData?.bio || "", "profile")}
-                />
-            </ProfileSection>
-
-            <ProfileSection
-                title="Body Measurements"
-                description={`Last updated: ${getLastMeasurementDate()}`}
-            >
-                <ProfileInfoItem
-                    label="Weight"
-                    value={formatMeasurement(profileData?.measurements?.weight || null, "kg")}
-                    icon={<Scale className="h-5 w-5" />}
-                    editable
-                    onEdit={() => openEditDialog(
-                        "Edit Weight",
-                        "weight",
-                        profileData?.measurements?.weight?.value.toString() || "",
-                        "measurements"
-                    )}
-                />
-
-                <ProfileInfoItem
-                    label="Height"
-                    value={formatMeasurement(profileData?.measurements?.height || null, "cm")}
-                    icon={<Ruler className="h-5 w-5" />}
-                    editable
-                    onEdit={() => openEditDialog(
-                        "Edit Height",
-                        "height",
-                        profileData?.measurements?.height?.value.toString() || "",
-                        "measurements"
-                    )}
-                />
-
-                <ProfileInfoItem
-                    label="Body Fat"
-                    value={formatMeasurement(profileData?.measurements?.bodyFat || null, "%")}
-                    icon={<Percent className="h-5 w-5" />}
-                    editable
-                    onEdit={() => openEditDialog(
-                        "Edit Body Fat",
-                        "bodyFat",
-                        profileData?.measurements?.bodyFat?.value.toString() || "",
-                        "measurements"
-                    )}
-                />
-            </ProfileSection>
-
-            {/* Edit Dialog */}
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>{dialogConfig.title}</DialogTitle>
-                    </DialogHeader>
-                    <div className="py-4">
-                        {dialogConfig.field === "bio" ? (
-                            <textarea
-                                id="new-value"
-                                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                value={newValue}
-                                onChange={(e) => setNewValue(e.target.value)}
-                                rows={4}
-                                disabled={isLoading}
-                            />
-                        ) : (
-                            <input
-                                id="new-value"
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                value={newValue}
-                                onChange={(e) => setNewValue(e.target.value)}
-                                disabled={isLoading}
-                                type={dialogConfig.section === "measurements" ? "number" : "text"}
-                                step={dialogConfig.field === "bodyFat" ? "0.1" : "1"}
-                            />
-                        )}
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => setDialogOpen(false)}
-                            disabled={isLoading}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleSaveEdit}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? "Saving..." : "Confirm"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </ProfileLayout>
+            <RegisterForm onSubmit={handleRegister} disabled={isSubmitting} />
+            <SocialLogin onGoogleLogin={handleGoogleSignUp} registerMode={true} />
+        </AuthLayout>
     );
 }

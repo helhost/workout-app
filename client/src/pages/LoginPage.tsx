@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LoginLayout, LoginForm, SocialLogin } from "@/features/auth";
+import { LoginForm, SocialLogin } from "@/features/auth";
+import { LoginLayout } from "@/features/auth";
 import { useAuth } from "@/features/auth/authContext";
 
 export default function LoginPage() {
