@@ -5,7 +5,7 @@ import {
     addHeightMeasurement,
     addBodyFatMeasurement
 } from '@/services/userService';
-import { Controller } from 'types';
+import { Controller } from '@/types';
 
 /**
  * Retrieves the latest measurements for the authenticated user

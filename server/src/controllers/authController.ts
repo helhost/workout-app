@@ -2,7 +2,7 @@ import { register, login } from '../services/authService';
 import { getUserById } from '../services/userService';
 import { generateAccessToken, generateRefreshToken } from '../middleware/authMiddleware';
 import jwt from 'jsonwebtoken';
-import { Controller } from '../../types';
+import { Controller } from '../types';
 
 /**
  * Handles user registration

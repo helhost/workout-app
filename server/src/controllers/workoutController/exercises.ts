@@ -3,7 +3,7 @@ import {
     updateExercise,
     deleteExercise
 } from '@/services/workoutService/exercises';
-import { Controller } from 'types';
+import { Controller } from '@/types';
 import { Workout } from '@shared';
 
 /**

@@ -9,7 +9,7 @@ import {
     updateDropsetSubSet,
     deleteDropsetSubSet
 } from '@/services/workoutService/sets';
-import { Controller } from 'types';
+import { Controller } from '@/types';
 import { Workout } from '@shared';
 
 /**

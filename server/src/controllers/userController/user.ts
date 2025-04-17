@@ -4,7 +4,7 @@ import {
     updateBio,
     updateSettings
 } from '@/services/userService';
-import { Controller } from 'types';
+import { Controller } from '@/types';
 
 /**
  * Retrieves the user information of the authenticated user

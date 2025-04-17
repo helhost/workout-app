@@ -5,7 +5,7 @@ import {
     getProfileImageMetadata,
     deleteProfileImage
 } from '@/services/userService';
-import { Controller } from 'types';
+import { Controller } from '@/types';
 
 /**
  * Uploads or updates the profile image of the authenticated user
