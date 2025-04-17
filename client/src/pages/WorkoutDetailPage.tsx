@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Workout, isSuperset } from "@/features/workouts/types";
+import { toast } from "sonner";
 import {
     BackButton,
     EditButton,
@@ -9,29 +9,45 @@ import {
     WorkoutHeader,
     WorkoutNotes
 } from "@/features/workouts/components/workout-detail";
-import { sampleWorkouts } from "@/features/workouts/data/sampleWorkouts";
+import { getWorkoutById } from "@/features/workouts/api";
+import { WorkoutFull } from "@/types";
 
 export default function WorkoutDetailPage() {
     const { workoutId } = useParams<{ workoutId: string }>();
     const navigate = useNavigate();
-    const [workout, setWorkout] = useState<Workout | null>(null);
+    const [workout, setWorkout] = useState<WorkoutFull | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // In production, you would fetch the workout data from an API
-        // For now, we'll use the sample data
-        if (workoutId) {
-            const foundWorkout = sampleWorkouts.find(w => w.id === workoutId);
-            setWorkout(foundWorkout || null);
-        }
-        setLoading(false);
+        const fetchWorkout = async () => {
+            if (!workoutId) {
+                setError("No workout ID provided");
+                setLoading(false);
+                return;
+            }
+
+            try {
+                setLoading(true);
+                const response = await getWorkoutById(workoutId);
+                setWorkout(response.workout);
+                setLoading(false);
+            } catch (err) {
+                console.error("Error fetching workout:", err);
+                setError("Failed to load workout details");
+                toast.error("Failed to load workout details");
+                setLoading(false);
+            }
+        };
+
+        fetchWorkout();
     }, [workoutId]);
 
     const handleBack = () => {
         navigate("/workouts");
     };
 
-    const handleEdit = (workout: Workout) => {
+    const handleEdit = (workout: WorkoutFull) => {
         navigate(`/workouts/${workout.id}/edit`);
     };
 
@@ -43,7 +59,7 @@ export default function WorkoutDetailPage() {
         );
     }
 
-    if (!workout) {
+    if (error || !workout) {
         return (
             <div className="max-w-2xl mx-auto p-6 text-center">
                 <h2 className="text-xl font-semibold mb-4">Workout not found</h2>
@@ -58,6 +74,14 @@ export default function WorkoutDetailPage() {
         );
     }
 
+    // Calculate duration from startTime and endTime
+    let duration = undefined;
+    if (workout.startTime && workout.endTime) {
+        const startDate = new Date(workout.startTime);
+        const endDate = new Date(workout.endTime);
+        duration = Math.round((endDate.getTime() - startDate.getTime()) / 60000); // duration in minutes
+    }
+
     return (
         <div className="max-w-2xl mx-auto space-y-4">
             <div className="flex justify-between items-center">
@@ -68,8 +92,8 @@ export default function WorkoutDetailPage() {
             <WorkoutHeader
                 workout={{
                     name: workout.name,
-                    date: workout.date,
-                    duration: workout.duration,
+                    date: workout.startTime || undefined,
+                    duration: duration,
                     completed: workout.completed
                 }}
             />
@@ -79,7 +103,7 @@ export default function WorkoutDetailPage() {
             <div className="space-y-4">
                 <h2 className="text-lg font-semibold">Exercises</h2>
                 {workout.items.map((item) =>
-                    isSuperset(item) ? (
+                    item.type === 'superset' ? (
                         <SupersetItem key={item.id} superset={item} />
                     ) : (
                         <ExerciseItem key={item.id} exercise={item} />

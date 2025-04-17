@@ -1,9 +1,9 @@
 import { ArrowLeftRight } from "lucide-react";
-import { SuperSet } from "../../types";
+import { Superset } from "@/types/workout";
 import { SetList } from "./SetList";
 
 interface SupersetItemProps {
-    superset: SuperSet;
+    superset: Superset;
 }
 
 export function SupersetItem({ superset }: SupersetItemProps) {
@@ -34,6 +34,15 @@ export function SupersetItem({ superset }: SupersetItemProps) {
                     </div>
                 ))}
             </div>
+
+            {superset.notes && (
+                <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-3">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                        <span className="font-medium">Superset Notes: </span>
+                        {superset.notes}
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

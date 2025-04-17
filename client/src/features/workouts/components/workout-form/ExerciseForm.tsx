@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeftRight, PlusCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Exercise, Set } from "../../types";
+import { Exercise, Set } from "@/features/workouts/types";
 import { createDefaultSet } from "./form-utils";
 import MuscleGroupSelect from "./MuscleGroupSelect";
 import SetForm from "./SetForm";

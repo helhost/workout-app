@@ -4,13 +4,17 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 
-import { WorkoutsList } from "@/features/workouts";
+import WorkoutsList from "@/features/workouts/components/workout-list/WorkoutsList";
 import { getWorkouts } from "@/features/workouts/api";
-import { Workout } from "@/features/workouts/types";
-import { transformWorkout } from "@/features/workouts/utils";
+import { WorkoutSummary, PaginationResult } from "@/types/workout";
 
 export default function WorkoutsPage() {
-    const [workouts, setWorkouts] = useState<Workout[]>([]);
+    const [workouts, setWorkouts] = useState<WorkoutSummary[]>([]);
+    const [pagination, setPagination] = useState<PaginationResult>({
+        total: 0,
+        offset: 0,
+        limit: 10
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -25,10 +29,8 @@ export default function WorkoutsPage() {
                 // Fetch workouts from API
                 const response = await getWorkouts();
 
-                // Transform backend workouts to frontend format
-                const transformedWorkouts = response.workouts.map(transformWorkout);
-
-                setWorkouts(transformedWorkouts);
+                setWorkouts(response.workouts);
+                setPagination(response.pagination);
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to fetch workouts:", err);
@@ -42,7 +44,7 @@ export default function WorkoutsPage() {
     }, []);
 
     // Handler for when a workout is clicked in the list
-    const handleWorkoutClick = (workout: Workout) => {
+    const handleWorkoutClick = (workout: WorkoutSummary) => {
         navigate(`/workouts/${workout.id}`);
     };
 
@@ -84,6 +86,15 @@ export default function WorkoutsPage() {
                 workouts={workouts}
                 onWorkoutClick={handleWorkoutClick}
             />
+
+            {pagination.total > 0 && pagination.total > pagination.limit && (
+                <div className="mt-6 flex justify-center">
+                    {/* Simple pagination could be added here */}
+                    <p className="text-sm text-gray-500">
+                        Showing {pagination.offset + 1} to {Math.min(pagination.offset + pagination.limit, pagination.total)} of {pagination.total} workouts
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

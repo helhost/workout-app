@@ -1,7 +1,12 @@
 import { CheckCircle, Calendar, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { WorkoutItemProps } from "../../types";
-import { calculateExerciseCount, calculateSetCount } from '../../utils';
+import { WorkoutSummary } from "@/types";
+
+export interface WorkoutItemProps {
+    workout: WorkoutSummary;
+    onClick?: (workout: WorkoutSummary) => void;
+    className?: string;
+}
 
 export default function WorkoutItem({
     workout,
@@ -9,7 +14,7 @@ export default function WorkoutItem({
     className
 }: WorkoutItemProps) {
     // Helper function to format dates without date-fns
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString: string | Date) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
             year: 'numeric',
@@ -19,7 +24,7 @@ export default function WorkoutItem({
     };
 
     // Helper function to format time without date-fns
-    const formatTime = (dateString: string) => {
+    const formatTime = (dateString: string | Date) => {
         const date = new Date(dateString);
         return date.toLocaleTimeString('en-US', {
             hour: 'numeric',
@@ -28,13 +33,12 @@ export default function WorkoutItem({
         });
     };
 
-    // Calculate exercise and set counts using utility functions
-    const exerciseCount = calculateExerciseCount(workout);
-    const setCount = calculateSetCount(workout);
+    // Get the workout date from startTime if available, otherwise from createdAt
+    const workoutDate = workout.startTime ? workout.startTime : workout.createdAt;
 
     // Format date and time for display
-    const formattedDate = formatDate(workout.date);
-    const formattedTime = formatTime(workout.date);
+    const formattedDate = formatDate(workoutDate);
+    const formattedTime = formatTime(workoutDate);
 
     return (
         <div
@@ -62,12 +66,16 @@ export default function WorkoutItem({
             </div>
 
             <div className="flex flex-wrap gap-2 mt-3">
-                <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm">
-                    {exerciseCount} {exerciseCount === 1 ? 'exercise' : 'exercises'}
-                </div>
-                <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm">
-                    {setCount} {setCount === 1 ? 'set' : 'sets'}
-                </div>
+                {workout.exerciseCount !== undefined && (
+                    <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm">
+                        {workout.exerciseCount} {workout.exerciseCount === 1 ? 'exercise' : 'exercises'}
+                    </div>
+                )}
+                {workout.setCount !== undefined && (
+                    <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm">
+                        {workout.setCount} {workout.setCount === 1 ? 'set' : 'sets'}
+                    </div>
+                )}
                 {workout.duration && (
                     <div className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded text-sm flex items-center">
                         <Clock className="h-3 w-3 mr-1" />

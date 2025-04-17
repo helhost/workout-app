@@ -6,5 +6,13 @@ export { default as SetComplete } from './SetComplete';
 export { default as MuscleGroupSelect } from './MuscleGroupSelect';
 export { default as FormActions } from './FormActions';
 
-// Re-export any types specific to the form if needed
-export * from './form-utils';
+// Re-export utility functions
+export {
+    createDefaultExercise,
+    createDefaultSet,
+    createSuperset,
+    createDefaultWorkout,
+    isWorkoutCompleted,
+    generateId,
+    muscleGroupOptions
+} from './form-utils';

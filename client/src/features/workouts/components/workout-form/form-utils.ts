@@ -1,4 +1,4 @@
-import { Exercise, Set, SuperSet, Workout, MuscleGroup } from '../../types';
+import { Exercise, Set, Superset, Exercise as WorkoutExercise, MuscleGroup } from '@/types/workout';
 
 /**
  * Generates a unique ID with a specific prefix
@@ -14,24 +14,26 @@ export const createDefaultSet = (): Set => ({
     id: generateId('set'),
     weight: 0,
     reps: 10,
-    completed: false
+    order: 0
 });
 
 /**
  * Creates a new empty exercise with default values
  */
-export const createDefaultExercise = (): Exercise => ({
+export const createDefaultExercise = (): WorkoutExercise => ({
     id: generateId('ex'),
     name: '',
     muscleGroup: 'fullBody',
     sets: [createDefaultSet()],
-    notes: ''
+    dropsets: [],
+    notes: '',
+    type: 'exercise'
 });
 
 /**
  * Creates a new superset with an initial exercise
  */
-export const createSuperset = (initialExercise?: Exercise): SuperSet => ({
+export const createSuperset = (initialExercise?: WorkoutExercise): Superset => ({
     id: generateId('ss'),
     type: 'superset',
     exercises: initialExercise ? [initialExercise] : [createDefaultExercise()],
@@ -41,23 +43,24 @@ export const createSuperset = (initialExercise?: Exercise): SuperSet => ({
 /**
  * Creates a default workout object
  */
-export const createDefaultWorkout = (): Workout => ({
+export const createDefaultWorkout = (): any => ({
     id: generateId('workout'),
     name: '',
     date: new Date().toISOString(),
     items: [],
-    completed: false
+    completed: false,
+    notes: ''
 });
 
 /**
  * Checks if all sets in a workout are completed
  */
-export const isWorkoutCompleted = (workout: Workout): boolean => {
+export const isWorkoutCompleted = (workout: any): boolean => {
     // Get all sets from all items (exercises and supersets)
     const allSets: Set[] = [];
 
     workout.items.forEach(item => {
-        if ('type' in item && item.type === 'superset') {
+        if (item.type === 'superset') {
             // It's a superset
             item.exercises.forEach(exercise => {
                 allSets.push(...exercise.sets);
@@ -69,11 +72,11 @@ export const isWorkoutCompleted = (workout: Workout): boolean => {
     });
 
     // Check if there are any sets and if all of them are completed
-    return allSets.length > 0 && allSets.every(set => set.completed);
+    return allSets.length > 0 && allSets.every(set => set.order !== undefined);
 };
 
 /**
- * Get all available muscle groups with labels
+ * Available muscle group options for the select dropdown
  */
 export const muscleGroupOptions = [
     { label: "Chest", value: "chest" as MuscleGroup },
@@ -82,6 +85,7 @@ export const muscleGroupOptions = [
     { label: "Biceps", value: "biceps" as MuscleGroup },
     { label: "Triceps", value: "triceps" as MuscleGroup },
     { label: "Legs", value: "legs" as MuscleGroup },
+    { label: "Quads", value: "quads" as MuscleGroup },
     { label: "Core", value: "core" as MuscleGroup },
     { label: "Cardio", value: "cardio" as MuscleGroup },
     { label: "Full Body", value: "fullBody" as MuscleGroup }

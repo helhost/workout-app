@@ -1,6 +1,12 @@
 import { cn } from "@/lib/utils";
 import WorkoutItem from "./WorkoutItem";
-import { WorkoutsListProps } from "../../types";
+import { WorkoutSummary } from "@/types";
+
+export interface WorkoutsListProps {
+    workouts: WorkoutSummary[];
+    onWorkoutClick?: (workout: WorkoutSummary) => void;
+    className?: string;
+}
 
 export default function WorkoutsList({
     workouts,

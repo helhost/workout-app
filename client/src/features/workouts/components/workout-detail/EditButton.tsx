@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Workout } from "../../types";
+import { WorkoutFull } from "@/types/workout";
 
 interface EditButtonProps {
-    workout: Workout;
-    onEdit?: (workout: Workout) => void;
+    workout: WorkoutFull;
+    onEdit?: (workout: WorkoutFull) => void;
 }
 
 export function EditButton({ workout, onEdit }: EditButtonProps) {

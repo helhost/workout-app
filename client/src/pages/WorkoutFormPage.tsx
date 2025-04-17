@@ -4,8 +4,9 @@ import { toast } from "sonner";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Import workout components and types
-import { sampleWorkouts, Workout, Exercise, WorkoutItemType, isSuperset } from "@/features/workouts";
+// Import types
+import { Workout } from "@/features/workouts/types";
+import { WorkoutFull, Exercise, ExerciseData, SupersetData } from "@/types/workout";
 
 // Import form components
 import {
@@ -17,6 +18,20 @@ import {
     createDefaultWorkout,
     createSuperset
 } from "@/features/workouts/components/workout-form";
+
+// Import API functions
+import {
+    getWorkoutById,
+    createWorkout,
+    updateWorkout,
+    addExerciseToWorkout,
+    updateExercise,
+    deleteExercise,
+    addSupersetToWorkout,
+    updateSuperset,
+    deleteSuperset,
+    addExerciseToSuperset
+} from "@/features/workouts/api";
 
 export default function WorkoutFormPage() {
     const { workoutId } = useParams<{ workoutId: string }>();
@@ -34,15 +49,39 @@ export default function WorkoutFormPage() {
     useEffect(() => {
         // Only fetch workout if we're in edit mode
         if (isEditMode && workoutId) {
-            // In production, you would fetch the workout data from an API
-            // For now, we'll use the sample data
-            const foundWorkout = sampleWorkouts.find(w => w.id === workoutId);
-            if (foundWorkout) {
-                setFormData(foundWorkout);
-            }
+            const fetchWorkout = async () => {
+                try {
+                    setLoading(true);
+                    const response = await getWorkoutById(workoutId);
+                    // Transform backend workout to frontend format
+                    setFormData(transformWorkout(response.workout));
+                    setLoading(false);
+                } catch (error) {
+                    console.error("Error fetching workout:", error);
+                    toast.error("Failed to load workout");
+                    setLoading(false);
+                }
+            };
+
+            fetchWorkout();
+        } else {
+            setLoading(false);
         }
-        setLoading(false);
     }, [workoutId, isEditMode]);
+
+    // Transform the backend workout to frontend format
+    const transformWorkout = (backendWorkout: WorkoutFull): Workout => {
+        return {
+            id: backendWorkout.id,
+            name: backendWorkout.name,
+            date: backendWorkout.startTime
+                ? new Date(backendWorkout.startTime).toISOString()
+                : new Date().toISOString(),
+            items: backendWorkout.items,
+            notes: backendWorkout.notes || '',
+            completed: backendWorkout.completed
+        };
+    };
 
     // Handle changes to workout level fields
     const handleWorkoutChange = <K extends keyof Workout>(field: K, value: Workout[K]) => {
@@ -54,7 +93,7 @@ export default function WorkoutFormPage() {
         field: 'name' | 'date' | 'notes' | 'duration',
         value: string | number | undefined
     ) => {
-        handleWorkoutChange(field, value as any);
+        handleWorkoutChange(field as any, value as any);
     };
 
     // Add a new exercise to the workout
@@ -70,7 +109,7 @@ export default function WorkoutFormPage() {
     };
 
     // Update a workout item (exercise or superset)
-    const updateItem = (itemIndex: number, updatedItem: WorkoutItemType) => {
+    const updateItem = (itemIndex: number, updatedItem: any) => {
         const updatedItems = [...formData.items];
         updatedItems[itemIndex] = updatedItem;
         handleWorkoutChange("items", updatedItems);
@@ -93,22 +132,66 @@ export default function WorkoutFormPage() {
         setSubmitting(true);
 
         try {
-            // In production, you would send the data to your API
-            // For now, we'll just simulate a delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (isEditMode && workoutId) {
+                // Update existing workout
+                await updateWorkout(workoutId, {
+                    name: formData.name,
+                    notes: formData.notes
+                });
 
-            // Show success message
-            toast.success(
-                isEditMode
-                    ? "Workout updated successfully!"
-                    : "Workout created successfully!"
-            );
+                // Here we'd need to sync all exercises and supersets
+                // This would require comparing current state with original data
+                // and making appropriate API calls
 
-            // Navigate back to the detail page if editing, or to the list if creating
-            if (isEditMode) {
-                navigate(`/workouts/${formData.id}`);
+                toast.success("Workout updated successfully!");
+                navigate(`/workouts/${workoutId}`);
             } else {
-                navigate("/workouts");
+                // Create new workout
+                const response = await createWorkout({
+                    name: formData.name,
+                    notes: formData.notes
+                });
+
+                const newWorkoutId = response.workout.id;
+
+                // Add all exercises and supersets sequentially
+                for (const [index, item] of formData.items.entries()) {
+                    if (item.type === 'exercise') {
+                        // Add exercise
+                        const exerciseData: ExerciseData = {
+                            name: item.name,
+                            muscleGroup: item.muscleGroup,
+                            notes: item.notes,
+                            order: index
+                        };
+
+                        await addExerciseToWorkout(newWorkoutId, exerciseData);
+                    } else if (item.type === 'superset') {
+                        // Add superset
+                        const supersetData: SupersetData = {
+                            notes: item.notes,
+                            order: index
+                        };
+
+                        const supersetResponse = await addSupersetToWorkout(newWorkoutId, supersetData);
+                        const newSupersetId = supersetResponse.superset.id;
+
+                        // Add exercises to superset
+                        for (const [exIndex, exercise] of item.exercises.entries()) {
+                            const exerciseData: ExerciseData = {
+                                name: exercise.name,
+                                muscleGroup: exercise.muscleGroup,
+                                notes: exercise.notes,
+                                order: exIndex
+                            };
+
+                            await addExerciseToSuperset(newSupersetId, exerciseData);
+                        }
+                    }
+                }
+
+                toast.success("Workout created successfully!");
+                navigate(`/workouts/${newWorkoutId}`);
             }
         } catch (error) {
             console.error("Error saving workout:", error);
@@ -160,7 +243,7 @@ export default function WorkoutFormPage() {
                         name={formData.name}
                         date={formData.date}
                         notes={formData.notes}
-                        duration={formData.duration}
+                        duration={typeof formData.duration === 'number' ? formData.duration : undefined}
                         onChange={handleInfoChange}
                     />
                 </div>
@@ -181,7 +264,7 @@ export default function WorkoutFormPage() {
                         <div className="space-y-4">
                             {formData.items.map((item, index) => (
                                 <div key={item.id}>
-                                    {isSuperset(item) ? (
+                                    {item.type === 'superset' ? (
                                         <SupersetForm
                                             superset={item}
                                             onUpdate={(updatedSuperset) => updateItem(index, updatedSuperset)}
@@ -189,7 +272,7 @@ export default function WorkoutFormPage() {
                                         />
                                     ) : (
                                         <ExerciseForm
-                                            exercise={item as Exercise}
+                                            exercise={item}
                                             onUpdate={(updatedExercise) => updateItem(index, updatedExercise)}
                                             onRemove={() => removeItem(index)}
                                             onConvertToSuperset={() => convertToSuperset(index)}

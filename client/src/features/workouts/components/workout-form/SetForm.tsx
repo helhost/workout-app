@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { MinusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Set } from "../../types";
+import { Set } from "@/features/workouts/types";
 import SetComplete from "./SetComplete";
 
 interface SetFormProps {

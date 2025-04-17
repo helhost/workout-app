@@ -1,8 +1,12 @@
-import { Workout } from "../../types";
 import { cn } from "@/lib/utils";
 
 interface WorkoutHeaderProps {
-    workout: Pick<Workout, 'name' | 'date' | 'duration' | 'completed'>;
+    workout: {
+        name: string;
+        date?: string | Date;
+        duration?: number;
+        completed: boolean;
+    };
     className?: string;
 }
 
@@ -10,13 +14,15 @@ export function WorkoutHeader({
     workout: { name, date, duration, completed },
     className
 }: WorkoutHeaderProps) {
-    // Format date with full details
-    const formattedDate = new Date(date).toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    // Format date with full details, if available
+    const formattedDate = date
+        ? new Date(date).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        })
+        : 'Not scheduled';
 
     return (
         <div className={cn(

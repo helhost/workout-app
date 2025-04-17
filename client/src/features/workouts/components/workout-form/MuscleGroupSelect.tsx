@@ -5,7 +5,7 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { MuscleGroup } from "../../types";
+import { MuscleGroup } from "@/types/workout";
 import { muscleGroupOptions } from "./form-utils";
 import { cn } from "@/lib/utils";
 

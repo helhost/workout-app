@@ -1,4 +1,4 @@
-import { Exercise } from "../../types";
+import { Exercise } from "@/types/workout";
 import { SetList } from "./SetList";
 
 interface ExerciseItemProps {
