@@ -1,7 +1,7 @@
 import { ArrowLeftRight, PlusCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { SuperSet, Exercise } from "@/features/workouts/types";
+import { Workout } from "@shared";
 import { createDefaultExercise } from "./form-utils";
 import {
     AlertDialog,
@@ -17,8 +17,8 @@ import {
 import ExerciseForm from "./ExerciseForm";
 
 interface SupersetFormProps {
-    superset: SuperSet;
-    onUpdate: (superset: SuperSet) => void;
+    superset: Workout.Superset;
+    onUpdate: (superset: Workout.Superset) => void;
     onRemove: () => void;
     className?: string;
 }
@@ -39,7 +39,7 @@ const SupersetForm = ({
     };
 
     // Update an exercise within the superset
-    const updateExerciseInSuperset = (exerciseIndex: number, updatedExercise: Exercise) => {
+    const updateExerciseInSuperset = (exerciseIndex: number, updatedExercise: Workout.Exercise) => {
         const updatedExercises = [...superset.exercises];
         updatedExercises[exerciseIndex] = updatedExercise;
 

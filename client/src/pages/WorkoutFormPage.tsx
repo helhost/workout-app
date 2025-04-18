@@ -4,8 +4,6 @@ import { toast } from "sonner";
 import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Import types
-import { Workout } from "@/features/workouts/types";
 import { WorkoutFull, Exercise, ExerciseData, SupersetData } from "@/types/workout";
 
 // Import form components
@@ -16,7 +14,7 @@ import {
     FormActions,
     createDefaultExercise,
     createDefaultWorkout,
-    createSuperset
+    createDefaultSuperset
 } from "@/features/workouts/components/workout-form";
 
 // Import API functions
@@ -30,7 +28,10 @@ import {
     addSupersetToWorkout,
     updateSuperset,
     deleteSuperset,
-    addExerciseToSuperset
+    addExerciseToSuperset,
+    addSetToExercise,
+    updateSet,
+    deleteSet
 } from "@/features/workouts/api";
 
 export default function WorkoutFormPage() {
@@ -40,6 +41,7 @@ export default function WorkoutFormPage() {
 
     // State for the form
     const [formData, setFormData] = useState<Workout>(createDefaultWorkout());
+    const [originalItems, setOriginalItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
@@ -53,8 +55,11 @@ export default function WorkoutFormPage() {
                 try {
                     setLoading(true);
                     const response = await getWorkoutById(workoutId);
-                    // Transform backend workout to frontend format
-                    setFormData(transformWorkout(response.workout));
+                    const transformedWorkout = transformWorkout(response.workout);
+
+                    // Save the original items to compare later
+                    setOriginalItems(JSON.parse(JSON.stringify(response.workout.items)));
+                    setFormData(transformedWorkout);
                     setLoading(false);
                 } catch (error) {
                     console.error("Error fetching workout:", error);
@@ -122,8 +127,15 @@ export default function WorkoutFormPage() {
 
         // Create superset with the existing exercise
         const superset = createSuperset(exercise);
+        // Add an empty exercise to the superset
+        superset.exercises.push(createDefaultExercise());
         updatedItems[itemIndex] = superset;
         handleWorkoutChange("items", updatedItems);
+    };
+
+    // Find an item by ID in the original items array
+    const findOriginalItemById = (id: string) => {
+        return originalItems.find(item => item.id === id);
     };
 
     // Submit the form
@@ -139,9 +151,210 @@ export default function WorkoutFormPage() {
                     notes: formData.notes
                 });
 
-                // Here we'd need to sync all exercises and supersets
-                // This would require comparing current state with original data
-                // and making appropriate API calls
+                // Track items to delete
+                const currentItemIds = formData.items.map(item => item.id);
+                const deletedItems = originalItems.filter(item => !currentItemIds.includes(item.id));
+
+                // Delete removed items
+                for (const item of deletedItems) {
+                    if (item.type === 'exercise') {
+                        await deleteExercise(item.id);
+                    } else if (item.type === 'superset') {
+                        await deleteSuperset(item.id);
+                    }
+                }
+
+                // Update or create workout items
+                for (const [index, item] of formData.items.entries()) {
+                    if (item.type === 'exercise') {
+                        const originalItem = findOriginalItemById(item.id);
+
+                        if (originalItem) {
+                            // Update existing exercise
+                            await updateExercise(item.id, {
+                                name: item.name,
+                                muscleGroup: item.muscleGroup,
+                                notes: item.notes,
+                                order: index
+                            });
+
+                            // Sync sets - first get existing set IDs
+                            const existingSetIds = originalItem.sets.map(set => set.id);
+                            const currentSetIds = item.sets.map(set => set.id);
+
+                            // Delete removed sets
+                            for (const setId of existingSetIds) {
+                                if (!currentSetIds.includes(setId)) {
+                                    await deleteSet(setId);
+                                }
+                            }
+
+                            // Update/Create sets
+                            for (const [setIndex, set] of item.sets.entries()) {
+                                if (existingSetIds.includes(set.id)) {
+                                    // Update existing set
+                                    await updateSet(set.id, {
+                                        weight: set.weight,
+                                        reps: set.reps,
+                                        completed: set.completed || false,
+                                        order: setIndex
+                                    });
+                                } else {
+                                    // Add new set
+                                    await addSetToExercise(item.id, {
+                                        weight: set.weight,
+                                        reps: set.reps,
+                                        completed: set.completed || false,
+                                        order: setIndex
+                                    });
+                                }
+                            }
+                        } else {
+                            // Add new exercise
+                            const exerciseData: ExerciseData = {
+                                name: item.name,
+                                muscleGroup: item.muscleGroup,
+                                notes: item.notes,
+                                order: index
+                            };
+
+                            const response = await addExerciseToWorkout(workoutId, exerciseData);
+                            const newExerciseId = response.exercise.id;
+
+                            // Add sets to the new exercise
+                            for (const [setIndex, set] of item.sets.entries()) {
+                                await addSetToExercise(newExerciseId, {
+                                    weight: set.weight,
+                                    reps: set.reps,
+                                    completed: set.completed || false,
+                                    order: setIndex
+                                });
+                            }
+                        }
+                    } else if (item.type === 'superset') {
+                        const originalItem = findOriginalItemById(item.id);
+
+                        if (originalItem) {
+                            // Update existing superset
+                            await updateSuperset(item.id, {
+                                notes: item.notes,
+                                order: index
+                            });
+
+                            // Track superset exercises
+                            const existingExerciseIds = originalItem.exercises.map(ex => ex.id);
+                            const currentExerciseIds = item.exercises.map(ex => ex.id);
+
+                            // Delete removed exercises
+                            for (const exId of existingExerciseIds) {
+                                if (!currentExerciseIds.includes(exId)) {
+                                    await deleteExercise(exId);
+                                }
+                            }
+
+                            // Update/Create exercises in superset
+                            for (const [exIndex, exercise] of item.exercises.entries()) {
+                                if (existingExerciseIds.includes(exercise.id)) {
+                                    // Update existing exercise
+                                    await updateExercise(exercise.id, {
+                                        name: exercise.name,
+                                        muscleGroup: exercise.muscleGroup,
+                                        notes: exercise.notes,
+                                        order: exIndex
+                                    });
+
+                                    // Also need to sync sets for this exercise
+                                    const originalExercise = originalItem.exercises.find(ex => ex.id === exercise.id);
+                                    if (originalExercise) {
+                                        const existingSetIds = originalExercise.sets.map(set => set.id);
+                                        const currentSetIds = exercise.sets.map(set => set.id);
+
+                                        // Delete removed sets
+                                        for (const setId of existingSetIds) {
+                                            if (!currentSetIds.includes(setId)) {
+                                                await deleteSet(setId);
+                                            }
+                                        }
+
+                                        // Update/Create sets
+                                        for (const [setIndex, set] of exercise.sets.entries()) {
+                                            if (existingSetIds.includes(set.id)) {
+                                                // Update existing set
+                                                await updateSet(set.id, {
+                                                    weight: set.weight,
+                                                    reps: set.reps,
+                                                    completed: set.completed || false,
+                                                    order: setIndex
+                                                });
+                                            } else {
+                                                // Add new set
+                                                await addSetToExercise(exercise.id, {
+                                                    weight: set.weight,
+                                                    reps: set.reps,
+                                                    completed: set.completed || false,
+                                                    order: setIndex
+                                                });
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // Add new exercise to superset
+                                    const exerciseData: ExerciseData = {
+                                        name: exercise.name,
+                                        muscleGroup: exercise.muscleGroup,
+                                        notes: exercise.notes,
+                                        order: exIndex
+                                    };
+
+                                    const response = await addExerciseToSuperset(item.id, exerciseData);
+                                    const newExerciseId = response.exercise.id;
+
+                                    // Add sets to the new exercise
+                                    for (const [setIndex, set] of exercise.sets.entries()) {
+                                        await addSetToExercise(newExerciseId, {
+                                            weight: set.weight,
+                                            reps: set.reps,
+                                            completed: set.completed || false,
+                                            order: setIndex
+                                        });
+                                    }
+                                }
+                            }
+                        } else {
+                            // Add new superset
+                            const supersetData: SupersetData = {
+                                notes: item.notes,
+                                order: index
+                            };
+
+                            const response = await addSupersetToWorkout(workoutId, supersetData);
+                            const newSupersetId = response.superset.id;
+
+                            // Add exercises to the new superset
+                            for (const [exIndex, exercise] of item.exercises.entries()) {
+                                const exerciseData: ExerciseData = {
+                                    name: exercise.name,
+                                    muscleGroup: exercise.muscleGroup,
+                                    notes: exercise.notes,
+                                    order: exIndex
+                                };
+
+                                const exResponse = await addExerciseToSuperset(newSupersetId, exerciseData);
+                                const newExerciseId = exResponse.exercise.id;
+
+                                // Add sets to the new exercise
+                                for (const [setIndex, set] of exercise.sets.entries()) {
+                                    await addSetToExercise(newExerciseId, {
+                                        weight: set.weight,
+                                        reps: set.reps,
+                                        completed: set.completed || false,
+                                        order: setIndex
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
 
                 toast.success("Workout updated successfully!");
                 navigate(`/workouts/${workoutId}`);
@@ -165,7 +378,18 @@ export default function WorkoutFormPage() {
                             order: index
                         };
 
-                        await addExerciseToWorkout(newWorkoutId, exerciseData);
+                        const exerciseResponse = await addExerciseToWorkout(newWorkoutId, exerciseData);
+                        const newExerciseId = exerciseResponse.exercise.id;
+
+                        // Add sets to the exercise
+                        for (const [setIndex, set] of item.sets.entries()) {
+                            await addSetToExercise(newExerciseId, {
+                                weight: set.weight,
+                                reps: set.reps,
+                                completed: set.completed || false,
+                                order: setIndex
+                            });
+                        }
                     } else if (item.type === 'superset') {
                         // Add superset
                         const supersetData: SupersetData = {
@@ -185,7 +409,18 @@ export default function WorkoutFormPage() {
                                 order: exIndex
                             };
 
-                            await addExerciseToSuperset(newSupersetId, exerciseData);
+                            const exResponse = await addExerciseToSuperset(newSupersetId, exerciseData);
+                            const newExerciseId = exResponse.exercise.id;
+
+                            // Add sets to the exercise
+                            for (const [setIndex, set] of exercise.sets.entries()) {
+                                await addSetToExercise(newExerciseId, {
+                                    weight: set.weight,
+                                    reps: set.reps,
+                                    completed: set.completed || false,
+                                    order: setIndex
+                                });
+                            }
                         }
                     }
                 }

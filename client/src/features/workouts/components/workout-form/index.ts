@@ -10,9 +10,8 @@ export { default as FormActions } from './FormActions';
 export {
     createDefaultExercise,
     createDefaultSet,
-    createSuperset,
+    createDefaultSuperset,
     createDefaultWorkout,
     isWorkoutCompleted,
-    generateId,
     muscleGroupOptions
 } from './form-utils';

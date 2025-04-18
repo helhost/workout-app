@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeftRight, PlusCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Exercise, Set } from "@/features/workouts/types";
+import { Workout } from "@shared";
 import { createDefaultSet } from "./form-utils";
 import MuscleGroupSelect from "./MuscleGroupSelect";
 import SetForm from "./SetForm";
@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface ExerciseFormProps {
-    exercise: Exercise;
-    onUpdate: (exercise: Exercise) => void;
+    exercise: Workout.Exercise;
+    onUpdate: (exercise: Workout.Exercise) => void;
     onRemove: () => void;
     onConvertToSuperset?: () => void;
     isInSuperset?: boolean;
@@ -37,7 +37,7 @@ const ExerciseForm = ({
     className
 }: ExerciseFormProps) => {
     // Update a specific field of the exercise
-    const updateField = <K extends keyof Exercise>(field: K, value: Exercise[K]) => {
+    const updateField = <K extends keyof Workout.Exercise>(field: K, value: Workout.Exercise[K]) => {
         onUpdate({
             ...exercise,
             [field]: value
@@ -49,7 +49,7 @@ const ExerciseForm = ({
         const lastSet = exercise.sets[exercise.sets.length - 1];
 
         // Create new set, inheriting weight and reps from last set if possible
-        const newSet: Set = createDefaultSet();
+        const newSet: Workout.ExerciseSet = createDefaultSet();
         if (lastSet) {
             newSet.weight = lastSet.weight;
             newSet.reps = lastSet.reps;
@@ -59,7 +59,7 @@ const ExerciseForm = ({
     };
 
     // Update a specific set
-    const updateSet = (index: number, updatedSet: Set) => {
+    const updateSet = (index: number, updatedSet: Workout.ExerciseSet) => {
         const updatedSets = [...exercise.sets];
         updatedSets[index] = updatedSet;
         updateField("sets", updatedSets);
@@ -207,7 +207,7 @@ const ExerciseForm = ({
                     <tbody>
                         {exercise.sets.map((set, index) => (
                             <SetForm
-                                key={set.id}
+                                key={index}
                                 set={set}
                                 index={index}
                                 onChange={(updatedSet) => updateSet(index, updatedSet)}

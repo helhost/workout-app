@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { MinusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Set } from "@/features/workouts/types";
+import { Workout } from "@shared";
 import SetComplete from "./SetComplete";
 
 interface SetFormProps {
-    set: Set;
+    set: Workout.ExerciseSet;
     index: number;
-    onChange: (updatedSet: Set) => void;
+    onChange: (updatedSet: Workout.ExerciseSet) => void;
     onRemove: () => void;
     canDelete: boolean;
     className?: string;
@@ -22,7 +22,7 @@ const SetForm = ({
     className
 }: SetFormProps) => {
     // Update a specific field of the set
-    const updateField = <K extends keyof Set>(field: K, value: Set[K]) => {
+    const updateField = <K extends keyof Workout.ExerciseSet>(field: K, value: Workout.ExerciseSet[K]) => {
         onChange({
             ...set,
             [field]: value
@@ -59,7 +59,7 @@ const SetForm = ({
             </td>
             <td className="p-2 text-center">
                 <SetComplete
-                    completed={set.completed}
+                    completed={!!set.completed}
                     onChange={(completed) => updateField("completed", completed)}
                 />
             </td>

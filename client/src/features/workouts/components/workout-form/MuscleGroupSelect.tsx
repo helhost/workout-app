@@ -5,13 +5,13 @@ import {
     SelectTrigger,
     SelectValue
 } from "@/components/ui/select";
-import { MuscleGroup } from "@/types/workout";
+import { Workout } from "@shared";
 import { muscleGroupOptions } from "./form-utils";
 import { cn } from "@/lib/utils";
 
 interface MuscleGroupSelectProps {
-    value: MuscleGroup;
-    onChange: (value: MuscleGroup) => void;
+    value: Workout.MuscleGroup;
+    onChange: (value: Workout.MuscleGroup) => void;
     className?: string;
 }
 
@@ -23,7 +23,7 @@ const MuscleGroupSelect = ({
     return (
         <Select
             value={value}
-            onValueChange={(value) => onChange(value as MuscleGroup)}
+            onValueChange={(value) => onChange(value as Workout.MuscleGroup)}
         >
             <SelectTrigger className={cn(
                 "text-xs text-gray-500 dark:text-gray-400 capitalize bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded h-auto min-h-0 w-auto border-none",

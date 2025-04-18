@@ -4,7 +4,6 @@ interface InfoFormProps {
     name: string;
     date: string;
     notes?: string;
-    duration?: number;
     onChange: <T extends string | number | undefined>(
         field: 'name' | 'date' | 'notes' | 'duration',
         value: T
@@ -16,7 +15,6 @@ const InfoForm = ({
     name,
     date,
     notes,
-    duration,
     onChange,
     className
 }: InfoFormProps) => {
@@ -45,27 +43,9 @@ const InfoForm = ({
                     id="workout-date"
                     type="datetime-local"
                     value={date.substring(0, 16)} // Format for datetime-local input
-                    onChange={(e) => onChange("date", new Date(e.target.value).toISOString())}
+                    onChange={(e) => onChange("date", e.target.value)}
                     required
                     className="bg-transparent border-b border-gray-200 dark:border-gray-700 py-1 px-0 focus:outline-none focus:ring-0 focus:border-blue-500 text-gray-700 dark:text-gray-300 w-auto"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="workout-duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Duration (minutes)
-                </label>
-                <input
-                    id="workout-duration"
-                    type="number"
-                    min="1"
-                    value={duration || ""}
-                    onChange={(e) => {
-                        const val = e.target.value ? parseInt(e.target.value) : undefined;
-                        onChange("duration", val);
-                    }}
-                    className="bg-transparent border-b border-gray-200 dark:border-gray-700 py-1 px-0 focus:outline-none focus:ring-0 focus:border-blue-500 text-gray-700 dark:text-gray-300 w-24"
-                    placeholder="Duration"
                 />
             </div>
 
