@@ -97,7 +97,8 @@ export const getWorkoutById = async (
                 weight: set.weight,
                 reps: set.reps,
                 notes: set.notes,
-                order: set.order
+                order: set.order,
+                completed: set.completed,
             })),
             dropsets: exercise.dropsets.map(dropset => ({
                 notes: dropset.notes,
@@ -105,7 +106,8 @@ export const getWorkoutById = async (
                 subSets: dropset.subSets.map(subset => ({
                     weight: subset.weight,
                     reps: subset.reps,
-                    order: subset.order
+                    order: subset.order,
+                    completed: subset.completed,
                 }))
             }))
         })),
@@ -119,7 +121,8 @@ export const getWorkoutById = async (
                     weight: set.weight,
                     reps: set.reps,
                     notes: set.notes,
-                    order: set.order
+                    order: set.order,
+                    completed: set.completed,
                 })),
                 dropsets: exercise.dropsets.map(dropset => ({
                     notes: dropset.notes,
@@ -127,7 +130,8 @@ export const getWorkoutById = async (
                     subSets: dropset.subSets.map(subset => ({
                         weight: subset.weight,
                         reps: subset.reps,
-                        order: subset.order
+                        order: subset.order,
+                        completed: subset.completed,
                     }))
                 }))
             }))
