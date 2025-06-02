@@ -5,6 +5,7 @@ import {
     updateSettings
 } from '@/services/userService';
 import { Controller } from '@/types';
+import { User } from '@shared';
 
 /**
  * Retrieves the user information of the authenticated user
@@ -15,11 +16,14 @@ import { Controller } from '@/types';
  * @throws 404 if user is not found
  * @throws 500 if server encounters an error
  */
-export const handleGetUserById: Controller = async (req, res) => {
+export const handleGetUserById: Controller<User.UserFull> = async (req, res) => {
     try {
         // Check if user is authenticated
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -27,18 +31,25 @@ export const handleGetUserById: Controller = async (req, res) => {
         const profile = await getUserById(userId);
 
         res.status(200).json({
+            success: true,
             message: 'Profile retrieved successfully',
-            profile
+            data: profile
         });
     } catch (error: any) {
         console.error(error);
 
         if (error.message === 'User not found') {
-            res.status(404).json({ error: 'User not found' });
+            res.status(404).json({
+                success: false,
+                error: 'User not found'
+            });
             return
         }
 
-        res.status(500).json({ error: 'Failed to retrieve profile' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to retrieve profile'
+        });
     }
 };
 
@@ -51,10 +62,13 @@ export const handleGetUserById: Controller = async (req, res) => {
  * @throws 400 if name is missing or invalid
  * @throws 500 if update operation fails
  */
-export const handleUpdateUsername: Controller = async (req, res) => {
+export const handleUpdateUsername: Controller<{ id: string, name: string }> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -62,19 +76,26 @@ export const handleUpdateUsername: Controller = async (req, res) => {
         const { name } = req.body;
 
         if (!name || typeof name !== 'string') {
-            res.status(400).json({ error: 'Valid name is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Valid name is required'
+            });
             return
         }
 
         const updatedUser = await updateUsername(userId, name);
 
         res.status(200).json({
+            success: true,
             message: 'Name updated successfully',
-            user: updatedUser
+            data: updatedUser
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to update name' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update name'
+        });
     }
 };
 
@@ -87,10 +108,13 @@ export const handleUpdateUsername: Controller = async (req, res) => {
  * @throws 400 if bio is undefined or invalid
  * @throws 500 if update operation fails
  */
-export const handleUpdateBio: Controller = async (req, res) => {
+export const handleUpdateBio: Controller<{ id: string, bio: string }> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -98,19 +122,26 @@ export const handleUpdateBio: Controller = async (req, res) => {
         const { bio } = req.body;
 
         if (bio === undefined || typeof bio !== 'string') {
-            res.status(400).json({ error: 'Valid bio is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Valid bio is required',
+            });
             return
         }
 
         const updatedUser = await updateBio(userId, bio);
 
         res.status(200).json({
+            success: true,
             message: 'Bio updated successfully',
-            user: updatedUser
+            data: updatedUser,
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to update bio' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update bio'
+        });
     }
 };
 
@@ -123,10 +154,13 @@ export const handleUpdateBio: Controller = async (req, res) => {
  * @throws 400 if settings object is missing or invalid
  * @throws 500 if settings update fails
  */
-export const handleUpdateSettings: Controller = async (req, res) => {
+export const handleUpdateSettings: Controller<User.Settings> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return;
         }
 
@@ -134,7 +168,10 @@ export const handleUpdateSettings: Controller = async (req, res) => {
         const { settings } = req.body;
 
         if (!settings || typeof settings !== 'object') {
-            res.status(400).json({ error: 'Valid settings object is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Valid settings object is required'
+            });
             return;
         }
 
@@ -142,11 +179,15 @@ export const handleUpdateSettings: Controller = async (req, res) => {
         const updatedSettings = await updateSettings(userId, settings);
 
         res.status(200).json({
+            success: true,
             message: 'Settings updated successfully',
-            settings: updatedSettings
+            data: updatedSettings
         });
     } catch (error) {
         console.error('Settings update error:', error);
-        res.status(500).json({ error: 'Failed to update settings' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update settings'
+        });
     }
 };

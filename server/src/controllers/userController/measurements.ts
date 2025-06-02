@@ -6,6 +6,7 @@ import {
     addBodyFatMeasurement
 } from '@/services/userService';
 import { Controller } from '@/types';
+import { User } from '@shared';
 
 /**
  * Retrieves the latest measurements for the authenticated user
@@ -15,10 +16,13 @@ import { Controller } from '@/types';
  * @throws 401 if user is not authenticated
  * @throws 500 if server encounters an error
  */
-export const handleGetLatestMeasurements: Controller = async (req, res) => {
+export const handleGetLatestMeasurements: Controller<User.SimpleMeasurements> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -26,12 +30,16 @@ export const handleGetLatestMeasurements: Controller = async (req, res) => {
         const measurements = await getLatestMeasurements(userId);
 
         res.status(200).json({
+            success: true,
             message: 'Latest measurements retrieved successfully',
-            measurements
+            data: measurements
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to retrieve measurements' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to retrieve measurements'
+        });
     }
 };
 
@@ -43,10 +51,13 @@ export const handleGetLatestMeasurements: Controller = async (req, res) => {
  * @throws 401 if user is not authenticated
  * @throws 500 if server encounters an error
  */
-export const handleGetMeasurementHistory: Controller = async (req, res) => {
+export const handleGetMeasurementHistory: Controller<User.Measurements> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -59,12 +70,16 @@ export const handleGetMeasurementHistory: Controller = async (req, res) => {
         );
 
         res.status(200).json({
+            success: true,
             message: 'Measurement history retrieved successfully',
-            history
+            data: history
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to retrieve measurement history' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to retrieve measurement history'
+        });
     }
 };
 
@@ -77,10 +92,13 @@ export const handleGetMeasurementHistory: Controller = async (req, res) => {
  * @throws 400 if weight value is invalid
  * @throws 500 if server encounters an error
  */
-export const handleAddWeightMeasurement: Controller = async (req, res) => {
+export const handleAddWeightMeasurement: Controller<User.MeasurementData> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -89,19 +107,26 @@ export const handleAddWeightMeasurement: Controller = async (req, res) => {
 
         // Validate weight value
         if (value === undefined || typeof value !== 'number' || value <= 0) {
-            res.status(400).json({ error: 'Valid weight value is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Valid weight value is required'
+            });
             return
         }
 
         const measurement = await addWeightMeasurement(userId, value);
 
         res.status(201).json({
+            success: true,
             message: 'Weight measurement added successfully',
-            measurement
+            data: measurement
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to add weight measurement' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to add weight measurement'
+        });
     }
 };
 
@@ -114,10 +139,13 @@ export const handleAddWeightMeasurement: Controller = async (req, res) => {
  * @throws 400 if height value is invalid
  * @throws 500 if server encounters an error
  */
-export const handleAddHeightMeasurement: Controller = async (req, res) => {
+export const handleAddHeightMeasurement: Controller<User.MeasurementData> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -126,18 +154,25 @@ export const handleAddHeightMeasurement: Controller = async (req, res) => {
 
         // Validate height value
         if (value === undefined || typeof value !== 'number' || value <= 0) {
-            res.status(400).json({ error: 'Valid height value is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Valid height value is required'
+            });
             return
         }
 
         const measurement = await addHeightMeasurement(userId, value);
         res.status(201).json({
+            success: true,
             message: 'Height measurement added successfully',
-            measurement
+            data: measurement
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to add height measurement' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to add height measurement'
+        });
     }
 };
 
@@ -150,10 +185,13 @@ export const handleAddHeightMeasurement: Controller = async (req, res) => {
  * @throws 400 if body fat value is invalid
  * @throws 500 if server encounters an error
  */
-export const handleAddBodyFatMeasurement: Controller = async (req, res) => {
+export const handleAddBodyFatMeasurement: Controller<User.MeasurementData> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -162,18 +200,25 @@ export const handleAddBodyFatMeasurement: Controller = async (req, res) => {
 
         // Validate body fat value
         if (value === undefined || typeof value !== 'number' || value < 0 || value > 100) {
-            res.status(400).json({ error: 'Valid body fat percentage (0-100) is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Valid body fat percentage (0-100) is required'
+            });
             return
         }
 
         const measurement = await addBodyFatMeasurement(userId, value);
 
         res.status(201).json({
+            success: true,
             message: 'Body fat measurement added successfully',
-            measurement
+            data: measurement
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to add body fat measurement' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to add body fat measurement'
+        });
     }
 };

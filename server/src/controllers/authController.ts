@@ -3,6 +3,7 @@ import { getUserById } from '../services/userService';
 import { generateAccessToken, generateRefreshToken } from '../middleware/authMiddleware';
 import jwt from 'jsonwebtoken';
 import { Controller } from '../types';
+import { User } from '@shared';
 
 /**
  * Handles user registration
@@ -10,26 +11,35 @@ import { Controller } from '../types';
  * @param res Express response object
  * @returns HTTP response with user data or error message
  */
-export const handleRegister: Controller = async (req, res) => {
+export const handleRegister: Controller<User.UserFull> = async (req, res) => {
     try {
         const { name, email, password, agreeToTerms } = req.body;
 
         // Basic validation
         if (!name || !email || !password || !agreeToTerms) {
-            res.status(400).json({ error: 'Name, email, password, and agreement to terms are required' });
+            res.status(400).json({
+                success: false,
+                error: 'Name, email, password, and agreement to terms are required'
+            });
             return;
         }
 
         // Email format validation
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            res.status(400).json({ error: 'Invalid email format' });
+            res.status(400).json({
+                success: false,
+                error: 'Invalid email format'
+            });
             return;
         }
 
         // Password strength check (you can enhance this)
         if (password.length < 8) {
-            res.status(400).json({ error: 'Password must be at least 8 characters long' });
+            res.status(400).json({
+                success: false,
+                error: 'Password must be at least 8 characters long'
+            });
             return;
         }
 
@@ -42,17 +52,24 @@ export const handleRegister: Controller = async (req, res) => {
 
         // Return success with user data
         res.status(201).json({
+            success: true,
             message: 'User registered successfully',
-            user: user
+            data: user
         });
     } catch (error: any) {
         if (error.message === 'User already exists') {
-            res.status(409).json({ error: 'Email is already registered' });
+            res.status(409).json({
+                success: false,
+                error: 'Email is already registered'
+            });
             return;
         }
 
         console.error(error);
-        res.status(500).json({ error: 'Registration failed' });
+        res.status(500).json({
+            success: false,
+            error: 'Registration failed'
+        });
     }
 };
 
@@ -62,20 +79,26 @@ export const handleRegister: Controller = async (req, res) => {
  * @param res Express response object
  * @returns HTTP response with user profile data or error message
  */
-export const handleLogin: Controller = async (req, res) => {
+export const handleLogin: Controller<User.UserFull> = async (req, res) => {
     try {
         const { email, password, rememberMe = false } = req.body;
 
         // Basic validation
         if (!email || !password) {
-            res.status(400).json({ error: 'Email and password are required' });
+            res.status(400).json({
+                success: false,
+                error: 'Email and password are required'
+            });
             return;
         }
 
         // Validate email format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            res.status(400).json({ error: 'Invalid email format' });
+            res.status(400).json({
+                success: false,
+                error: 'Invalid email format'
+            });
             return;
         }
 
@@ -90,21 +113,31 @@ export const handleLogin: Controller = async (req, res) => {
 
         // Return the complete user profile
         res.status(200).json({
+            success: true,
             message: 'Login successful',
-            user: userProfile
+            data: userProfile
         });
     } catch (error: any) {
         // Handle specific error types
         if (error.message === 'Invalid credentials') {
-            res.status(401).json({ error: 'Invalid email or password' });
+            res.status(401).json({
+                success: false,
+                error: 'Invalid email or password'
+            });
             return;
         } else if (error.message === 'User not found') {
-            res.status(404).json({ error: 'User account not found' });
+            res.status(404).json({
+                success: false,
+                error: 'User account not found'
+            });
             return;
         }
 
         console.error(error);
-        res.status(500).json({ error: 'Login failed' });
+        res.status(500).json({
+            success: false,
+            error: 'Login failed'
+        });
     }
 };
 
@@ -114,20 +147,26 @@ export const handleLogin: Controller = async (req, res) => {
  * @param res Express response object
  * @returns HTTP response with success message or error
  */
-export const handleRefreshToken: Controller = async (req, res) => {
+export const handleRefreshToken: Controller<null> = async (req, res) => {
     try {
         // Get the refresh token from cookies
         const refreshToken = req.cookies.refresh_token;
 
         if (!refreshToken) {
-            res.status(401).json({ error: 'Refresh token not provided' });
+            res.status(401).json({
+                success: false,
+                error: 'Refresh token not provided'
+            });
             return;
         }
 
         // Verify the refresh token
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!, async (err: any, user: any) => {
             if (err) {
-                res.status(403).json({ error: 'Invalid refresh token' });
+                res.status(403).json({
+                    success: false,
+                    error: 'Invalid refresh token'
+                });
                 return;
             }
 
@@ -155,12 +194,17 @@ export const handleRefreshToken: Controller = async (req, res) => {
             });
 
             res.status(200).json({
-                message: 'Token refreshed successfully'
+                success: true,
+                message: 'Token refreshed successfully',
+                data: null
             });
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to refresh token' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to refresh token'
+        });
     }
 };
 
@@ -170,13 +214,17 @@ export const handleRefreshToken: Controller = async (req, res) => {
  * @param res Express response object
  * @returns HTTP response with success message
  */
-export const handleLogout: Controller = (req, res) => {
+export const handleLogout: Controller<null> = (req, res) => {
     // Clear all auth cookies
     res.clearCookie('access_token');
     res.clearCookie('refresh_token', { path: '/api/auth/refresh' });
     res.clearCookie('XSRF-TOKEN');
 
-    res.status(200).json({ message: 'Logged out successfully' });
+    res.status(200).json({
+        success: true,
+        message: 'Logged out successfully',
+        data: null
+    });
 };
 
 /**

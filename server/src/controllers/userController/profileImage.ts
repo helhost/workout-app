@@ -1,4 +1,3 @@
-import { Request, Response } from 'express';
 import {
     saveProfileImage,
     getProfileImage,
@@ -6,6 +5,7 @@ import {
     deleteProfileImage
 } from '@/services/userService';
 import { Controller } from '@/types';
+import { User } from '@shared';
 
 /**
  * Uploads or updates the profile image of the authenticated user
@@ -16,10 +16,13 @@ import { Controller } from '@/types';
  * @throws 400 if image file is missing or invalid
  * @throws 500 if upload operation fails
  */
-export const handleUploadProfileImage: Controller = async (req, res) => {
+export const handleUploadProfileImage: Controller<User.ProfileImageMetadata> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -27,7 +30,10 @@ export const handleUploadProfileImage: Controller = async (req, res) => {
 
         // Make sure we have a file to upload
         if (!req.file) {
-            res.status(400).json({ error: 'No image file provided' });
+            res.status(400).json({
+                success: false,
+                error: 'No image file provided'
+            });
             return
         }
 
@@ -44,6 +50,7 @@ export const handleUploadProfileImage: Controller = async (req, res) => {
         const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         if (!validImageTypes.includes(imageData.mimeType)) {
             res.status(400).json({
+                success: false,
                 error: 'Invalid image format. Supported formats: JPEG, PNG, GIF, WebP'
             });
             return
@@ -53,14 +60,25 @@ export const handleUploadProfileImage: Controller = async (req, res) => {
         const savedImage = await saveProfileImage(userId, imageData);
 
         res.status(200).json({
+            success: true,
             message: 'Profile image uploaded successfully',
-            profileImage: savedImage
+            data: savedImage
         });
     } catch (error) {
         console.error('Profile image upload error:', error);
-        res.status(500).json({ error: 'Failed to upload profile image' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to upload profile image'
+        });
     }
 };
+
+interface ProfileImageResponse {
+    dataUri: string;
+    filename: string;
+    mimeType: string;
+    size: number;
+}
 
 /**
  * Retrieves the profile image of the authenticated user
@@ -71,11 +89,14 @@ export const handleUploadProfileImage: Controller = async (req, res) => {
  * @throws 404 if profile image is not found
  * @throws 500 if server encounters an error
  */
-export const handleGetProfileImage: Controller = async (req, res) => {
+export const handleGetProfileImage: Controller<ProfileImageResponse> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
-            return
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
+            return;
         }
 
         const userId = req.user.id;
@@ -83,22 +104,37 @@ export const handleGetProfileImage: Controller = async (req, res) => {
         try {
             const profileImage = await getProfileImage(userId);
 
-            // Fix: Set appropriate headers for image delivery without charset
-            res.set('Content-Type', profileImage.mimeType);
-            res.set('Content-Disposition', `inline; filename="${profileImage.filename}"`);
+            // Convert binary data to base64
+            const base64Data = Buffer.from(profileImage.data).toString('base64');
+            const dataUri = `data:${profileImage.mimeType};base64,${base64Data}`;
 
-            // Send the binary image data without text encoding
-            res.end(profileImage.data, 'binary');
+            res.status(200).json({
+                success: true,
+                data: {
+                    dataUri,
+                    filename: profileImage.filename,
+                    mimeType: profileImage.mimeType,
+                    size: profileImage.size
+                },
+                message: 'Profile image retrieved successfully'
+            });
+
         } catch (error: any) {
             if (error.message === 'Profile image not found') {
-                res.status(404).json({ error: 'Profile image not found' });
-                return
+                res.status(404).json({
+                    success: false,
+                    error: 'Profile image not found'
+                });
+                return;
             }
             throw error;
         }
     } catch (error) {
         console.error('Get profile image error:', error);
-        res.status(500).json({ error: 'Failed to retrieve profile image' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to retrieve profile image'
+        });
     }
 };
 
@@ -111,10 +147,13 @@ export const handleGetProfileImage: Controller = async (req, res) => {
  * @throws 404 if profile image is not found
  * @throws 500 if server encounters an error
  */
-export const handleGetProfileImageMetadata: Controller = async (req, res) => {
+export const handleGetProfileImageMetadata: Controller<User.ProfileImageMetadata> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -124,19 +163,26 @@ export const handleGetProfileImageMetadata: Controller = async (req, res) => {
             const metadata = await getProfileImageMetadata(userId);
 
             res.status(200).json({
+                success: true,
                 message: 'Profile image metadata retrieved successfully',
-                profileImage: metadata
+                data: metadata
             });
         } catch (error: any) {
             if (error.message === 'Profile image not found') {
-                res.status(404).json({ error: 'Profile image not found' });
+                res.status(404).json({
+                    success: false,
+                    error: 'Profile image not found'
+                });
                 return
             }
             throw error;
         }
     } catch (error) {
         console.error('Get profile image metadata error:', error);
-        res.status(500).json({ error: 'Failed to retrieve profile image metadata' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to retrieve profile image metadata'
+        });
     }
 };
 
@@ -149,10 +195,13 @@ export const handleGetProfileImageMetadata: Controller = async (req, res) => {
  * @throws 404 if profile image is not found
  * @throws 500 if deletion operation fails
  */
-export const handleDeleteProfileImage: Controller = async (req, res) => {
+export const handleDeleteProfileImage: Controller<null> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -162,18 +211,26 @@ export const handleDeleteProfileImage: Controller = async (req, res) => {
             await deleteProfileImage(userId);
 
             res.status(200).json({
-                message: 'Profile image deleted successfully'
+                success: true,
+                message: 'Profile image deleted successfully',
+                data: null
             });
         } catch (error: any) {
             // Prisma throws a specific error when record is not found
             if (error.code === 'P2025') {
-                res.status(404).json({ error: 'Profile image not found' });
+                res.status(404).json({
+                    success: false,
+                    error: 'Profile image not found'
+                });
                 return
             }
             throw error;
         }
     } catch (error) {
         console.error('Delete profile image error:', error);
-        res.status(500).json({ error: 'Failed to delete profile image' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete profile image'
+        });
     }
 };

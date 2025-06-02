@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 export const saveProfileImage = async (
     userId: string,
     imageData: User.ProfileImage
-): Promise<Omit<User.ProfileImage, 'data'>> => {
+): Promise<User.ProfileImageMetadata> => {
     // Check if user already has a profile image
     const existingImage = await prisma.profileImage.findUnique({
         where: { userId }
@@ -87,7 +87,7 @@ export const getProfileImage = async (userId: string): Promise<User.ProfileImage
  * @returns Profile image metadata
  * @throws Error if profile image is not found
  */
-export const getProfileImageMetadata = async (userId: string): Promise<Omit<User.ProfileImage, 'data'>> => {
+export const getProfileImageMetadata = async (userId: string): Promise<User.ProfileImageMetadata> => {
     const profileImage = await prisma.profileImage.findUnique({
         where: { userId },
         select: {

@@ -19,6 +19,7 @@ export namespace User {
     };
 
     export type ProfileImage = Omit<PrismaTypes.ProfileImage, 'userId' | 'createdAt' | 'updatedAt'>;
+    export type ProfileImageMetadata = Omit<ProfileImage, 'data'>;
 
     export type UserFull = Omit<PrismaTypes.User, 'password'> & {
         settings: Settings | null;

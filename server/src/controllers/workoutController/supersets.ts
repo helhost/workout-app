@@ -18,10 +18,13 @@ import { Workout } from '@shared';
  * @throws 404 if workout is not found
  * @throws 500 if server encounters an error
  */
-export const handleAddSupersetToWorkout: Controller = async (req, res) => {
+export const handleAddSupersetToWorkout: Controller<Workout.Superset> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -30,31 +33,44 @@ export const handleAddSupersetToWorkout: Controller = async (req, res) => {
         const supersetData = req.body;
 
         if (!workoutId) {
-            res.status(400).json({ error: 'Workout ID is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Workout ID is required'
+            });
             return
         }
 
         if (!supersetData || typeof supersetData !== 'object' || supersetData.order === undefined) {
-            res.status(400).json({ error: 'Valid superset data with order is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Valid superset data with order is required'
+            });
             return
         }
 
         const newSuperset = await addSupersetToWorkout(workoutId, userId, supersetData);
 
         res.status(201).json({
+            success: true,
             message: 'Superset added successfully',
-            superset: newSuperset
+            data: newSuperset
         });
         return
     } catch (error: any) {
         console.error('Add superset error:', error);
 
         if (error.message === 'Workout not found') {
-            res.status(404).json({ error: 'Workout not found' });
+            res.status(404).json({
+                success: false,
+                error: 'Workout not found'
+            });
             return
         }
 
-        res.status(500).json({ error: 'Failed to add superset' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to add superset'
+        });
     }
 };
 
@@ -68,11 +84,14 @@ export const handleAddSupersetToWorkout: Controller = async (req, res) => {
  * @throws 404 if superset is not found
  * @throws 500 if server encounters an error
  */
-export const handleUpdateSuperset: Controller = async (req, res) => {
+export const handleUpdateSuperset: Controller<Workout.Superset> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
-            res.status(401).json({ error: 'Unauthorized' });
         }
 
         const userId = req.user.id;
@@ -80,31 +99,44 @@ export const handleUpdateSuperset: Controller = async (req, res) => {
         const updateData: Partial<Workout.SupersetData> = req.body;
 
         if (!supersetId) {
+            res.status(400).json({
+                success: false,
+                error: 'Superset ID is required'
+            });
             return
-            res.status(400).json({ error: 'Superset ID is required' });
         }
 
         if (!updateData || typeof updateData !== 'object') {
+            res.status(400).json({
+                success: false,
+                error: 'Valid update data is required'
+            });
             return
-            res.status(400).json({ error: 'Valid update data is required' });
         }
 
         const updatedSuperset = await updateSuperset(supersetId, userId, updateData);
 
         res.status(200).json({
+            success: true,
             message: 'Superset updated successfully',
-            superset: updatedSuperset
+            data: updatedSuperset
         });
         return
     } catch (error: any) {
         console.error('Update superset error:', error);
 
         if (error.message === 'Superset not found') {
-            res.status(404).json({ error: 'Superset not found' });
+            res.status(404).json({
+                success: false,
+                error: 'Superset not found'
+            });
             return
         }
 
-        res.status(500).json({ error: 'Failed to update superset' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update superset'
+        });
     }
 };
 
@@ -118,10 +150,13 @@ export const handleUpdateSuperset: Controller = async (req, res) => {
  * @throws 404 if superset is not found
  * @throws 500 if server encounters an error
  */
-export const handleDeleteSuperset: Controller = async (req, res) => {
+export const handleDeleteSuperset: Controller<null> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -129,25 +164,36 @@ export const handleDeleteSuperset: Controller = async (req, res) => {
         const { supersetId } = req.params;
 
         if (!supersetId) {
-            res.status(400).json({ error: 'Superset ID is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Superset ID is required'
+            });
             return
         }
 
         await deleteSuperset(supersetId, userId);
 
         res.status(200).json({
-            message: 'Superset deleted successfully'
+            success: true,
+            message: 'Superset deleted successfully',
+            data: null
         });
         return
     } catch (error: any) {
         console.error('Delete superset error:', error);
 
         if (error.message === 'Superset not found') {
-            res.status(404).json({ error: 'Superset not found' });
+            res.status(404).json({
+                success: false,
+                error: 'Superset not found'
+            });
             return
         }
 
-        res.status(500).json({ error: 'Failed to delete superset' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete superset'
+        });
     }
 };
 
@@ -161,10 +207,13 @@ export const handleDeleteSuperset: Controller = async (req, res) => {
  * @throws 404 if superset is not found
  * @throws 500 if server encounters an error
  */
-export const handleAddExerciseToSuperset: Controller = async (req, res) => {
+export const handleAddExerciseToSuperset: Controller<Workout.Exercise> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -173,12 +222,16 @@ export const handleAddExerciseToSuperset: Controller = async (req, res) => {
         const exerciseData: Workout.ExerciseData = req.body;
 
         if (!supersetId) {
-            res.status(400).json({ error: 'Superset ID is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Superset ID is required'
+            });
             return
         }
 
         if (!exerciseData || typeof exerciseData !== 'object' || !exerciseData.name || !exerciseData.muscleGroup) {
             res.status(400).json({
+                success: false,
                 error: 'Valid exercise data with name, muscleGroup, and order is required'
             });
             return
@@ -187,19 +240,26 @@ export const handleAddExerciseToSuperset: Controller = async (req, res) => {
         const newExercise = await addExerciseToSuperset(supersetId, userId, exerciseData);
 
         res.status(201).json({
+            success: true,
             message: 'Exercise added to superset successfully',
-            exercise: newExercise
+            data: newExercise
         });
         return
     } catch (error: any) {
         console.error('Add exercise to superset error:', error);
 
         if (error.message === 'Superset not found') {
-            res.status(404).json({ error: 'Superset not found' });
+            res.status(404).json({
+                success: false,
+                error: 'Superset not found'
+            });
             return
         }
 
-        res.status(500).json({ error: 'Failed to add exercise to superset' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to add exercise to superset'
+        });
     }
 };
 
@@ -213,10 +273,13 @@ export const handleAddExerciseToSuperset: Controller = async (req, res) => {
  * @throws 404 if exercise is not found
  * @throws 500 if server encounters an error
  */
-export const handleRemoveExerciseFromSuperset: Controller = async (req, res) => {
+export const handleRemoveExerciseFromSuperset: Controller<null> = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({
+                success: false,
+                error: 'Unauthorized'
+            });
             return
         }
 
@@ -224,24 +287,35 @@ export const handleRemoveExerciseFromSuperset: Controller = async (req, res) => 
         const { exerciseId } = req.params;
 
         if (!exerciseId) {
-            res.status(400).json({ error: 'Exercise ID is required' });
+            res.status(400).json({
+                success: false,
+                error: 'Exercise ID is required'
+            });
             return
         }
 
         await removeExerciseFromSuperset(exerciseId, userId);
 
         res.status(200).json({
-            message: 'Exercise removed from superset successfully'
+            success: true,
+            message: 'Exercise removed from superset successfully',
+            data: null
         });
         return
     } catch (error: any) {
         console.error('Remove exercise from superset error:', error);
 
         if (error.message === 'Exercise not found') {
-            res.status(404).json({ error: 'Exercise not found' });
+            res.status(404).json({
+                success: false,
+                error: 'Exercise not found'
+            });
             return
         }
 
-        res.status(500).json({ error: 'Failed to remove exercise from superset' });
+        res.status(500).json({
+            success: false,
+            error: 'Failed to remove exercise from superset'
+        });
     }
 };
