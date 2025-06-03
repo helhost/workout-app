@@ -167,7 +167,7 @@ export const handleUpdateSettings: Controller<User.Settings> = async (req, res) 
         const userId = req.user.id;
         const { settings } = req.body;
 
-        if (!settings || typeof settings !== 'object') {
+        if (!isValidSettings(settings)) {
             res.status(400).json({
                 success: false,
                 error: 'Valid settings object is required'
@@ -189,5 +189,21 @@ export const handleUpdateSettings: Controller<User.Settings> = async (req, res) 
             success: false,
             error: 'Failed to update settings'
         });
+    }
+
+    function isValidSettings(input: any): input is User.Settings {
+        if (
+            input &&
+            typeof input === 'object' &&
+            !Array.isArray(input) &&
+            (typeof input.darkMode === 'boolean' || input.darkMode === undefined) &&
+            (typeof input.language === 'string' || input.language === undefined) &&
+            (input.defaultMeasurementUnit === 'metric' ||
+                input.defaultMeasurementUnit === 'imperial' ||
+                input.defaultMeasurementUnit === undefined)
+        ) {
+            return true;
+        }
+        return false;
     }
 };
