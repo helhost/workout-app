@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: workout_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    networks:
+      - workout-network
+
+  python-app: 
+    build: ./server
+    depends_on:
+      - db
+    environment: 
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/workout_db
+    volumes:
+      - ./server:/app
+    networks: 
+      - workout-network
+    command: python main.py
+
+networks:
+  workout-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
