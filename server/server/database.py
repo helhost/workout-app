@@ -1,22 +1,12 @@
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
-
+from models import User, Base
 def setup_database():
     
     database_url = os.getenv("DATABASE_URL")
     engine = create_engine(database_url)
-
-    Base = declarative_base()
-
-    class User(Base):
-        __tablename__ = 'Users'
-        id = Column(Integer,primary_key=True)
-        name = Column(String(64))
-
     Base.metadata.create_all(engine)
-
     print("db initialized")
 
     SessionLocal = sessionmaker(bind=engine)
