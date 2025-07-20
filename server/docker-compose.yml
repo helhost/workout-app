@@ -22,7 +22,7 @@ services:
       retries: 5
 
   python-app: 
-    build: ./server
+    build: ./app
     depends_on:
       db:
         condition: service_healthy
@@ -31,7 +31,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./server:/app
+      - ./app:/app
     networks: 
       - workout-network
     command: python main.py
