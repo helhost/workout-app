@@ -1,4 +1,8 @@
-from conftest import client
+import pytest
+from fastapi.testclient import TestClient
+from main import app
+
+client = TestClient(app)
 
 def test_get_users_initially_empty():
     response = client.get("/api/users")
