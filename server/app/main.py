@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from database import setup_database
-from api import users
-
+from api import users, workouts
 app = FastAPI(title = "Workout Backend")
 
 app.include_router(users.router, prefix="/api")
+app.include_router(workouts.router, prefix="/api")
 
 @app.get("/")
 def root():

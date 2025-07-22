@@ -3,6 +3,8 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 import os
 
 database_url = os.getenv("DATABASE_URL")
+if not database_url:
+    exit(1)
 engine = create_engine(database_url)
 Base = declarative_base()
 

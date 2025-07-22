@@ -1,0 +1,160 @@
+from fastapi import APIRouter, Depends, HTTPException
+from database import get_db
+from sqlalchemy.orm import Session
+from models.workouts import Workout, Exercise, Set, Subset
+from pydantic import BaseModel
+from typing import List
+
+from sqlalchemy.orm import joinedload
+
+router = APIRouter()
+
+class SubsetCreate(BaseModel):
+    reps: int
+    weight: float
+
+class SetCreate(BaseModel):
+    exercise_name: str
+    sub_sets: List[SubsetCreate] = []
+
+class ExerciseCreate(BaseModel):
+    sets: List[SetCreate] = []
+
+class WorkoutCreate(BaseModel):
+    exercises: List[ExerciseCreate] = []
+
+
+# Get requests
+@router.get("/workouts")
+def get_workouts(db: Session = Depends(get_db)):
+    workouts = db.query(Workout).options(
+        joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.sub_sets)
+    ).all()
+    return {"workouts":workouts}
+
+@router.get("/workouts/{id}")
+def get_workout(id:int, db: Session = Depends(get_db)):
+    workout = db.query(Workout).options(
+        joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.sub_sets)
+    ).filter(Workout.id == id).first()
+
+    if not workout:
+        raise HTTPException(status_code=404, detail="Workout not found")
+    return {"workout": workout}
+
+@router.get("/exercises/{id}")
+def get_exercise(id:int, db: Session = Depends(get_db)):
+    exercise = db.query(Exercise).options(
+        joinedload(Exercise.sets).joinedload(Set.sub_sets)
+    ).filter(Exercise.id == id).first()
+
+    if not exercise:
+        raise HTTPException(status_code=404, detail="Exercise not found")
+    return {"exercise": exercise}
+
+@router.get("/sets/{id}")
+def get_set(id:int, db: Session = Depends(get_db)):
+    exercise_set = db.query(Set).options(
+        joinedload(Set.sub_sets)
+    ).filter(Set.id == id).first()
+
+    if not exercise_set:
+        raise HTTPException(status_code=404, detail="Set not found")
+    return {"set": exercise_set}
+
+@router.get("/subsets/{id}")
+def get_subset(id:int, db: Session = Depends(get_db)):
+    subset = db.get(Subset,id)
+    if not subset:
+        raise HTTPException(status_code=404, detail="Subset not found")
+    return {"subset": subset}
+
+
+# Post requests
+@router.post("/workouts")
+def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
+    new_workout = Workout(
+        exercises = [
+            Exercise(
+                sets = [
+                    Set(
+                        exercise_name = set_data.exercise_name,
+                        sub_sets = [
+                            Subset(reps = ss.reps, weight = ss.weight)
+                            for ss in set_data.sub_sets
+                        ]
+                    )
+                    for set_data in ex.sets
+                ]
+            )
+            for ex in workout.exercises
+        ]
+    )
+
+    db.add(new_workout)
+    db.commit()
+    db.refresh(new_workout)
+    return {"workout": new_workout}
+
+@router.post("/workouts/{workout_id}/exercises")
+def create_exercise(exercise: ExerciseCreate, workout_id: int, db : Session = Depends(get_db)):
+    workout = db.get(Workout,workout_id)
+    if not workout:
+        raise HTTPException(status_code=404, detail="Workout not found")
+
+    new_exercise = Exercise(
+        workout_id = workout_id,
+        sets = [
+            Set(
+                exercise_name = set_data.exercise_name,
+                sub_sets = [
+                    Subset(reps = ss.reps, weight = ss.weight)
+                    for ss in set_data.sub_sets
+                ]
+            )
+            for set_data in exercise.sets
+        ]
+    )
+
+    db.add(new_exercise)
+    db.commit()
+    db.refresh(new_exercise)
+    return {"exercise": new_exercise}
+
+@router.post("/workouts/{workout_id}/exercises/{exercise_id}/sets")
+def create_set(workout_id: int, exercise_id: int, set_data: SetCreate, db: Session = Depends(get_db)):
+    exercise = db.get(Exercise, exercise_id)
+    if not exercise or getattr(exercise, 'workout_id', None) != workout_id:
+        raise HTTPException(status_code=404, detail="Exercise not found")
+
+    new_set = Set(
+        exercise_id = exercise_id,
+        exercise_name = set_data.exercise_name,
+        sub_sets = [
+            Subset(reps = ss.reps, weight = ss.weight)
+            for ss in set_data.sub_sets
+        ]
+    )
+
+    db.add(new_set)
+    db.commit()
+    db.refresh(new_set)
+    return {"set": new_set}
+
+@router.post("/workouts/{workout_id}/exercises/{exercise_id}/sets/{set_id}/subset")
+def create_subset(workout_id: int, exercise_id: int, set_id: int, subset: SubsetCreate, db: Session = Depends(get_db)):
+    set_data = db.get(Set, set_id)
+    if not set_data or getattr(set_data, 'exercise_id', None) != exercise_id:
+        raise HTTPException(status_code=404, detail="Set not found")
+
+    exercise = db.get(Exercise, exercise_id)
+    if not exercise or getattr(exercise, 'workout_id', None) != workout_id:
+        raise HTTPException(status_code=404, detail="Set not found")
+
+    sub_set = Subset(reps = subset.reps, weight = subset.weight, set_id=set_id)
+
+    db.add(sub_set)
+    db.commit()
+    db.refresh(sub_set)
+    return {"subset": sub_set}
+
