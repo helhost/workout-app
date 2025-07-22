@@ -94,7 +94,12 @@ def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
     db.add(new_workout)
     db.commit()
     db.refresh(new_workout)
-    return {"workout": new_workout}
+    
+    workout_with_relations = db.query(Workout).options(
+        joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.sub_sets)
+    ).filter(Workout.id == new_workout.id).first()
+
+    return {"workout": workout_with_relations}
 
 @router.post("/workouts/{workout_id}/exercises")
 def create_exercise(exercise: ExerciseCreate, workout_id: int, db : Session = Depends(get_db)):
@@ -119,7 +124,12 @@ def create_exercise(exercise: ExerciseCreate, workout_id: int, db : Session = De
     db.add(new_exercise)
     db.commit()
     db.refresh(new_exercise)
-    return {"exercise": new_exercise}
+
+    exercise_with_relations = db.query(Exercise).options(
+        joinedload(Exercise.sets).joinedload(Set.sub_sets)
+    ).filter(Exercise.id == new_exercise.id).first()
+
+    return {"exercise": exercise_with_relations}
 
 @router.post("/workouts/{workout_id}/exercises/{exercise_id}/sets")
 def create_set(workout_id: int, exercise_id: int, set_data: SetCreate, db: Session = Depends(get_db)):
@@ -139,7 +149,12 @@ def create_set(workout_id: int, exercise_id: int, set_data: SetCreate, db: Sessi
     db.add(new_set)
     db.commit()
     db.refresh(new_set)
-    return {"set": new_set}
+
+    set_with_relations = db.query(Set).options(
+        joinedload(Set.sub_sets)
+    ).filter(Set.id == new_set.id).first()
+
+    return {"set": set_with_relations}
 
 @router.post("/workouts/{workout_id}/exercises/{exercise_id}/sets/{set_id}/subset")
 def create_subset(workout_id: int, exercise_id: int, set_id: int, subset: SubsetCreate, db: Session = Depends(get_db)):
