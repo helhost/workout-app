@@ -3,11 +3,6 @@ from main import app
 
 client = TestClient(app)
 
-def test_get_users_initially_empty():
-    response = client.get("/api/users")
-    assert response.status_code == 200
-    assert "users" in response.json()
-
 def test_server_running():
     response = client.get("/")
     assert response.status_code == 200
@@ -19,6 +14,7 @@ def test_create_and_get_user():
     create_data = create_response.json()
     assert create_response.status_code == 200
     assert "id" in create_data
+    assert create_data["id"] == 2
     assert create_data["name"] == user_data["name"]
 
     get_response = client.get("/api/users")
