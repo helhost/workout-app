@@ -11,4 +11,4 @@ def clean_database():
     Base.metadata.create_all(bind=engine)
 
     user_data = {"name": "Test User"}
-    client.post("/api/useers", json=user_data)
+    client.post("/api/users", json=user_data)
