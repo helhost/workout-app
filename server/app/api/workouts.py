@@ -11,17 +11,21 @@ router = APIRouter()
 
 class SubsetCreate(BaseModel):
     reps: int
+    subset_number: int
     weight: float
 
 class SetCreate(BaseModel):
     exercise_name: str
+    set_number: int
     sub_sets: List[SubsetCreate] = []
 
 class ExerciseCreate(BaseModel):
+    exercise_number: int
     sets: List[SetCreate] = []
 
 class WorkoutCreate(BaseModel):
     exercises: List[ExerciseCreate] = []
+    user_id: int
 
 
 # Get requests
@@ -74,13 +78,16 @@ def get_subset(id:int, db: Session = Depends(get_db)):
 @router.post("/workouts")
 def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
     new_workout = Workout(
+        user_id = workout.user_id,
         exercises = [
             Exercise(
+                exercise_number = ex.exercise_number,
                 sets = [
                     Set(
                         exercise_name = set_data.exercise_name,
+                        set_number = set_data.set_number,
                         sub_sets = [
-                            Subset(reps = ss.reps, weight = ss.weight)
+                            Subset(reps = ss.reps, weight = ss.weight, subset_number=ss.subset_number)
                             for ss in set_data.sub_sets
                         ]
                     )
@@ -109,11 +116,13 @@ def create_exercise(exercise: ExerciseCreate, workout_id: int, db : Session = De
 
     new_exercise = Exercise(
         workout_id = workout_id,
+        exercise_number = exercise.exercise_number,
         sets = [
             Set(
                 exercise_name = set_data.exercise_name,
+                set_number = set_data.set_number,
                 sub_sets = [
-                    Subset(reps = ss.reps, weight = ss.weight)
+                    Subset(reps = ss.reps, weight = ss.weight, subset_number= ss.subset_number)
                     for ss in set_data.sub_sets
                 ]
             )
@@ -140,8 +149,9 @@ def create_set(workout_id: int, exercise_id: int, set_data: SetCreate, db: Sessi
     new_set = Set(
         exercise_id = exercise_id,
         exercise_name = set_data.exercise_name,
+        set_number = set_data.set_number,
         sub_sets = [
-            Subset(reps = ss.reps, weight = ss.weight)
+            Subset(reps = ss.reps, weight = ss.weight, subset_number = ss.subset_number)
             for ss in set_data.sub_sets
         ]
     )
@@ -166,7 +176,7 @@ def create_subset(workout_id: int, exercise_id: int, set_id: int, subset: Subset
     if not exercise or getattr(exercise, 'workout_id', None) != workout_id:
         raise HTTPException(status_code=404, detail="Set not found")
 
-    sub_set = Subset(reps = subset.reps, weight = subset.weight, set_id=set_id)
+    sub_set = Subset(reps = subset.reps, weight = subset.weight, set_id=set_id, subset_number = subset.subset_number)
 
     db.add(sub_set)
     db.commit()

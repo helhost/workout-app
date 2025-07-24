@@ -4,89 +4,105 @@ from main import app
 client = TestClient(app)
 test_data = {
     "workout": {
+        "user_id": 1,
         "exercises": [
             {
+                "exercise_number": 1,
                 "sets": [
                     {
+                        "set_number": 1,
                         "exercise_name": "Bench Press",
                         "sub_sets": [
-                            {"reps": 10, "weight": 80.0}
+                            {"reps": 10, "weight": 80.0,"subset_number": 1}
                         ]
                     },
                     {
+                        "set_number": 2,
                         "exercise_name": "Bench Press",
                         "sub_sets": [
-                            {"reps": 8, "weight": 85.0}
+                            {"reps": 8, "weight": 85.0,"subset_number": 1}
                         ]
                     },
                     {
+                        "set_number": 3,
                         "exercise_name": "Bench Press",
                         "sub_sets": [
-                            {"reps": 6, "weight": 90.0}
+                            {"reps": 6, "weight": 90.0,"subset_number": 1}
                         ]
                     }
                 ]
             },
             {
+                "exercise_number": 2,
                 "sets": [
                     {
+                        "set_number": 1,
                         "exercise_name": "Squats",
                         "sub_sets": [
-                            {"reps": 12, "weight": 100.0}
+                            {"reps": 12, "weight": 100.0,"subset_number": 1}
                         ]
                     },
                     {
+                        "set_number": 2,
                         "exercise_name": "Squats",
                         "sub_sets": [
-                            {"reps": 10, "weight": 110.0}
+                            {"reps": 10, "weight": 110.0,"subset_number": 1}
                         ]
                     },
                     {
+                        "set_number": 3,
                         "exercise_name": "Squats",
                         "sub_sets": [
-                            {"reps": 8, "weight": 120.0},
-                            {"reps": 8, "weight": 80.0},
-                            {"reps": 8, "weight": 40.0},
+                            {"reps": 8, "weight": 120.0,"subset_number": 1},
+                            {"reps": 8, "weight": 80.0,"subset_number": 2},
+                            {"reps": 8, "weight": 40.0,"subset_number": 3},
                         ]
                     }
                 ]
             },
             {
+                "exercise_number": 3,
                 "sets": [
                     {
+                        "set_number": 1,
                         "exercise_name": "Pull-ups",
                         "sub_sets": [
-                            {"reps": 8, "weight": 0.0}
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
                         ]
                     },
                     {
+                        "set_number": 2,
                         "exercise_name": "Chin-ups",
                         "sub_sets": [
-                            {"reps": 8, "weight": 0.0}
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
                         ]
                     },
                     {
+                        "set_number": 3,
                         "exercise_name": "Pull-ups",
                         "sub_sets": [
-                            {"reps": 8, "weight": 0.0}
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
                         ]
                     },
                     {
+                        "set_number": 4,
                         "exercise_name": "Chin-ups",
                         "sub_sets": [
-                            {"reps": 8, "weight": 0.0}
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
                         ]
                     },
                     {
+                        "set_number": 5,
                         "exercise_name": "Pull-ups",
                         "sub_sets": [
-                            {"reps": 8, "weight": 0.0}
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
                         ]
                     },
                     {
+                        "set_number": 6,
                         "exercise_name": "Chin-ups",
                         "sub_sets": [
-                            {"reps": 8, "weight": 0.0}
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
                         ]
                     },
                 ]
@@ -101,7 +117,7 @@ def test_get_workouts_initially_empty():
     assert response.status_code == 200
     assert "workouts" in response.json()
 
-def test_create_and_get_user():
+def test_create_and_get_workouts():
     create_response = client.post("/api/workouts", json=test_data["workout"])
     assert create_response.status_code == 200
 
@@ -124,23 +140,28 @@ def test_workout_structure_integrity():
     workout_data = create_response.json()["workout"]
     
     assert "exercises" in workout_data
+    assert "user_id" in workout_data
     assert len(workout_data["exercises"]) == 3
     
     first_exercise = workout_data["exercises"][0]
     assert "sets" in first_exercise
+    assert "exercise_number" in first_exercise
     assert len(first_exercise["sets"]) == 3
     
     first_set = first_exercise["sets"][0]
     assert "exercise_name" in first_set
     assert first_set["exercise_name"] == "Bench Press"
     assert "sub_sets" in first_set
+    assert "set_number" in first_set
     assert len(first_set["sub_sets"]) == 1
     
     first_subset = first_set["sub_sets"][0]
     assert "reps" in first_subset
     assert "weight" in first_subset
+    assert "subset_number" in first_subset
     assert first_subset["reps"] == 10
     assert first_subset["weight"] == 80.0
+    assert first_subset["subset_number"] == 1
 
 
 def test_create_exercise_for_existing_workout():
@@ -148,11 +169,13 @@ def test_create_exercise_for_existing_workout():
     workout_id = create_response.json()["workout"]["id"]
     
     new_exercise = {
+        "exercise_number": 1,
         "sets": [
             {
+                "set_number": 1,
                 "exercise_name": "Deadlifts",
                 "sub_sets": [
-                    {"reps": 5, "weight": 140.0}
+                    {"reps": 5, "weight": 140.0, "subset_number": 1}
                 ]
             }
         ]
@@ -168,11 +191,13 @@ def test_create_exercise_for_existing_workout():
 
 def test_create_exercise_for_nonexistent_workout():
     new_exercise = {
+        "exercise_number": 1,
         "sets": [
             {
+                "set_number": 1,
                 "exercise_name": "Deadlifts",
                 "sub_sets": [
-                    {"reps": 5, "weight": 140.0}
+                    {"reps": 5, "weight": 140.0, "subset_number": 1}
                 ]
             }
         ]
@@ -208,9 +233,10 @@ def test_create_set_for_existing_exercise():
     exercise_id = workout_data["exercises"][0]["id"]
     
     new_set = {
+        "set_number" : 1,
         "exercise_name": "Bench Press",
         "sub_sets": [
-            {"reps": 12, "weight": 75.0}
+            {"reps": 12, "weight": 75.0, "subset_number": 1}
         ]
     }
     
@@ -224,6 +250,7 @@ def test_create_set_for_existing_exercise():
 
 def test_create_set_for_nonexistent_exercise():
     new_set = {
+        "set_number": 1,
         "exercise_name": "Bench Press",
         "sub_sets": [
             {"reps": 12, "weight": 75.0}
@@ -261,7 +288,7 @@ def test_create_subset_for_existing_set():
     exercise_id = workout_data["exercises"][0]["id"]
     set_id = workout_data["exercises"][0]["sets"][0]["id"]
 
-    new_subset = {"reps": 15, "weight": 70.0}
+    new_subset = {"reps": 15, "weight": 70.0, "subset_number": 1}
 
     subset_response = client.post(f"/api/workouts/{workout_id}/exercises/{exercise_id}/sets/{set_id}/subset", json=new_subset)
     assert subset_response.status_code == 200
