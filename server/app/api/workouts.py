@@ -9,28 +9,35 @@ from sqlalchemy.orm import joinedload
 
 router = APIRouter()
 
-class SubsetCreate(BaseModel):
-    set_id: int
+
+class SubsetData(BaseModel):
     reps: int
     subset_number: int
     weight: float
 
-class SetCreate(BaseModel):
-    exercise_id: int
+class SetData(BaseModel):
     exercise_name: str
     set_number: int
-    sub_sets: List[SubsetCreate] = []
+    sub_sets: List[SubsetData] = []
 
-
-class ExerciseCreate(BaseModel):
-    workout_id: int
+class ExerciseData(BaseModel):
     exercise_number: int
-    sets: List[SetCreate] = []
+    sets: List[SetData] = []
 
-class WorkoutCreate(BaseModel):
+class WorkoutData(BaseModel):
     user_id: int
-    exercises: List[ExerciseCreate] = []
+    exercises: List[ExerciseData] = []
 
+class SubsetCreate(SubsetData):
+    set_id: int
+
+class SetCreate(SetData):
+    exercise_id: int
+
+class ExerciseCreate(ExerciseData):
+    workout_id: int
+
+WorkoutCreate = WorkoutData
 
 # Get requests
 @router.get("/workouts")
