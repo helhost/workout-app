@@ -112,13 +112,13 @@ test_data = {
 }
 
 
-def test_get_all_workouts():
+def test_get_all_workouts_initially():
     response = client.get("/api/workouts")
     assert response.status_code == 200
     response_data = response.json()
 
     assert "workouts" in response_data
-    assert len(response_data["workouts"]) == 1
+    assert len(response_data["workouts"]) == 0
 
 def test_create_and_get_workouts():
     create_response = client.post("/api/workouts", json=test_data["workout"])
@@ -257,7 +257,7 @@ def test_create_subset_for_existing_set():
     workout_data = create_response.json()["workout"]
     set_id = workout_data["exercises"][0]["sets"][0]["id"]
 
-    subset_response = client.post(f"/api/subsets", json={**test_data["workout"]["exercises"][0]["sets"][0]["subsets"][0], 
+    subset_response = client.post(f"/api/subsets", json={**test_data["workout"]["exercises"][0]["sets"][0]["sub_sets"][0], 
                                                          "set_id": set_id})
     assert subset_response.status_code == 200
 
@@ -296,4 +296,4 @@ def test_get_all_workouts_after_creation():
     
     data = response.json()
     assert "workouts" in data
-    assert len(data["workouts"]) == 2
+    assert len(data["workouts"]) == 1
