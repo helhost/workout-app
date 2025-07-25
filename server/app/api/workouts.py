@@ -166,7 +166,7 @@ def create_set(workout_id: int, exercise_id: int, set_data: SetCreate, db: Sessi
 
     return {"set": set_with_relations}
 
-@router.post("/workouts/{workout_id}/exercises/{exercise_id}/sets/{set_id}/subset")
+@router.post("/workouts/{workout_id}/exercises/{exercise_id}/sets/{set_id}/subsets")
 def create_subset(workout_id: int, exercise_id: int, set_id: int, subset: SubsetCreate, db: Session = Depends(get_db)):
     set_data = db.get(Set, set_id)
     if not set_data or getattr(set_data, 'exercise_id', None) != exercise_id:

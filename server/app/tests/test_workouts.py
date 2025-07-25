@@ -290,7 +290,7 @@ def test_create_subset_for_existing_set():
 
     new_subset = {"reps": 15, "weight": 70.0, "subset_number": 1}
 
-    subset_response = client.post(f"/api/workouts/{workout_id}/exercises/{exercise_id}/sets/{set_id}/subset", json=new_subset)
+    subset_response = client.post(f"/api/workouts/{workout_id}/exercises/{exercise_id}/sets/{set_id}/subsets", json=new_subset)
     assert subset_response.status_code == 200
 
     subset_data = subset_response.json()
