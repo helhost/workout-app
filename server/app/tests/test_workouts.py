@@ -253,7 +253,7 @@ def test_create_set_for_nonexistent_exercise():
         "set_number": 1,
         "exercise_name": "Bench Press",
         "sub_sets": [
-            {"reps": 12, "weight": 75.0}
+            {"reps": 12, "weight": 75.0, "subset_number": 1}
         ]
     }
 
