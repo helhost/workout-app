@@ -289,7 +289,7 @@ def test_get_nonexistent_subset():
 
 def test_get_all_workouts_after_creation():
     create_response = client.post("/api/workouts", json=test_data["workout"])
-    assert create_response == 200
+    assert create_response.status_code == 200
     
     response = client.get("/api/workouts")
     assert response.status_code == 200
