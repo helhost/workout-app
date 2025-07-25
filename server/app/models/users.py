@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Integer, String
-from database import Base 
+from pydantic import BaseModel
 
-class User(Base):
-    __tablename__ = 'Users'
-    id = Column(Integer,primary_key=True)
-    name = Column(String(64))
+class UserData(BaseModel):
+    name:str
+
+UserCreate = UserData

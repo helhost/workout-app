@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends
 from database import get_db
 from sqlalchemy.orm import Session
-from models.users import User
-from pydantic import BaseModel
-
+from schemas.users import User
+from models.users import UserCreate
 router = APIRouter()
 
 @router.get("/users")
@@ -11,9 +10,6 @@ def get_users(db: Session = Depends(get_db)):
     users = db.query(User).all()
     return {"users":users}
 
-
-class UserCreate(BaseModel):
-    name: str
 
 @router.post("/users")
 def create_user(user_data: UserCreate, db: Session = Depends(get_db)):

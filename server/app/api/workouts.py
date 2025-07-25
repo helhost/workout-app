@@ -1,43 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from database import get_db
 from sqlalchemy.orm import Session
-from models.workouts import Workout, Exercise, Set, Subset
-from pydantic import BaseModel
-from typing import List
-
+from schemas.workouts import Workout, Exercise, Set, Subset
+from models.workouts import WorkoutCreate, ExerciseCreate, SetCreate, SubsetCreate
 from sqlalchemy.orm import joinedload
 
 router = APIRouter()
 
 
-class SubsetData(BaseModel):
-    reps: int
-    subset_number: int
-    weight: float
-
-class SetData(BaseModel):
-    exercise_name: str
-    set_number: int
-    sub_sets: List[SubsetData] = []
-
-class ExerciseData(BaseModel):
-    exercise_number: int
-    sets: List[SetData] = []
-
-class WorkoutData(BaseModel):
-    user_id: int
-    exercises: List[ExerciseData] = []
-
-class SubsetCreate(SubsetData):
-    set_id: int
-
-class SetCreate(SetData):
-    exercise_id: int
-
-class ExerciseCreate(ExerciseData):
-    workout_id: int
-
-WorkoutCreate = WorkoutData
 
 # Get requests
 @router.get("/workouts")
