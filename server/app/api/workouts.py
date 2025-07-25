@@ -10,22 +10,26 @@ from sqlalchemy.orm import joinedload
 router = APIRouter()
 
 class SubsetCreate(BaseModel):
+    set_id: int
     reps: int
     subset_number: int
     weight: float
 
 class SetCreate(BaseModel):
+    exercise_id: int
     exercise_name: str
     set_number: int
     sub_sets: List[SubsetCreate] = []
 
+
 class ExerciseCreate(BaseModel):
+    workout_id: int
     exercise_number: int
     sets: List[SetCreate] = []
 
 class WorkoutCreate(BaseModel):
-    exercises: List[ExerciseCreate] = []
     user_id: int
+    exercises: List[ExerciseCreate] = []
 
 
 # Get requests
@@ -108,14 +112,14 @@ def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
 
     return {"workout": workout_with_relations}
 
-@router.post("/workouts/{workout_id}/exercises")
-def create_exercise(exercise: ExerciseCreate, workout_id: int, db : Session = Depends(get_db)):
-    workout = db.get(Workout,workout_id)
+@router.post("/exercises")
+def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_db)):
+    workout = db.get(Workout,exercise.workout_id)
     if not workout:
         raise HTTPException(status_code=404, detail="Workout not found")
 
     new_exercise = Exercise(
-        workout_id = workout_id,
+        workout_id = exercise.workout_id,
         exercise_number = exercise.exercise_number,
         sets = [
             Set(
@@ -140,14 +144,14 @@ def create_exercise(exercise: ExerciseCreate, workout_id: int, db : Session = De
 
     return {"exercise": exercise_with_relations}
 
-@router.post("/workouts/{workout_id}/exercises/{exercise_id}/sets")
-def create_set(workout_id: int, exercise_id: int, set_data: SetCreate, db: Session = Depends(get_db)):
-    exercise = db.get(Exercise, exercise_id)
-    if not exercise or getattr(exercise, 'workout_id', None) != workout_id:
+@router.post("/sets")
+def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
+    exercise = db.get(Exercise, set_data.exercise_id)
+    if not exercise:
         raise HTTPException(status_code=404, detail="Exercise not found")
 
     new_set = Set(
-        exercise_id = exercise_id,
+        exercise_id = set_data.exercise_id,
         exercise_name = set_data.exercise_name,
         set_number = set_data.set_number,
         sub_sets = [
@@ -166,17 +170,13 @@ def create_set(workout_id: int, exercise_id: int, set_data: SetCreate, db: Sessi
 
     return {"set": set_with_relations}
 
-@router.post("/workouts/{workout_id}/exercises/{exercise_id}/sets/{set_id}/subsets")
-def create_subset(workout_id: int, exercise_id: int, set_id: int, subset: SubsetCreate, db: Session = Depends(get_db)):
-    set_data = db.get(Set, set_id)
-    if not set_data or getattr(set_data, 'exercise_id', None) != exercise_id:
+@router.post("/subsets")
+def create_subset(subset: SubsetCreate, db: Session = Depends(get_db)):
+    set_data = db.get(Set, subset.set_id)
+    if not set_data:
         raise HTTPException(status_code=404, detail="Set not found")
 
-    exercise = db.get(Exercise, exercise_id)
-    if not exercise or getattr(exercise, 'workout_id', None) != workout_id:
-        raise HTTPException(status_code=404, detail="Set not found")
-
-    sub_set = Subset(reps = subset.reps, weight = subset.weight, set_id=set_id, subset_number = subset.subset_number)
+    sub_set = Subset(reps = subset.reps, weight = subset.weight, set_id=subset.set_id, subset_number = subset.subset_number)
 
     db.add(sub_set)
     db.commit()
