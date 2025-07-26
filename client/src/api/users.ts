@@ -18,5 +18,5 @@ class UsersAPI {
   };
 };
 
-const usersAPI = new UsersAPI({ baseURL: "http://localhost:8080/api/users" })
+const usersAPI = new UsersAPI({ baseURL: `${import.meta.env.VITE_API_URL}/api/users` })
 export default usersAPI
