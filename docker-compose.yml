@@ -12,7 +12,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d
+      - ./server/db/init:/docker-entrypoint-initdb.d
     networks:
       - workout-network
     healthcheck:
@@ -21,8 +21,8 @@ services:
       timeout: 5s
       retries: 5
 
-  python-app: 
-    build: ./app
+  backend: 
+    build: ./server/app
     depends_on:
       db:
         condition: service_healthy
@@ -31,10 +31,24 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./app:/app
+      - ./server/app:/app
     networks: 
       - workout-network
     command: python main.py
+
+  client:
+    build: ./client
+    depends_on:
+      - backend
+    ports:
+      - "3000:5173"
+    volumes:
+      - ./client/:/app
+      - /app/node_modules
+    networks:
+      - workout-network
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
 
 networks:
   workout-network:
