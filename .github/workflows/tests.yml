@@ -60,7 +60,6 @@ jobs:
 
           for i in {1..30}; do
             if curl -f http://localhost:8080/ 2>/dev/null; then
-              echo "Server is ready!"
               break
             fi
             if [ $i -eq 30 ]; then
