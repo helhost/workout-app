@@ -15,7 +15,7 @@ def get_workouts(db: Session = Depends(get_db)):
     workouts = db.query(Workout).options(
         joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.sub_sets)
     ).all()
-    return {"workouts":workouts}
+    return workouts
 
 @router.get("/workouts/{id}")
 def get_workout(id:int, db: Session = Depends(get_db)):
@@ -25,7 +25,7 @@ def get_workout(id:int, db: Session = Depends(get_db)):
 
     if not workout:
         raise HTTPException(status_code=404, detail="Workout not found")
-    return {"workout": workout}
+    return workout
 
 @router.get("/exercises/{id}")
 def get_exercise(id:int, db: Session = Depends(get_db)):
@@ -35,7 +35,7 @@ def get_exercise(id:int, db: Session = Depends(get_db)):
 
     if not exercise:
         raise HTTPException(status_code=404, detail="Exercise not found")
-    return {"exercise": exercise}
+    return exercise
 
 @router.get("/sets/{id}")
 def get_set(id:int, db: Session = Depends(get_db)):
@@ -45,7 +45,7 @@ def get_set(id:int, db: Session = Depends(get_db)):
 
     if not exercise_set:
         raise HTTPException(status_code=404, detail="Set not found")
-    return {"set": exercise_set}
+    return exercise_set
 
 @router.get("/subsets/{id}")
 def get_subset(id:int, db: Session = Depends(get_db)):
@@ -82,12 +82,12 @@ def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
     db.add(new_workout)
     db.commit()
     db.refresh(new_workout)
-    
+
     workout_with_relations = db.query(Workout).options(
         joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.sub_sets)
     ).filter(Workout.id == new_workout.id).first()
 
-    return {"workout": workout_with_relations}
+    return workout_with_relations
 
 @router.post("/exercises")
 def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_db)):
@@ -119,7 +119,7 @@ def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_db)):
         joinedload(Exercise.sets).joinedload(Set.sub_sets)
     ).filter(Exercise.id == new_exercise.id).first()
 
-    return {"exercise": exercise_with_relations}
+    return exercise_with_relations
 
 @router.post("/sets")
 def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
@@ -145,7 +145,7 @@ def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
         joinedload(Set.sub_sets)
     ).filter(Set.id == new_set.id).first()
 
-    return {"set": set_with_relations}
+    return set_with_relations
 
 @router.post("/subsets")
 def create_subset(subset: SubsetCreate, db: Session = Depends(get_db)):
@@ -158,5 +158,5 @@ def create_subset(subset: SubsetCreate, db: Session = Depends(get_db)):
     db.add(sub_set)
     db.commit()
     db.refresh(sub_set)
-    return {"subset": sub_set}
+    return sub_set
 
