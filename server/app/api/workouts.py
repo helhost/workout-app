@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from schemas.workouts import Workout, Exercise, Set, Subset
 from models.workouts import WorkoutCreate, ExerciseCreate, SetCreate, SubsetCreate
 from sqlalchemy.orm import joinedload
-
+from ws_manager import websocket_manager
 router = APIRouter()
 
 
@@ -57,7 +57,7 @@ def get_subset(id:int, db: Session = Depends(get_db)):
 
 # Post requests
 @router.post("/workouts")
-def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
+async def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
     new_workout = Workout(
         user_id = workout.user_id,
         exercises = [
@@ -87,10 +87,19 @@ def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
         joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.sub_sets)
     ).filter(Workout.id == new_workout.id).first()
 
+
+    await websocket_manager.broadcast(
+        resource=f"users:{workout.user_id}", 
+        data={
+            "type":"workout_created",
+            "data": workout_with_relations.__dict__
+      }
+    )
+
     return workout_with_relations
 
 @router.post("/exercises")
-def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_db)):
+async def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_db)):
     workout = db.get(Workout,exercise.workout_id)
     if not workout:
         raise HTTPException(status_code=404, detail="Workout not found")
@@ -119,10 +128,18 @@ def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_db)):
         joinedload(Exercise.sets).joinedload(Set.sub_sets)
     ).filter(Exercise.id == new_exercise.id).first()
 
+    await websocket_manager.broadcast(
+        resource=f"workouts:{exercise.workout_id}", 
+        data={
+            "type":"exercise_created",
+            "data": exercise_with_relations.__dict__
+      }
+    )
+
     return exercise_with_relations
 
 @router.post("/sets")
-def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
+async def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
     exercise = db.get(Exercise, set_data.exercise_id)
     if not exercise:
         raise HTTPException(status_code=404, detail="Exercise not found")
@@ -145,10 +162,18 @@ def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
         joinedload(Set.sub_sets)
     ).filter(Set.id == new_set.id).first()
 
+    await websocket_manager.broadcast(
+        resource=f"exercises:{set_data.exercise_id}", 
+        data={
+            "type":"set_created",
+            "data": set_with_relations.__dict__
+      }
+    )
+
     return set_with_relations
 
 @router.post("/subsets")
-def create_subset(subset: SubsetCreate, db: Session = Depends(get_db)):
+async def create_subset(subset: SubsetCreate, db: Session = Depends(get_db)):
     set_data = db.get(Set, subset.set_id)
     if not set_data:
         raise HTTPException(status_code=404, detail="Set not found")
@@ -158,5 +183,13 @@ def create_subset(subset: SubsetCreate, db: Session = Depends(get_db)):
     db.add(sub_set)
     db.commit()
     db.refresh(sub_set)
-    return sub_set
 
+    await websocket_manager.broadcast(
+        resource=f"sets:{subset.set_id}", 
+        data={
+            "type":"subset_created",
+            "data": sub_set.__dict__
+      }
+    )
+
+    return sub_set

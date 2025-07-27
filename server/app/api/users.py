@@ -23,7 +23,7 @@ async def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
         resource="users", 
         data={
             "type":"user_created",
-            "data": {"id": new_user.id, "name": new_user.name}
+            "data": new_user.__dict__
       }
     )
 
