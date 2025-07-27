@@ -15,8 +15,8 @@ function App() {
     const fetchUsers = async () => {
       try {
         setLoading(true)
-        const response = await usersAPI.getUsers()
-        setUsers(response.users)
+        const users = await usersAPI.getUsers()
+        setUsers(users)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch users')
       } finally {

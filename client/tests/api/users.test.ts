@@ -4,12 +4,11 @@ import { test, expect } from "vitest"
 test("can fetch users from real API", async () => {
   const users = await usersAPI.getUsers();
   expect(users).toBeDefined()
-  console.log(users.users)
-  expect(Array.isArray(users.users)).toBeTruthy()
+  expect(Array.isArray(users)).toBeTruthy()
 
-  if (users.users.length > 0) {
-    expect(typeof users.users[0].id).toBe("number")
-    expect(typeof users.users[0].name).toBe("string")
+  if (users.length > 0) {
+    expect(typeof users[0].id).toBe("number")
+    expect(typeof users[0].name).toBe("string")
   };
 
 })

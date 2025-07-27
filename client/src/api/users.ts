@@ -14,7 +14,7 @@ class UsersAPI {
   };
 
   public async getUsers() {
-    return this.client.get<{ "users": User[] }>("/")
+    return this.client.get<User[]>("/")
   };
 };
 
