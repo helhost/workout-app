@@ -15,7 +15,7 @@
         
         ws.onopen = () => {
             status.textContent = 'Connected! Subscribing to users...';
-            ws.send(JSON.stringify({type: 'subscribe', resource: 'users'}));
+            ws.send(JSON.stringify({type: 'subscribe', resource: 'users:1'}));
         };
         
         ws.onmessage = (e) => {

@@ -5,6 +5,7 @@ from schemas.workouts import Workout, Exercise, Set, Subset
 from models.workouts import WorkoutCreate, ExerciseCreate, SetCreate, SubsetCreate
 from sqlalchemy.orm import joinedload
 from ws_manager import websocket_manager
+from api.util import get_all_parents
 router = APIRouter()
 
 
@@ -87,14 +88,16 @@ async def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
         joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.sub_sets)
     ).filter(Workout.id == new_workout.id).first()
 
-
-    await websocket_manager.broadcast(
-        resource=f"users:{workout.user_id}", 
-        data={
-            "type":"workout_created",
-            "data": workout_with_relations.__dict__
-      }
-    )
+    resources = get_all_parents(db=db, child_type="workouts", child_id=getattr(new_workout, "id"), result=[])
+    print(f"resources{resources}")
+    for resource in resources:
+        await websocket_manager.broadcast(
+            resource=resource,
+            data={
+                "type":"workout_created",
+                "data": WorkoutCreate.from_orm(workout_with_relations).dict()
+          }
+        )
 
     return workout_with_relations
 
@@ -128,13 +131,16 @@ async def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_d
         joinedload(Exercise.sets).joinedload(Set.sub_sets)
     ).filter(Exercise.id == new_exercise.id).first()
 
-    await websocket_manager.broadcast(
-        resource=f"workouts:{exercise.workout_id}", 
-        data={
-            "type":"exercise_created",
-            "data": exercise_with_relations.__dict__
-      }
-    )
+    resources = get_all_parents(db=db, child_type="exercises", child_id=getattr(new_exercise, "id"), result=[])
+    print(f"resources{resources}")
+    for resource in resources:
+        await websocket_manager.broadcast(
+            resource=resource,
+            data={
+                "type":"exercise_created",
+                "data": ExerciseCreate.from_orm(exercise_with_relations).dict()
+          }
+        )
 
     return exercise_with_relations
 
@@ -162,14 +168,16 @@ async def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
         joinedload(Set.sub_sets)
     ).filter(Set.id == new_set.id).first()
 
-    await websocket_manager.broadcast(
-        resource=f"exercises:{set_data.exercise_id}", 
-        data={
-            "type":"set_created",
-            "data": set_with_relations.__dict__
-      }
-    )
-
+    resources = get_all_parents(db=db, child_type="sets", child_id=getattr(new_set, "id"), result=[])
+    print(f"resources{resources}")
+    for resource in resources:
+        await websocket_manager.broadcast(
+            resource=resource,
+            data={
+                "type":"set_created",
+                "data": SetCreate.from_orm(set_with_relations).dict()
+          }
+        )
     return set_with_relations
 
 @router.post("/subsets")
@@ -184,12 +192,14 @@ async def create_subset(subset: SubsetCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(sub_set)
 
-    await websocket_manager.broadcast(
-        resource=f"sets:{subset.set_id}", 
-        data={
-            "type":"subset_created",
-            "data": sub_set.__dict__
-      }
-    )
-
+    resources = get_all_parents(db=db, child_type="sub_sets", child_id=getattr(sub_set, "id"), result=[])
+    print(f"resources{resources}")
+    for resource in resources:
+        await websocket_manager.broadcast(
+            resource=resource,
+            data={
+                "type":"subset_created",
+                "data": SubsetCreate.from_orm(sub_set).dict()
+          }
+        )
     return sub_set
