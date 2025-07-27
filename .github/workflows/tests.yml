@@ -61,6 +61,8 @@ jobs:
           npm ci
 
       - name: Run Client Tests
+        env:
+          VITE_API_URL: http://localhost:8080
         run: |
           cd client
           npm test
