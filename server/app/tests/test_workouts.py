@@ -180,8 +180,7 @@ def test_create_exercise_for_existing_workout():
     assert exercise_response.status_code == 200
 
     exercise_data = exercise_response.json()
-    assert "exercise" in exercise_data
-    assert "id" in exercise_data["exercise"]
+    assert "id" in exercise_data
 
 
 def test_create_exercise_for_nonexistent_workout():

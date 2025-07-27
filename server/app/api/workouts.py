@@ -52,7 +52,7 @@ def get_subset(id:int, db: Session = Depends(get_db)):
     subset = db.get(Subset,id)
     if not subset:
         raise HTTPException(status_code=404, detail="Subset not found")
-    return {"subset": subset}
+    return subset
 
 
 # Post requests
