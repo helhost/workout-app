@@ -30,20 +30,37 @@ jobs:
       - name: Get the code
         uses: actions/checkout@v4
 
+      # Server
       - name: Setup Python
         uses: actions/setup-python@v4
         with: 
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install Server dependencies
         run: |
           cd server/app
           pip install -r requirements.txt
           pip install pytest httpx
 
-      - name: Run tests
+      - name: Run Server tests
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_workout_db
         run: |
           cd server/app
           python -m pytest tests/ -v
+
+      # Client
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Client Dependencies
+        run: |
+          cd client
+          npm ci
+
+      - name: Run Client Tests
+        run: |
+          cd client
+          npm test
