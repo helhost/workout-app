@@ -2,9 +2,9 @@ name: Test
 
 on: 
   push:
-    branches: [ main ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "**" ]
 
 jobs:
   test:
@@ -30,20 +30,60 @@ jobs:
       - name: Get the code
         uses: actions/checkout@v4
 
+      # Server
       - name: Setup Python
         uses: actions/setup-python@v4
         with: 
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install Server dependencies
         run: |
           cd server/app
           pip install -r requirements.txt
           pip install pytest httpx
 
-      - name: Run tests
+      - name: Run Server tests
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_workout_db
         run: |
           cd server/app
           python -m pytest tests/ -v
+
+      # Client
+      - name: Start Server for Client Tests
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_workout_db
+        run: |
+          cd server/app
+          python main.py &
+          echo "Server started, waiting for it to be ready..."
+
+          for i in {1..30}; do
+            if curl -f http://localhost:8080/ 2>/dev/null; then
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "Server failed to start within 30 seconds"
+              exit 1
+            fi
+            echo "Waiting for server... (attempt $i/30)"
+            sleep 1
+          done
+
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Client Dependencies
+        run: |
+          cd client
+          npm ci
+
+      - name: Run Client Tests
+        env:
+          VITE_API_URL: http://localhost:8080
+        run: |
+          cd client
+          npm test

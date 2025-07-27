@@ -18,7 +18,7 @@ def test_create_and_get_user():
     assert create_data["name"] == user_data["name"]
 
     get_response = client.get("/api/users")
-    users = get_response.json()["users"]
+    users = get_response.json()
     assert get_response.status_code == 200
 
     created_user = next((user for user in users if user["id"] == create_data["id"]),None)
