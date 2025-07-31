@@ -24,25 +24,19 @@ class SubsetCreate(SubsetData):
 
     class Config:
         from_attributes=True
-        orm_mode = True
 
 class SetCreate(SetData):
     exercise_id: int
 
     class Config:
         from_attributes=True
-        orm_mode = True
 
 class ExerciseCreate(ExerciseData):
     workout_id: int
 
     class Config:
         from_attributes=True
-        orm_mode = True
 
 class WorkoutCreate(WorkoutData):
     class Config:
         from_attributes=True
-        orm_mode = True
-
-

@@ -95,7 +95,7 @@ async def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
             resource=resource,
             data={
                 "type":"workout_created",
-                "data": WorkoutCreate.from_orm(workout_with_relations).dict()
+                "data": WorkoutCreate.model_validate(workout_with_relations).model_dump()
           }
         )
 
@@ -138,7 +138,7 @@ async def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_d
             resource=resource,
             data={
                 "type":"exercise_created",
-                "data": ExerciseCreate.from_orm(exercise_with_relations).dict()
+                "data": ExerciseCreate.model_validate(exercise_with_relations).model_dump()
           }
         )
 
@@ -175,7 +175,7 @@ async def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
             resource=resource,
             data={
                 "type":"set_created",
-                "data": SetCreate.from_orm(set_with_relations).dict()
+                "data": SetCreate.model_validate(set_with_relations).model_dump()
           }
         )
     return set_with_relations
@@ -199,7 +199,7 @@ async def create_subset(subset: SubsetCreate, db: Session = Depends(get_db)):
             resource=resource,
             data={
                 "type":"subset_created",
-                "data": SubsetCreate.from_orm(sub_set).dict()
+                "data": SubsetCreate.model_validate(sub_set).model_dump()
           }
         )
     return sub_set
