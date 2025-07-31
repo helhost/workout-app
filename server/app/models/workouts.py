@@ -47,6 +47,4 @@ class WorkoutData(BaseModel):
     class Config:
         from_attributes = True
 
-class WorkoutCreate(WorkoutData):
-    class Config:
-        from_attributes = True
+WorkoutCreate = WorkoutData
