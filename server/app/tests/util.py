@@ -20,4 +20,7 @@ def create_workout(data):
 def subscribe_and_listen(resource:str):
     with client.websocket_connect("/ws") as ws:
         ws.send_json({"type": "subscribe", "resource": resource})
+
+        message = ws.receive_json()
+        assert message["type"] == "subscribed"
         yield ws
