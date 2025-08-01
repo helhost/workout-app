@@ -14,3 +14,8 @@ def retrieve_workout():
 def create_workout(data):
     create_response = client.post("/api/workouts", json=data["workout"])
     return create_response.json()
+
+def subscribe_and_listen(resource:str):
+    ws = client.websocket_connect("/ws")
+    ws.send_json({"type": "subscribe", "resource": resource})
+    return ws
