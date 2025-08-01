@@ -10,7 +10,6 @@ def data():
     return retrieve_workout()
 
 def test_workout_created_user_broadcast(data):
-    print("here 1")
     with subscribe_and_listen("users:1") as ws:
         created = create_workout(data)
         message = ws.receive_json()
@@ -19,12 +18,10 @@ def test_workout_created_user_broadcast(data):
     assert message["data"]["user_id"] == created["user_id"]
 
 def test_exercise_created_user_broadcast(data):
-    print("here2")
-    workout_id = create_workout(data)
+    workout_id = create_workout(data)["id"]
 
     with subscribe_and_listen("users:1") as ws:
         created = client.post(f"/api/exercises", json={**data["workout"]["exercises"][0], "workout_id":workout_id}).json()
-        print(created)
         message = ws.receive_json()
 
     assert message["type"] == "exercise_created"
@@ -32,11 +29,11 @@ def test_exercise_created_user_broadcast(data):
 
 
 def test_set_created_user_broadcast(data):
-    print("here3")
-    workout_id = create_workout(data)
+    workout_data = create_workout(data)
+    exercise_id = workout_data["exercises"][0]["id"]
 
     with subscribe_and_listen("users:1") as ws:
-        created = client.post(f"/api/sets", json={**data["workout"]["exercises"][0]["sets"][0], "set_id":workout_id}).json()
+        created = client.post(f"/api/sets", json={**data["workout"]["exercises"][0]["sets"][0], "exercise_id":exercise_id}).json()
         message = ws.receive_json()
 
     assert message["type"] == "set_created"
@@ -44,10 +41,11 @@ def test_set_created_user_broadcast(data):
 
 
 def test_subset_created_user_broadcast(data):
-    workout_id = create_workout(data)
+    workout_data = create_workout(data)
+    set_id = workout_data["exercises"][0]["sets"][0]["id"]
 
     with subscribe_and_listen("users:1") as ws:
-        created = client.post(f"/api/subsets", json={**data["workout"]["exercises"][0]["sets"][0]["subsets"][0], "subset_id":workout_id}).json()
+        created = client.post(f"/api/subsets", json={**data["workout"]["exercises"][0]["sets"][0]["subsets"][0], "set_id":set_id}).json()
         message = ws.receive_json()
 
     assert message["type"] == "subset_created"
