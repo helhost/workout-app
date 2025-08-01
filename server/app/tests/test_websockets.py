@@ -45,7 +45,7 @@ def test_subset_created_user_broadcast(data):
     set_id = workout_data["exercises"][0]["sets"][0]["id"]
 
     with subscribe_and_listen("users:1") as ws:
-        created = client.post(f"/api/subsets", json={**data["workout"]["exercises"][0]["sets"][0]["sub_sets"][0], "set_id":set_id}).json()
+        created = client.post(f"/api/subsets", json={**data["workout"]["exercises"][0]["sets"][0]["subsets"][0], "set_id":set_id}).json()
         message = ws.receive_json()
 
     assert message["type"] == "subset_created"
