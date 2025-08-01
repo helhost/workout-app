@@ -1,21 +1,14 @@
 from fastapi.testclient import TestClient
 from main import app
-import json
-import os
+from tests.util import create_workout
+from tests.util import retrieve_workout
 import pytest
 
 client = TestClient(app)
 
 @pytest.fixture(scope="module")
 def data():
-    curr_dir = os.path.dirname(__file__)
-    json_path = os.path.join(curr_dir, "data", "workout.json")
-    with open(json_path, 'r') as f:
-        return json.load(f)
-
-def create_workout(data):
-    create_response = client.post("/api/workouts", json=data["workout"])
-    return create_response.json()
+    return retrieve_workout()
 
 
 def test_get_all_workouts_initially():
