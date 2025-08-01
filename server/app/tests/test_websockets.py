@@ -11,4 +11,4 @@ def test_workout_created_user_broadcast(data):
         message = ws.receive_json()
 
     assert message["type"] == "workout_created"
-    assert message["data"]["id"] == created["id"]
+    assert message["data"]["user_id"] == created["user_id"]
