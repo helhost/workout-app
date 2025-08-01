@@ -18,8 +18,10 @@ def test_workout_created_user_broadcast(data):
     assert message["data"]["user_id"] == created["user_id"]
 
 def test_exercise_created_user_broadcast(data):
+    workout_id = create_workout(data)
+
     with subscribe_and_listen("user:1") as ws:
-        created = client.post(f"/api/exercises", json={**data["workout"]["exercises"][0], "workout_id":1}).json()
+        created = client.post(f"/api/exercises", json={**data["workout"]["exercises"][0], "workout_id":workout_id}).json()
         message = ws.receive_json()
 
     assert message["type"] == "exercise_created"
@@ -27,8 +29,10 @@ def test_exercise_created_user_broadcast(data):
 
 
 def test_set_created_user_broadcast(data):
+    workout_id = create_workout(data)
+
     with subscribe_and_listen("user:1") as ws:
-        created = client.post(f"/api/sets", json={**data["workout"]["exercises"][0]["sets"][0], "set_id":1}).json()
+        created = client.post(f"/api/sets", json={**data["workout"]["exercises"][0]["sets"][0], "set_id":workout_id}).json()
         message = ws.receive_json()
 
     assert message["type"] == "set_created"
@@ -36,8 +40,10 @@ def test_set_created_user_broadcast(data):
 
 
 def test_subset_created_user_broadcast(data):
+    workout_id = create_workout(data)
+
     with subscribe_and_listen("user:1") as ws:
-        created = client.post(f"/api/subsets", json={**data["workout"]["exercises"][0]["sets"][0]["subsets"][0], "subset_id":1}).json()
+        created = client.post(f"/api/subsets", json={**data["workout"]["exercises"][0]["sets"][0]["subsets"][0], "subset_id":workout_id}).json()
         message = ws.receive_json()
 
     assert message["type"] == "subset_created"
