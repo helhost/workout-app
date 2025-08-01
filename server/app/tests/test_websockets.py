@@ -10,6 +10,7 @@ def data():
     return retrieve_workout()
 
 def test_workout_created_user_broadcast(data):
+    print("here 1")
     with subscribe_and_listen("users:1") as ws:
         created = create_workout(data)
         message = ws.receive_json()
@@ -18,10 +19,12 @@ def test_workout_created_user_broadcast(data):
     assert message["data"]["user_id"] == created["user_id"]
 
 def test_exercise_created_user_broadcast(data):
+    print("here2")
     workout_id = create_workout(data)
 
     with subscribe_and_listen("users:1") as ws:
         created = client.post(f"/api/exercises", json={**data["workout"]["exercises"][0], "workout_id":workout_id}).json()
+        print(created)
         message = ws.receive_json()
 
     assert message["type"] == "exercise_created"
@@ -29,6 +32,7 @@ def test_exercise_created_user_broadcast(data):
 
 
 def test_set_created_user_broadcast(data):
+    print("here3")
     workout_id = create_workout(data)
 
     with subscribe_and_listen("users:1") as ws:
