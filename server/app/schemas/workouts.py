@@ -15,7 +15,7 @@ class Set(Base):
     id = Column(Integer, primary_key=True)
     exercise_id = Column(Integer, ForeignKey("Exercises.id"))
     exercise_name = Column(String)
-    sub_sets = relationship("Subset", backref="set", cascade="all, delete-orphan")
+    subsets = relationship("Subset", backref="set", cascade="all, delete-orphan")
     set_number = Column(Integer)
 
 class Exercise(Base):

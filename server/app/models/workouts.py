@@ -18,7 +18,7 @@ class SubsetCreate(SubsetData):
 class SetData(BaseModel):
     exercise_name: str
     set_number: int
-    sub_sets: List[SubsetData] = []
+    subsets: List[SubsetData] = []
 
     class Config:
         from_attributes = True

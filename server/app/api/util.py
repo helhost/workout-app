@@ -9,7 +9,7 @@ def get_data(db: Session, id: int, model:AnyModel) -> AnyModel:
     return db.get(model, id)
 
 model_map: Dict[str, Tuple[str,Type[AnyModel]]]= {
-    "sub_sets": ("subset_id", Subset),
+    "subsets": ("subset_id", Subset),
     "sets": ("set_id", Set),
     "exercises": ("exercise_id", Exercise),
     "workouts": ("workout_id", Workout),
@@ -17,7 +17,7 @@ model_map: Dict[str, Tuple[str,Type[AnyModel]]]= {
 }
 
 parent_map = {
-    "sub_sets": "sets",
+    "subsets": "sets",
     "sets": "exercises",
     "exercises": "workouts",
     "workouts": "users"

@@ -48,12 +48,12 @@ def test_workout_structure_integrity(data):
     first_set = first_exercise["sets"][0]
     assert "exercise_name" in first_set
     assert first_set["exercise_name"] == "Bench Press"
-    assert "sub_sets" in first_set
+    assert "subsets" in first_set
     assert "set_number" in first_set
-    assert len(first_set["sub_sets"]) == 1
+    assert len(first_set["subsets"]) == 1
 
     # Verify subsets
-    first_subset = first_set["sub_sets"][0]
+    first_subset = first_set["subsets"][0]
     assert "reps" in first_subset
     assert "weight" in first_subset
     assert "subset_number" in first_subset
@@ -142,7 +142,7 @@ def test_create_subset_for_existing_set(data):
     set_id = workout_data["exercises"][0]["sets"][0]["id"]
 
     # Create Subset
-    subset_response = client.post(f"/api/subsets", json={**data["workout"]["exercises"][0]["sets"][0]["sub_sets"][0], 
+    subset_response = client.post(f"/api/subsets", json={**data["workout"]["exercises"][0]["sets"][0]["subsets"][0], 
                                                          "set_id": set_id})
     assert subset_response.status_code == 200
 
@@ -152,7 +152,7 @@ def test_create_subset_for_existing_set(data):
 
 def test_get_individual_subset(data):
     workout_data = create_workout(data)
-    subset_id = workout_data["exercises"][0]["sets"][0]["sub_sets"][0]["id"]
+    subset_id = workout_data["exercises"][0]["sets"][0]["subsets"][0]["id"]
 
     # Retreive Subset
     subset_response = client.get(f"/api/subsets/{subset_id}")
