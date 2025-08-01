@@ -20,7 +20,7 @@ def test_workout_created_user_broadcast(data):
 def test_exercise_created_user_broadcast(data):
     workout_id = create_workout(data)
 
-    with subscribe_and_listen("user:1") as ws:
+    with subscribe_and_listen("users:1") as ws:
         created = client.post(f"/api/exercises", json={**data["workout"]["exercises"][0], "workout_id":workout_id}).json()
         message = ws.receive_json()
 
@@ -31,7 +31,7 @@ def test_exercise_created_user_broadcast(data):
 def test_set_created_user_broadcast(data):
     workout_id = create_workout(data)
 
-    with subscribe_and_listen("user:1") as ws:
+    with subscribe_and_listen("users:1") as ws:
         created = client.post(f"/api/sets", json={**data["workout"]["exercises"][0]["sets"][0], "set_id":workout_id}).json()
         message = ws.receive_json()
 
@@ -42,7 +42,7 @@ def test_set_created_user_broadcast(data):
 def test_subset_created_user_broadcast(data):
     workout_id = create_workout(data)
 
-    with subscribe_and_listen("user:1") as ws:
+    with subscribe_and_listen("users:1") as ws:
         created = client.post(f"/api/subsets", json={**data["workout"]["exercises"][0]["sets"][0]["subsets"][0], "subset_id":workout_id}).json()
         message = ws.receive_json()
 
