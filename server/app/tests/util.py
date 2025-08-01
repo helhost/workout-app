@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from main import app
+from contextlib import contextmanager
 import json
 import os
 
@@ -15,7 +16,8 @@ def create_workout(data):
     create_response = client.post("/api/workouts", json=data["workout"])
     return create_response.json()
 
+@contextmanager
 def subscribe_and_listen(resource:str):
-    ws = client.websocket_connect("/ws")
-    ws.send_json({"type": "subscribe", "resource": resource})
-    return ws
+    with client.websocket_connect("/ws") as ws:
+        ws.send_json({"type": "subscribe", "resource": resource})
+        yield ws
