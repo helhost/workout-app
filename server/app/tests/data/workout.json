@@ -1,0 +1,108 @@
+{
+    "workout": {
+        "user_id": 1,
+        "exercises": [
+            {
+                "exercise_number": 1,
+                "sets": [
+                    {
+                        "set_number": 1,
+                        "exercise_name": "Bench Press",
+                        "sub_sets": [
+                            {"reps": 10, "weight": 80.0,"subset_number": 1}
+                        ]
+                    },
+                    {
+                        "set_number": 2,
+                        "exercise_name": "Bench Press",
+                        "sub_sets": [
+                            {"reps": 8, "weight": 85.0,"subset_number": 1}
+                        ]
+                    },
+                    {
+                        "set_number": 3,
+                        "exercise_name": "Bench Press",
+                        "sub_sets": [
+                            {"reps": 6, "weight": 90.0,"subset_number": 1}
+                        ]
+                    }
+                ]
+            },
+            {
+                "exercise_number": 2,
+                "sets": [
+                    {
+                        "set_number": 1,
+                        "exercise_name": "Squats",
+                        "sub_sets": [
+                            {"reps": 12, "weight": 100.0,"subset_number": 1}
+                        ]
+                    },
+                    {
+                        "set_number": 2,
+                        "exercise_name": "Squats",
+                        "sub_sets": [
+                            {"reps": 10, "weight": 110.0,"subset_number": 1}
+                        ]
+                    },
+                    {
+                        "set_number": 3,
+                        "exercise_name": "Squats",
+                        "sub_sets": [
+                            {"reps": 8, "weight": 120.0,"subset_number": 1},
+                            {"reps": 8, "weight": 80.0,"subset_number": 2},
+                            {"reps": 8, "weight": 40.0,"subset_number": 3}
+                        ]
+                    }
+                ]
+            },
+            {
+                "exercise_number": 3,
+                "sets": [
+                    {
+                        "set_number": 1,
+                        "exercise_name": "Pull-ups",
+                        "sub_sets": [
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
+                        ]
+                    },
+                    {
+                        "set_number": 2,
+                        "exercise_name": "Chin-ups",
+                        "sub_sets": [
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
+                        ]
+                    },
+                    {
+                        "set_number": 3,
+                        "exercise_name": "Pull-ups",
+                        "sub_sets": [
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
+                        ]
+                    },
+                    {
+                        "set_number": 4,
+                        "exercise_name": "Chin-ups",
+                        "sub_sets": [
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
+                        ]
+                    },
+                    {
+                        "set_number": 5,
+                        "exercise_name": "Pull-ups",
+                        "sub_sets": [
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
+                        ]
+                    },
+                    {
+                        "set_number": 6,
+                        "exercise_name": "Chin-ups",
+                        "sub_sets": [
+                            {"reps": 8, "weight": 0.0,"subset_number": 1}
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
