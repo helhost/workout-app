@@ -1,10 +1,6 @@
 import { HttpClient } from "../http-client"
 import type { ClientConfig } from "../http-client/types"
-
-type User = {
-  name: string,
-  id: number,
-};
+import type { User } from "@/types"
 
 class UsersAPI {
   private client: HttpClient
