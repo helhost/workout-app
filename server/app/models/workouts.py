@@ -1,5 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List
+
 
 # ---------- Subset ----------
 class SubsetData(BaseModel):
@@ -7,8 +8,7 @@ class SubsetData(BaseModel):
     subset_number: int
     weight: float
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 class SubsetCreate(SubsetData):
     set_id: int
@@ -20,8 +20,7 @@ class SetData(BaseModel):
     set_number: int
     subsets: List[SubsetData] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 class SetCreate(SetData):
     exercise_id: int
@@ -32,8 +31,7 @@ class ExerciseData(BaseModel):
     exercise_number: int
     sets: List[SetData] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 class ExerciseCreate(ExerciseData):
     workout_id: int
@@ -44,7 +42,6 @@ class WorkoutData(BaseModel):
     user_id: int
     exercises: List[ExerciseData] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes = True)
 
 WorkoutCreate = WorkoutData
