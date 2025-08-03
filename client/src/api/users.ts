@@ -1,6 +1,5 @@
 import { HttpClient } from "../http-client"
-import type { ClientConfig } from "../http-client/types"
-import type { User } from "@/types"
+import type { User, UserCreate, ClientConfig } from "@/types"
 
 class UsersAPI {
   private client: HttpClient
@@ -11,6 +10,10 @@ class UsersAPI {
 
   public async getUsers() {
     return this.client.get<User[]>("/")
+  };
+
+  public async createUser(data: UserCreate) {
+    return this.client.post<User>("/", data)
   };
 };
 

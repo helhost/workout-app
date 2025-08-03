@@ -1,14 +1,15 @@
-import usersAPI from "../../src/api/users"
-import { test, expect } from "vitest"
+import { usersAPI } from "@/api"
+import { test, expect, describe } from "vitest"
 
-test("can fetch users from real API", async () => {
-  const users = await usersAPI.getUsers();
-  expect(users).toBeDefined()
-  expect(Array.isArray(users)).toBeTruthy()
+describe("Users API Integration", () => {
+  test("can fetch users from real API", async () => {
+    const users = await usersAPI.getUsers();
+    expect(users).toBeDefined()
+    expect(Array.isArray(users)).toBeTruthy()
 
-  if (users.length > 0) {
-    expect(typeof users[0].id).toBe("number")
-    expect(typeof users[0].name).toBe("string")
-  };
-
-})
+    if (users.length > 0) {
+      expect(typeof users[0].id).toBe("number")
+      expect(typeof users[0].name).toBe("string")
+    };
+  });
+});
