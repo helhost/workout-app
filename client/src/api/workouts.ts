@@ -22,16 +22,20 @@ class WorkoutsAPI {
     return this.client.get<Workout[]>("/workouts")
   };
 
-  public async getExercises(workout_id: number) {
-    return this.client.get<Exercise[]>(`/exercises/${workout_id}`)
+  public async getWorkout(workout_id: number) {
+    return this.client.get<Workout>(`/workouts/${workout_id}`)
   };
 
-  public async getSets(exercise_id: number) {
-    return this.client.get<Set[]>(`/sets/${exercise_id}`)
+  public async getExercise(exercise_id: number) {
+    return this.client.get<Exercise>(`/exercises/${exercise_id}`)
   };
 
-  public async getSubsets(set_id: number) {
-    return this.client.get<Subset[]>(`/subsets/${set_id}`)
+  public async getSet(set_id: number) {
+    return this.client.get<Set>(`/sets/${set_id}`)
+  };
+
+  public async getSubset(subset_id: number) {
+    return this.client.get<Subset>(`/subsets/${subset_id}`)
   };
 
 

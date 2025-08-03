@@ -20,6 +20,9 @@ describe("Workout API Integration", () => {
     const newWorkout: WorkoutCreate = workoutData.workout;
     const workout = await workoutsAPI.createWorkout(newWorkout);
 
+    const workout_get = await workoutsAPI.getWorkout(workout.id);
+    expect(workout).toEqual(workout_get);
+
     expect(typeof workout.id).toBe("number");
     expect(workout.user_id).toEqual(newWorkout.user_id);
     expect(workout.exercises.length).toBe(newWorkout.exercises.length);
@@ -62,6 +65,9 @@ describe("Exercise API Integration", () => {
     const newExercise: ExerciseCreate = { ...workoutData.workout.exercises[0], workout_id: workout_id };
     const exercise = await workoutsAPI.createExercise(newExercise);
 
+    const exercise_get = await workoutsAPI.getExercise(exercise.id);
+    expect(exercise).toEqual(exercise_get);
+
     expect(typeof exercise.id).toBe("number");
     expect(exercise.workout_id).toEqual(workout_id);
     expect(exercise.sets.length).toBe(newExercise.sets.length);
@@ -96,6 +102,9 @@ describe("Set API Integration", () => {
     const newSet: SetCreate = { ...workoutData.workout.exercises[0].sets[0], exercise_id: exercise_id };
     const set = await workoutsAPI.createSet(newSet);
 
+    const set_get = await workoutsAPI.getSet(set.id);
+    expect(set).toEqual(set_get);
+
     expect(typeof set.id).toBe("number");
     expect(set.exercise_id).toEqual(exercise_id);
     expect(set.subsets.length).toBe(set.subsets.length);
@@ -115,11 +124,14 @@ describe("Set API Integration", () => {
 
 describe("Subset API Integration", () => {
 
-  test("can create new Subset", async () => {
+  test("can create and get new Subset", async () => {
     const workout: Workout = (globalThis as any).TEST_WORKOUT;
     const set_id = workout.exercises[0].sets[0].id;
     const newSubset: SubsetCreate = { ...workoutData.workout.exercises[0].sets[0].subsets[0], set_id: set_id };
     const subset = await workoutsAPI.createSubset(newSubset);
+
+    const subset_get = await workoutsAPI.getSubset(subset.id)
+    expect(subset).toEqual(subset_get);
 
     expect(typeof subset.id).toBe("number");
     expect(subset.set_id).toEqual(set_id);

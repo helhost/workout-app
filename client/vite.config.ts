@@ -23,6 +23,16 @@ export default defineConfig(({ mode }) => {
       setupFiles: ["tests/setup.ts"],
       env: {
         VITE_API_URL: env.VITE_API_URL
+      },
+      coverage: {
+        reporter: ['text', 'html'],
+        exclude: [
+          'tests/',
+          'src/types',
+          'vite.config.ts',
+          'eslint.config.js',
+          'vite-env.d.ts'
+        ]
       }
     }
   };
