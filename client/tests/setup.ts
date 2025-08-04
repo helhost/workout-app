@@ -1,7 +1,10 @@
 import { beforeAll } from "vitest";
 import { usersAPI, workoutsAPI } from "@/api";
-import type { WorkoutCreate } from "@/types"
-import workoutData from './data/workout.json'
+import type { WorkoutCreate } from "@/types";
+import workoutData from './data/workout.json';
+import WebSocket from 'ws';
+
+(globalThis as any).WebSocket = WebSocket;
 
 beforeAll(async () => {
   const user = await usersAPI.createUser({ name: "Test User" });
