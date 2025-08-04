@@ -4,8 +4,6 @@ export interface ClientConfig {
   defaultHeaders?: Record<string, string>;
 }
 
-export interface RequestOptions {
-}
-
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
+export type callback = (message: { type: string, data: any }) => void;

@@ -1,11 +1,19 @@
-import { HttpClient } from "../http-client"
-import type { User, UserCreate, ClientConfig } from "@/types"
+import { HttpClient } from "@/http-client";
+import { WebSocketClient } from "@/ws-client";
+import type { User, UserCreate, ClientConfig, callback } from "@/types";
 
 class UsersAPI {
   private client: HttpClient
+  private ws_client: WebSocketClient
 
   constructor(config: ClientConfig) {
-    this.client = new HttpClient(config)
+    if (!config.baseURL) {
+      throw new Error("baseURL is required to initialize UsersAPI");
+    };
+
+    this.client = new HttpClient(config);
+    this.ws_client = new WebSocketClient(config.baseURL);
+    this.ws_client.connect();
   };
 
   public async getUsers() {
@@ -14,6 +22,14 @@ class UsersAPI {
 
   public async createUser(data: UserCreate) {
     return this.client.post<User>("/", data)
+  };
+
+  public subscribeToUser(user_id: number, callback: callback): void {
+    this.ws_client.subscribe(`users:${user_id}`, callback);
+  };
+
+  public unsubscribeFromUser(user_id: number): void {
+    this.ws_client.unsubscribe(`users:${user_id}`);
   };
 };
 
