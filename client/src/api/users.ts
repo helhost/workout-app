@@ -12,7 +12,10 @@ class UsersAPI {
     };
 
     this.client = new HttpClient(config);
-    this.ws_client = new WebSocketClient(config.baseURL);
+    this.ws_client = new WebSocketClient(`${import.meta.env.VITE_API_URL}`);
+  };
+
+  public async connect() {
     this.ws_client.connect();
   };
 
