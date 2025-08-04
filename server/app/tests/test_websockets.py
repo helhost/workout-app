@@ -20,6 +20,7 @@ def test_workout_created_user_broadcast(data):
 
     assert message["type"] == "workout_created"
     assert message["data"]["user_id"] == created["user_id"]
+    assert message["resource"] == f"users:1"
 
 def test_exercise_created_user_broadcast(data):
     workout_id = create_workout(data)["id"]
@@ -30,6 +31,7 @@ def test_exercise_created_user_broadcast(data):
 
     assert message["type"] == "exercise_created"
     assert message["data"]["workout_id"] == created["workout_id"]
+    assert message["resource"] == f"users:1"
 
 
 def test_set_created_user_broadcast(data):
@@ -42,6 +44,7 @@ def test_set_created_user_broadcast(data):
 
     assert message["type"] == "set_created"
     assert message["data"]["exercise_id"] == created["exercise_id"]
+    assert message["resource"] == f"users:1"
 
 
 def test_subset_created_user_broadcast(data):
@@ -54,6 +57,7 @@ def test_subset_created_user_broadcast(data):
 
     assert message["type"] == "subset_created"
     assert message["data"]["set_id"] == created["set_id"]
+    assert message["resource"] == f"users:1"
 
 
 # ---------- Workout Subscription ----------
@@ -68,6 +72,7 @@ def test_exercise_created_workout_broadcast(data):
 
     assert message["type"] == "exercise_created"
     assert message["data"]["workout_id"] == created["workout_id"]
+    assert message["resource"] == f"workouts:{workout_id}"
 
 
 def test_set_created_workout_broadcast(data):
@@ -81,6 +86,7 @@ def test_set_created_workout_broadcast(data):
 
     assert message["type"] == "set_created"
     assert message["data"]["exercise_id"] == created["exercise_id"]
+    assert message["resource"] == f"workouts:{workout_id}"
 
 
 def test_subset_created_workout_broadcast(data):
@@ -94,6 +100,7 @@ def test_subset_created_workout_broadcast(data):
 
     assert message["type"] == "subset_created"
     assert message["data"]["set_id"] == created["set_id"]
+    assert message["resource"] == f"workouts:{workout_id}"
 
 
 # ---------- Exercise Subscription ----------
@@ -109,6 +116,7 @@ def test_set_created_exercise_broadcast(data):
 
     assert message["type"] == "set_created"
     assert message["data"]["exercise_id"] == created["exercise_id"]
+    assert message["resource"] == f"exercises:{exercise_id}"
 
 
 def test_subset_created_exercise_broadcast(data):
@@ -122,6 +130,7 @@ def test_subset_created_exercise_broadcast(data):
 
     assert message["type"] == "subset_created"
     assert message["data"]["set_id"] == created["set_id"]
+    assert message["resource"] == f"exercises:{exercise_id}"
 
 
 # ---------- Set Subscription ----------
@@ -137,4 +146,5 @@ def test_subset_created_set_broadcast(data):
 
     assert message["type"] == "subset_created"
     assert message["data"]["set_id"] == created["set_id"]
+    assert message["resource"] == f"sets:{set_id}"
 

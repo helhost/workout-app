@@ -44,12 +44,11 @@ class WebSocketManager:
 
     async def broadcast(self, resource: str, data:Dict, exclude_websocket: WebSocket | None = None):
         failed_connections = []
-        print(f"broadcsting to {resource}, {data}")
 
         for ws, resources in self.subscriptions.items():
             if resource in resources and ws is not exclude_websocket:
                 try:
-                    await ws.send_json(data)
+                    await ws.send_json({**data, resource: resource})
                 except Exception:
                     failed_connections.append(ws)
 
