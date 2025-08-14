@@ -4,9 +4,12 @@ import type {
   Exercise, ExerciseCreate,
   Set, SetCreate,
   Subset, SubsetCreate,
-  ClientConfig
+  ClientConfig,
+  SubscriptionCallback
 }
   from "@/types"
+
+import { subscribeWS, unsubscribeWS, workoutsResource, exercisesResource, setsResource, subsetsResource } from "@/ws-client";
 
 
 class WorkoutsAPI {
@@ -55,6 +58,33 @@ class WorkoutsAPI {
 
   public async createSubset(data: SubsetCreate) {
     return this.client.post<Subset>("/subsets", data)
+  };
+
+
+  // ------------ WS ------------
+
+  public subscribeToWorkout(workout_id: number, cb: SubscriptionCallback): () => void {
+    const resource = workoutsResource(workout_id);
+    subscribeWS(resource, cb);
+    return () => unsubscribeWS(resource);
+  };
+
+  public subscribeToExercise(exercise_id: number, cb: SubscriptionCallback): () => void {
+    const resource = exercisesResource(exercise_id);
+    subscribeWS(resource, cb);
+    return () => unsubscribeWS(resource);
+  };
+
+  public subscribeToSet(set_id: number, cb: SubscriptionCallback): () => void {
+    const resource = setsResource(set_id);
+    subscribeWS(resource, cb);
+    return () => unsubscribeWS(resource);
+  };
+
+  public subscribeToSubset(subset_id: number, cb: SubscriptionCallback): () => void {
+    const resource = subsetsResource(subset_id);
+    subscribeWS(resource, cb);
+    return () => unsubscribeWS(resource);
   };
 
 };
