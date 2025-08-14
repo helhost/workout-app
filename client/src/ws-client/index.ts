@@ -1,61 +1,18 @@
-import type { callback } from "@/types";
+import { WebSocketClient } from "./ws";
 
-export class WebSocketClient {
-  private baseURL: string;
-  private socket: WebSocket | null = null;
-  private subscriptions: Map<string, (data: any) => void> = new Map()
+const API_URL = import.meta.env.VITE_API_URL;
+const ORIGIN = API_URL.replace(/\/$/, "").replace(/\/api$/, "");
 
-  constructor(baseURL: string) {
-    this.baseURL = baseURL;
-  }
+export const ws = new WebSocketClient(ORIGIN, "/ws");
 
-  public connect(): void {
-    this.socket = new WebSocket(this.baseURL.replace('http', 'ws') + '/ws');
+export const connectWS = () => ws.connect();
+export const disconnectWS = () => ws.disconnect();
 
-    this.socket.addEventListener('message', (event) => {
-      try {
-        const message = JSON.parse(event.data);
-        const resource = message.resource;
-        const callback = this.subscriptions.get(resource);
+export const subscribeWS = ws.subscribe.bind(ws);
+export const unsubscribeWS = ws.unsubscribe.bind(ws);
 
-        if (callback) {
-          callback({
-            type: message.type,
-            data: message.data
-          });
-        } else {
-          console.warn(`No resource found for resource: ${resource}`);
-        };
-      } catch (e) {
-        console.error("Failed to handle websocket message:", e);
-      };
-    });
-  };
-
-  public close(): void {
-    this.socket?.close();
-  };
-
-  public subscribe(resource: string, callback: callback): void {
-    this.subscriptions.set(resource, callback);
-
-    const sendSubscribe = () => {
-      this.socket?.send(JSON.stringify({ action: "subscribe", resource: resource }));
-    };
-
-    if (!this.socket || this.socket.readyState != WebSocket.OPEN) {
-      this.socket?.addEventListener("open", sendSubscribe, { once: true });
-    } else {
-      sendSubscribe();
-    };
-  };
-
-  public unsubscribe(resource: string): void {
-    this.subscriptions.delete(resource);
-
-    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify({ action: "unsubscribe", resource: resource }));
-    }
-  };
-
-}
+export const usersResource = (userId: number) => `users:${userId}`;
+export const workoutsResource = (workoutId: number) => `workouts:${workoutId}`;
+export const exercisesResource = (exerciseId: number) => `exercises:${exerciseId}`;
+export const setsResource = (setId: number) => `sets:${setId}`;
+export const subsetsResource = (subsetId: number) => `subsets:${subsetId}`;

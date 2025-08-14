@@ -5,5 +5,3 @@ export interface ClientConfig {
 }
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-
-export type callback = (message: { type: string, data: any }) => void;

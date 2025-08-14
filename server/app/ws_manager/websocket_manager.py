@@ -21,11 +21,6 @@ class WebSocketManager:
         if websocket in self.subscriptions:
             del self.subscriptions[websocket]
 
-        try:
-            await websocket.close()
-        except Exception as e:
-            print(f"WARNING: Failed to disconnect connection: {e}")
-
     def subscribe(self, websocket: WebSocket, resource: str) -> None:
         if websocket not in self.active_connections:
             raise ValueError(f"Connection not active: {websocket}")
