@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import tailwindcss from "@tailwindcss/vite";
 import { loadEnv } from "vite";
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
@@ -11,7 +12,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode || "development", "../", "");
 
   return {
-    plugins: [react()],
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         "@": resolve(__dirname, "src")

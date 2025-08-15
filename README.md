@@ -1,44 +1,90 @@
 # Workout APP
 
-## Initialize
-
-
-
-**Server**
-
-add .env file to server root
+## SETUP
 
 ```sh
-touch server/.env
+touch .env
 ```
 
-fill in the required environment variables
+*Fill in the required environment variables*
+```C
+POSTGRES_USER=<some_user>
+POSTGRES_PASSWORD=<Sufficiently_strong_password>
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+VITE_API_URL=http://localhost:8080
+```
 
+## RUN
+
+1. First time:
 ```sh
-DATABASE_URL="postgresql://halvor@localhost:5432/halvor"
-
-JWT_SECRET=some_random_string
-REFRESH_TOKEN_SECRET=another_random_string
-
-# Allowed Origins for CORS (comma-separated)
-ALLOWED_ORIGINS=http://localhost:3001,http://localhost:5173
-
-# Application Port
-PORT=3001
-
-# Application Environment
-NODE_ENV=development
+docker-compose up -d --build
 ```
 
+2. Any other time:
 ```sh
-cd server
-npm i 
-npm run dev
+docker-compose up -d
 ```
 
-**Client**
+3. Shutdown:
 ```sh
-cd client
-npm i 
-npm run dev
+docker-compose down
 ```
+
+4. Shutdown and clear DB
+```sh
+docker-compose down -v
+```
+
+## Project structure
+
+workout-app
+├── docker-compose.yml
+├── .github/
+│   └── workflows/
+│       └── tests.yml
+├── client/
+│   ├── Dockerfile
+│   ├── index.html
+│   ├── src/
+│   │   ├── App.tsx
+│   │   ├── main.tsx
+│   │   ├── api/
+│   │   │   ├── index.ts
+│   │   │   ├── users.ts
+│   │   │   └── workouts.ts
+│   │   ├── http-client/
+│   │   │   ├── index.ts
+│   │   │   └── errors.ts
+│   │   └── ws-client/
+│   │       ├── index.ts
+│   │       └── ws.ts
+│   └── tests/
+│       ├── api/
+│       │   ├── users.test.ts
+│       │   └── workouts.test.ts
+│       └── ws/
+│           ├── users-ws.test.ts
+│           └── workouts-ws.test.ts
+└── server/
+    ├── app/
+    │   ├── Dockerfile
+    │   ├── main.py
+    │   ├── database.py
+    │   ├── api/
+    │   │   ├── users.py
+    │   │   └── workouts.py
+    │   ├── models/
+    │   │   ├── users.py
+    │   │   └── workouts.py
+    │   ├── schemas/
+    │   │   ├── users.py
+    │   │   └── workouts.py
+    │   ├── ws_manager/
+    │   │   └── websocket_manager.py
+    │   └── tests/
+    │       ├── test_users.py
+    │       ├── test_workouts.py
+    │       └── test_websockets.py
+    └── db/
+        └── init/
