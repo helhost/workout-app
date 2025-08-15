@@ -101,7 +101,13 @@ export class WebSocketClient {
     if (this.isOpen()) {
       sendSubscribe();
     } else {
-      throw new Error("No connection established");
+      this.connect()
+        .then(() => {
+          sendSubscribe();
+        })
+        .catch((err) => {
+          console.warn(`WS Subscribe: Could not connect for resource ${resource}`, err);
+        });
     };
   };
 

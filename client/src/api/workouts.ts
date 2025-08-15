@@ -18,7 +18,6 @@ class WorkoutsAPI {
   constructor(config: ClientConfig) {
     this.client = new HttpClient(config)
   };
-
   // ------------ GET ------------
 
   public async getWorkouts() {

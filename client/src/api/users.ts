@@ -14,11 +14,11 @@ class UsersAPI {
   };
 
   public async getUsers(): Promise<User[]> {
-    return this.client.get<User[]>("/")
+    return this.client.get<User[]>("")
   };
 
   public async createUser(data: UserCreate): Promise<User> {
-    return this.client.post<User>("/", data)
+    return this.client.post<User>("", data)
   };
 
   public subscribeToUser(user_id: number, cb: SubscriptionCallback): () => void {
