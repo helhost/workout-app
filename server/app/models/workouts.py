@@ -1,31 +1,47 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List
 
+
+# ---------- Subset ----------
 class SubsetData(BaseModel):
     reps: int
     subset_number: int
     weight: float
 
-class SetData(BaseModel):
-    exercise_name: str
-    set_number: int
-    sub_sets: List[SubsetData] = []
-
-class ExerciseData(BaseModel):
-    exercise_number: int
-    sets: List[SetData] = []
-
-class WorkoutData(BaseModel):
-    user_id: int
-    exercises: List[ExerciseData] = []
+    model_config = ConfigDict(from_attributes = True)
 
 class SubsetCreate(SubsetData):
     set_id: int
 
+
+# ---------- Set ----------
+class SetData(BaseModel):
+    exercise_name: str
+    set_number: int
+    subsets: List[SubsetData] = []
+
+    model_config = ConfigDict(from_attributes = True)
+
 class SetCreate(SetData):
     exercise_id: int
 
+
+# ---------- Exercise ----------
+class ExerciseData(BaseModel):
+    exercise_number: int
+    sets: List[SetData] = []
+
+    model_config = ConfigDict(from_attributes = True)
+
 class ExerciseCreate(ExerciseData):
     workout_id: int
+
+
+# ---------- Workout ----------
+class WorkoutData(BaseModel):
+    user_id: int
+    exercises: List[ExerciseData] = []
+
+    model_config = ConfigDict(from_attributes = True)
 
 WorkoutCreate = WorkoutData

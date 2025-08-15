@@ -1,20 +1,30 @@
-import { HttpClient } from "../http-client"
-import type { ClientConfig } from "../http-client/types"
-
-type User = {
-  name: string,
-  id: number,
-};
+import { HttpClient } from "@/http-client";
+import { subscribeWS, unsubscribeWS, usersResource } from "@/ws-client";
+import type { User, UserCreate, ClientConfig, SubscriptionCallback } from "@/types";
 
 class UsersAPI {
   private client: HttpClient
 
   constructor(config: ClientConfig) {
-    this.client = new HttpClient(config)
+    if (!config.baseURL) {
+      throw new Error("baseURL is required to initialize UsersAPI");
+    };
+
+    this.client = new HttpClient(config);
   };
 
-  public async getUsers() {
-    return this.client.get<User[]>("/")
+  public async getUsers(): Promise<User[]> {
+    return this.client.get<User[]>("")
+  };
+
+  public async createUser(data: UserCreate): Promise<User> {
+    return this.client.post<User>("", data)
+  };
+
+  public subscribeToUser(user_id: number, cb: SubscriptionCallback): () => void {
+    const resource = usersResource(user_id);
+    subscribeWS(resource, cb);
+    return () => unsubscribeWS(resource);
   };
 };
 

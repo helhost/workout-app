@@ -3,6 +3,7 @@ from database import get_db
 from sqlalchemy.orm import Session
 from schemas.users import User
 from models.users import UserCreate
+from ws_manager import websocket_manager  
 router = APIRouter()
 
 @router.get("/users")
@@ -12,11 +13,18 @@ def get_users(db: Session = Depends(get_db)):
 
 
 @router.post("/users")
-def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
+async def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
     new_user = User(name=user_data.name)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
-    return new_user
+    await websocket_manager.broadcast(
+        resource="users", 
+        data={
+            "type":"user_created",
+            "data": new_user.__dict__
+      }
+    )
 
+    return new_user

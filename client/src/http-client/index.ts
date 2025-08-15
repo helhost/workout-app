@@ -1,4 +1,4 @@
-import type { ClientConfig, HttpMethod } from "./types"
+import type { ClientConfig, HttpMethod } from "@/types"
 import { HttpError } from "./errors"
 
 export class HttpClient {
@@ -21,13 +21,13 @@ export class HttpClient {
     );
   };
 
-  public async post<T>(endpoint: string, headers?: Record<string, string>, data?: any): Promise<T> {
+  public async post<T>(endpoint: string, data?: any, headers?: Record<string, string>): Promise<T> {
     return this.makeRequest<T>(
       endpoint, "POST", headers, data
     );
   };
 
-  public async put<T>(endpoint: string, headers?: Record<string, string>, data?: any): Promise<T> {
+  public async put<T>(endpoint: string, data?: any, headers?: Record<string, string>): Promise<T> {
     return this.makeRequest<T>(
       endpoint, "PUT", headers, data
     )
@@ -39,7 +39,7 @@ export class HttpClient {
     );
   };
 
-  public async patch<T>(endpoint: string, headers?: Record<string, string>, data?: any): Promise<T> {
+  public async patch<T>(endpoint: string, data?: any, headers?: Record<string, string>): Promise<T> {
     return this.makeRequest<T>(
       endpoint, "PATCH", headers, data
     );

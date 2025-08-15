@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 from schemas.workouts import Workout, Exercise, Set, Subset
 from models.workouts import WorkoutCreate, ExerciseCreate, SetCreate, SubsetCreate
 from sqlalchemy.orm import joinedload
-
+from ws_manager import websocket_manager
+from api.util import get_all_parents
 router = APIRouter()
 
 
@@ -13,14 +14,14 @@ router = APIRouter()
 @router.get("/workouts")
 def get_workouts(db: Session = Depends(get_db)):
     workouts = db.query(Workout).options(
-        joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.sub_sets)
+        joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.subsets)
     ).all()
     return workouts
 
 @router.get("/workouts/{id}")
 def get_workout(id:int, db: Session = Depends(get_db)):
     workout = db.query(Workout).options(
-        joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.sub_sets)
+        joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.subsets)
     ).filter(Workout.id == id).first()
 
     if not workout:
@@ -30,7 +31,7 @@ def get_workout(id:int, db: Session = Depends(get_db)):
 @router.get("/exercises/{id}")
 def get_exercise(id:int, db: Session = Depends(get_db)):
     exercise = db.query(Exercise).options(
-        joinedload(Exercise.sets).joinedload(Set.sub_sets)
+        joinedload(Exercise.sets).joinedload(Set.subsets)
     ).filter(Exercise.id == id).first()
 
     if not exercise:
@@ -40,7 +41,7 @@ def get_exercise(id:int, db: Session = Depends(get_db)):
 @router.get("/sets/{id}")
 def get_set(id:int, db: Session = Depends(get_db)):
     exercise_set = db.query(Set).options(
-        joinedload(Set.sub_sets)
+        joinedload(Set.subsets)
     ).filter(Set.id == id).first()
 
     if not exercise_set:
@@ -57,7 +58,7 @@ def get_subset(id:int, db: Session = Depends(get_db)):
 
 # Post requests
 @router.post("/workouts")
-def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
+async def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
     new_workout = Workout(
         user_id = workout.user_id,
         exercises = [
@@ -67,9 +68,9 @@ def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
                     Set(
                         exercise_name = set_data.exercise_name,
                         set_number = set_data.set_number,
-                        sub_sets = [
+                        subsets = [
                             Subset(reps = ss.reps, weight = ss.weight, subset_number=ss.subset_number)
-                            for ss in set_data.sub_sets
+                            for ss in set_data.subsets
                         ]
                     )
                     for set_data in ex.sets
@@ -84,13 +85,24 @@ def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
     db.refresh(new_workout)
 
     workout_with_relations = db.query(Workout).options(
-        joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.sub_sets)
+        joinedload(Workout.exercises).joinedload(Exercise.sets).joinedload(Set.subsets)
     ).filter(Workout.id == new_workout.id).first()
+
+    resources = get_all_parents(db=db, child_type="workouts", child_id=getattr(new_workout, "id"), result=[])
+    print(f"resources{resources}")
+    for resource in resources:
+        await websocket_manager.broadcast(
+            resource=resource,
+            data={
+                "type":"workout_created",
+                "data": WorkoutCreate.model_validate(workout_with_relations, from_attributes=True).model_dump(mode="json")
+          }
+        )
 
     return workout_with_relations
 
 @router.post("/exercises")
-def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_db)):
+async def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_db)):
     workout = db.get(Workout,exercise.workout_id)
     if not workout:
         raise HTTPException(status_code=404, detail="Workout not found")
@@ -102,9 +114,9 @@ def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_db)):
             Set(
                 exercise_name = set_data.exercise_name,
                 set_number = set_data.set_number,
-                sub_sets = [
+                subsets = [
                     Subset(reps = ss.reps, weight = ss.weight, subset_number= ss.subset_number)
-                    for ss in set_data.sub_sets
+                    for ss in set_data.subsets
                 ]
             )
             for set_data in exercise.sets
@@ -116,13 +128,24 @@ def create_exercise(exercise: ExerciseCreate, db : Session = Depends(get_db)):
     db.refresh(new_exercise)
 
     exercise_with_relations = db.query(Exercise).options(
-        joinedload(Exercise.sets).joinedload(Set.sub_sets)
+        joinedload(Exercise.sets).joinedload(Set.subsets)
     ).filter(Exercise.id == new_exercise.id).first()
+
+    resources = get_all_parents(db=db, child_type="exercises", child_id=getattr(new_exercise, "id"), result=[])
+    print(f"resources{resources}")
+    for resource in resources:
+        await websocket_manager.broadcast(
+            resource=resource,
+            data={
+                "type":"exercise_created",
+                "data": ExerciseCreate.model_validate(exercise_with_relations, from_attributes=True).model_dump(mode="json")
+          }
+        )
 
     return exercise_with_relations
 
 @router.post("/sets")
-def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
+async def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
     exercise = db.get(Exercise, set_data.exercise_id)
     if not exercise:
         raise HTTPException(status_code=404, detail="Exercise not found")
@@ -131,9 +154,9 @@ def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
         exercise_id = set_data.exercise_id,
         exercise_name = set_data.exercise_name,
         set_number = set_data.set_number,
-        sub_sets = [
+        subsets = [
             Subset(reps = ss.reps, weight = ss.weight, subset_number = ss.subset_number)
-            for ss in set_data.sub_sets
+            for ss in set_data.subsets
         ]
     )
 
@@ -142,21 +165,41 @@ def create_set(set_data: SetCreate, db: Session = Depends(get_db)):
     db.refresh(new_set)
 
     set_with_relations = db.query(Set).options(
-        joinedload(Set.sub_sets)
+        joinedload(Set.subsets)
     ).filter(Set.id == new_set.id).first()
 
+    resources = get_all_parents(db=db, child_type="sets", child_id=getattr(new_set, "id"), result=[])
+    print(f"resources{resources}")
+    for resource in resources:
+        await websocket_manager.broadcast(
+            resource=resource,
+            data={
+                "type":"set_created",
+                "data": SetCreate.model_validate(set_with_relations, from_attributes=True).model_dump(mode="json")
+          }
+        )
     return set_with_relations
 
 @router.post("/subsets")
-def create_subset(subset: SubsetCreate, db: Session = Depends(get_db)):
+async def create_subset(subset: SubsetCreate, db: Session = Depends(get_db)):
     set_data = db.get(Set, subset.set_id)
     if not set_data:
         raise HTTPException(status_code=404, detail="Set not found")
 
-    sub_set = Subset(reps = subset.reps, weight = subset.weight, set_id=subset.set_id, subset_number = subset.subset_number)
+    subset = Subset(reps = subset.reps, weight = subset.weight, set_id=subset.set_id, subset_number = subset.subset_number)
 
-    db.add(sub_set)
+    db.add(subset)
     db.commit()
-    db.refresh(sub_set)
-    return sub_set
+    db.refresh(subset)
 
+    resources = get_all_parents(db=db, child_type="subsets", child_id=getattr(subset, "id"), result=[])
+    print(f"resources{resources}")
+    for resource in resources:
+        await websocket_manager.broadcast(
+            resource=resource,
+            data={
+                "type":"subset_created",
+                "data": SubsetCreate.model_validate(subset, from_attributes=True).model_dump(mode="json")
+          }
+        )
+    return subset
