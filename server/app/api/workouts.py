@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from database import get_db
 from sqlalchemy.orm import Session
-from schemas.workouts import Workout, Exercise, Set, Subset
+from schemas.workouts import Workout, Exercise, Set, Subset, WorkoutEnum
 from models.workouts import (
     WorkoutCreate, ExerciseCreate, SetCreate, SubsetCreate,
-    WorkoutRead, ExerciseRead, SetRead, SubsetRead,   # <- new
+    WorkoutRead, ExerciseRead, SetRead, SubsetRead
 )
 from sqlalchemy.orm import joinedload
 from ws_manager import websocket_manager
@@ -58,12 +58,19 @@ def get_subset(id:int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Subset not found")
     return subset
 
+#@router.get("/workouts/summary/{id}", response_model=list[WorkoutSummary])
+#def get_workout_summaries(id:int, db: Session = Depends(get_db)):
+#    return id
 
-# Post requests
+
+# =================== POST  ===================
+
+
 @router.post("/workouts", response_model=WorkoutRead)
 async def create_workout(workout: WorkoutCreate, db: Session = Depends(get_db)):
     new_workout = Workout(
         user_id = workout.user_id,
+        workout_type = WorkoutEnum(workout.type),
         exercises = [
             Exercise(
                 exercise_number = ex.exercise_number,
