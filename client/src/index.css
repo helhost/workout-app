@@ -1,1 +1,52 @@
+@theme {
+  :root {
+    /* ===== Typography ===== */
+    --color-text: #1c1c1c;
+    --color-text-accent: #495057;
+
+    /* ===== Brand ===== */
+    --color-primary: #1f7a8c;
+    --color-primary-accent: #2fa4b5;
+    --color-secondary: #e6af2e;
+    --color-secondary-accent: #f7c94c;
+
+    /* ===== Base ===== */
+    --color-border: #dee2e6;
+    --color-background: #f8f9fa;
+
+    /* ===== Status ===== */
+    --color-success: #2f9e44;
+    --color-warning: #f59f00;
+    --color-error: #d63939;
+
+    /* ===== Layout ===== */
+    --header-h: 56px;
+  }
+
+  /* Dark-mode overrides */
+  .dark {
+    --color-text: #f8f9fa;
+    --color-text-accent: #adb5bd;
+
+    --color-primary: #2fa4b5;
+    --color-primary-accent: #3fd6e5;
+    --color-secondary: #f7c94c;
+    --color-secondary-accent: #ffe27a;
+
+    --color-border: #343a40;
+    --color-background: #1c1c1c;
+
+    --color-success: #51cf66;
+    --color-warning: #fcc419;
+    --color-error: #ff6b6b;
+  }
+
+  /* Desktop override for header height */
+  @media (min-width: 768px) {
+    :root { --header-h: 80px; }
+  }
+}
+
+/* Tailwind v4 */
 @import "tailwindcss";
+

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import workoutsAPI from "./api/workouts";
 import usersAPI from "./api/users";
 import type { Workout } from "./types/api/workouts";
+import { Banner } from "@/components";
 
 export default function App() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -21,39 +22,44 @@ export default function App() {
   }, []);
 
   return (
-    <div className="font-sans p-4">
-      <h1 className="text-2xl font-bold mb-2">All Workouts (User 1)</h1>
+    <Banner name="test" navigation={[
+      { href: "/", label: "Home" },
+      { href: "/Workouts", label: "Workouts" }
+    ]}>
+      <div className="font-sans p-4">
+        <h1 className="text-2xl font-bold mb-2">All Workouts (User 1)</h1>
 
-      {workouts.map((w) => (
-        <div
-          key={w.id}
-          className="border border-neutral-300 p-2 my-2"
-        >
-          <h2 className="text-lg font-semibold">
-            Workout #{w.id} — User {w.user_id}
-          </h2>
+        {workouts.map((w) => (
+          <div
+            key={w.id}
+            className="border border-neutral-300 p-2 my-2"
+          >
+            <h2 className="text-lg font-semibold">
+              Workout #{w.id} — User {w.user_id}
+            </h2>
 
-          {w.exercises.map((ex) => (
-            <div key={ex.id} className="ml-4 mt-2">
-              <strong>Exercise {ex.exercise_number}:</strong> {ex.sets.length} sets
+            {w.exercises.map((ex) => (
+              <div key={ex.id} className="ml-4 mt-2">
+                <strong>Exercise {ex.exercise_number}:</strong> {ex.sets.length} sets
 
-              {ex.sets.map((s) => (
-                <div key={s.id} className="ml-4 mt-1">
-                  <em>
-                    Set {s.set_number} — {s.exercise_name}
-                  </em>
+                {ex.sets.map((s) => (
+                  <div key={s.id} className="ml-4 mt-1">
+                    <em>
+                      Set {s.set_number} — {s.exercise_name}
+                    </em>
 
-                  {s.subsets.map((sub) => (
-                    <div key={sub.id} className="ml-4">
-                      Reps: {sub.reps}, Weight: {sub.weight}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      ))}
-    </div>
+                    {s.subsets.map((sub) => (
+                      <div key={sub.id} className="ml-4">
+                        Reps: {sub.reps}, Weight: {sub.weight}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </Banner>
   );
 }
