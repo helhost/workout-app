@@ -14,6 +14,8 @@ def test_create_and_get_user():
     create_data = create_response.json()
     assert create_response.status_code == 200
     assert "id" in create_data
+    assert "created_at" in create_data
+
     assert create_data["id"] == 2
     assert create_data["name"] == user_data["name"]
 
