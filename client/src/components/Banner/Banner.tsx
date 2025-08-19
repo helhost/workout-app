@@ -17,7 +17,7 @@ export default function Banner({
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 w-full h-[var(--header-h)] bg-primary ${className ?? ''}`}>
+      <header className={`fixed top-0 left-0 right-0 w-full h-14 sm:h-20 bg-primary ${className ?? ''}`}>
         <div className="h-full flex items-center justify-between px-4 md:px-6 lg:px-8">
           <div className="text-xl md:text-2xl font-bold text-text">
             {name}
@@ -31,7 +31,7 @@ export default function Banner({
         </div>
       </header>
 
-      <div className="pt-[var(--header-h)]">
+      <div className="pt-14 sm:pt-20">
         {children}
       </div>
     </>
