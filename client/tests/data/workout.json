@@ -1,6 +1,7 @@
 {
     "workout": {
         "user_id": 1,
+	"type": "Back",
         "exercises": [
             {
                 "exercise_number": 1,
