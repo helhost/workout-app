@@ -15,6 +15,7 @@ class SubsetCreate(SubsetData):
 
 class SubsetRead(SubsetData):
     id: int
+    set_id: int
     created_at: datetime
 
 # ---------- Set ----------
@@ -30,6 +31,7 @@ class SetCreate(SetData):
 
 class SetRead(BaseModel):
     id: int
+    exercise_id: int
     exercise_name: str
     set_number: int
     created_at: datetime
@@ -49,6 +51,7 @@ class ExerciseCreate(ExerciseData):
 
 class ExerciseRead(BaseModel):
     id: int
+    workout_id: int
     exercise_number: int
     created_at: datetime
     sets: List[SetRead] = []
