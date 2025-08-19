@@ -1,27 +1,58 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* Tailwind v4 */
+@import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+/* Design tokens (only variables here) */
+@theme {
+  /* ===== Typography ===== */
+  --color-text: #121212;
+  --color-text-accent: #4b4f56;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* ===== Brand ===== */
+  --color-primary: #F10E69;
+  --color-primary-accent: #FF4C93;
+
+  --color-secondary: #0EF196;
+  --color-secondary-accent: #39F9B2;
+
+  /* ===== Base ===== */
+  --color-background: #FFF7FB;
+  --color-border: #e6dbe3;
+
+  /* ===== Status ===== */
+  --color-success: #2f9e44;
+  --color-warning: #f59f00;
+  --color-error:   #d63939;
+
+  /* ===== Layout ===== */
+  --header-h: 56px;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+/* Optional: advertise both color schemes */
+:root { color-scheme: light dark; }
+
+/* Dark-mode overrides (outside @theme) */
+.dark {
+  --color-text: #f1f1f1;
+  --color-text-accent: #c5c8ce;
+
+  /* ===== Brand (darker for dark mode) ===== */
+  --color-primary: #b00a4c;
+  --color-primary-accent: #cc2e6e;
+
+  --color-secondary: #0ab774;
+  --color-secondary-accent: #19c98a;
+
+  /* ===== Base ===== */
+  --color-background: #121212;
+  --color-border: #444; /* lighter border for contrast */
+
+  /* ===== Status (darker for dark mode) ===== */
+  --color-success: #237a34;
+  --color-warning: #b37400;
+  --color-error:   #a62b2b;
+}
+
+/* Responsive token override (outside @theme) */
+@media (min-width: 768px) {
+  :root { --header-h: 80px; }
 }
