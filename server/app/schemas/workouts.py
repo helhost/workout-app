@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
+from datetime import datetime, timezone
 
 class Subset(Base):
     __tablename__ = "Subsets"
@@ -9,6 +10,7 @@ class Subset(Base):
     reps = Column(Integer)
     weight = Column(Float) # Unit: kg
     subset_number = Column(Integer)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
 class Set(Base):
     __tablename__ = "Sets"
@@ -17,6 +19,7 @@ class Set(Base):
     exercise_name = Column(String)
     subsets = relationship("Subset", backref="set", cascade="all, delete-orphan")
     set_number = Column(Integer)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
 class Exercise(Base):
     __tablename__ = "Exercises"
@@ -24,6 +27,7 @@ class Exercise(Base):
     workout_id = Column(Integer, ForeignKey("Workouts.id"))
     sets = relationship("Set", backref="exercise", cascade="all, delete-orphan")
     exercise_number = Column(Integer)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
     @property
     def name(self):
@@ -39,3 +43,4 @@ class Workout(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("Users.id"))
     exercises = relationship("Exercise", backref="workout", cascade="all, delete-orphan")
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)

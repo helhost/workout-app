@@ -36,11 +36,13 @@ def test_workout_structure_integrity(data):
     # Verify Workout
     assert "exercises" in workout_data
     assert "user_id" in workout_data
+    assert "created_at" in workout_data
     assert len(workout_data["exercises"]) == 3
 
     # Verify Exercises
     first_exercise = workout_data["exercises"][0]
     assert "sets" in first_exercise
+    assert "created_at" in first_exercise
     assert "exercise_number" in first_exercise
     assert len(first_exercise["sets"]) == 3
 
@@ -49,6 +51,7 @@ def test_workout_structure_integrity(data):
     assert "exercise_name" in first_set
     assert first_set["exercise_name"] == "Bench Press"
     assert "subsets" in first_set
+    assert "created_at" in first_set
     assert "set_number" in first_set
     assert len(first_set["subsets"]) == 1
 
@@ -57,6 +60,7 @@ def test_workout_structure_integrity(data):
     assert "reps" in first_subset
     assert "weight" in first_subset
     assert "subset_number" in first_subset
+    assert "created_at" in first_subset
     assert first_subset["reps"] == 10
     assert first_subset["weight"] == 80.0
     assert first_subset["subset_number"] == 1
@@ -71,6 +75,7 @@ def test_create_exercise_for_existing_workout(data):
 
     exercise_data = exercise_response.json()
     assert "id" in exercise_data
+    assert "created_at" in exercise_data
 
 
 def test_create_exercise_for_nonexistent_workout(data):
@@ -109,6 +114,7 @@ def test_create_set_for_existing_exercise(data):
 
     set_data = set_response.json()
     assert "id" in set_data
+    assert "created_at" in set_data
 
 
 def test_create_set_for_nonexistent_exercise(data):
@@ -148,6 +154,7 @@ def test_create_subset_for_existing_set(data):
 
     subset_data = subset_response.json()
     assert "id" in subset_data
+    assert "created_at" in subset_data
 
 
 def test_get_individual_subset(data):
