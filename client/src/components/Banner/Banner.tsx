@@ -9,7 +9,6 @@ export default function Banner({
   className,
   children,
 }: BannerProps & { children?: React.ReactNode }) {
-
   const [path, setPath] = useState("");
 
   useEffect(() => {
@@ -20,12 +19,12 @@ export default function Banner({
     <>
       <header className={`fixed top-0 left-0 right-0 w-full h-[var(--header-h)] bg-primary ${className ?? ''}`}>
         <div className="h-full flex items-center justify-between px-4 md:px-6 lg:px-8">
-          <div className="text-xl md:text-2xl font-bold text-background">
+          <div className="text-xl md:text-2xl font-bold text-text">
             {name}
           </div>
           <nav className="flex items-center gap-6">
             {navigation.map((item) => (
-              <NavItem key={item.href} {...item} active={path == item.href} />
+              <NavItem key={item.href} {...item} active={path === item.href} />
             ))}
             <ThemeSwitch />
           </nav>
@@ -36,5 +35,5 @@ export default function Banner({
         {children}
       </div>
     </>
-  )
+  );
 }

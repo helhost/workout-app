@@ -13,7 +13,7 @@ export default function ThemeSwitch() {
       type="button"
       onClick={toggle}
       aria-label="Toggle dark mode"
-      className="ml-6 inline-flex items-center gap-2 rounded-md border border-border px-3 py-1 text-background hover:bg-primary-accent/20 transition-colors"
+      className="ml-6 inline-flex items-center gap-2 rounded-md border border-border px-3 py-1 text-text hover:bg-primary-accent transition-colors cursor-pointer"
     >
       <span aria-hidden>{isDark ? '🌙' : '☀️'}</span>
       <span className="hidden sm:inline">{isDark ? 'Dark' : 'Light'}</span>
