@@ -1,66 +1,21 @@
 import { useEffect, useState } from "react";
-import { workoutsAPI, usersAPI } from "@/api";
-import type { Workout, WorkoutSummary } from "@/types";
+import { workoutsAPI } from "@/api";
+import type { WorkoutSummary } from "@/types";
+import { WorkoutSummaryCard } from "@/components";
 
 export default function WokoutsPage() {
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [workout_summaries, setWorkoutSummaries] = useState<WorkoutSummary[]>([]);
 
   useEffect(() => {
-    workoutsAPI.getWorkouts().then((data) => {
-      setWorkouts(data.filter((w) => w.user_id === 1));
-    });
-
     workoutsAPI.getWorkoutSummaries(1).then((data) => {
       setWorkoutSummaries(data);
     });
-
-    const unsubscribe = usersAPI.subscribeToUser(1, (data) => {
-      console.log("Recived data from ws:", data);
-    });
-
-    return () => {
-      unsubscribe();
-    };
   }, []);
 
   return (
     <div className="font-sans p-4">
-      {console.log(workout_summaries)}
-      <h1 className="text-2xl text-text font-bold mb-2">All Workouts (User 1)</h1>
-
-      {workouts.map((w) => (
-        <div
-          key={w.id}
-          className="border border-border p-2 my-2 text-text"
-        >
-          <h2 className="text-text font-semibold">
-            Workout #{w.id} — User {w.user_id}
-          </h2>
-          <h3>
-            Workout type: {w.type}
-          </h3>
-
-          {w.exercises.map((ex) => (
-            <div key={ex.id} className="ml-4 mt-2 text-text">
-              <strong>Exercise {ex.exercise_number}:</strong> {ex.sets.length} sets
-
-              {ex.sets.map((s) => (
-                <div key={s.id} className="ml-4 mt-1 text-text">
-                  <em>
-                    Set {s.set_number} — {s.exercise_name}
-                  </em>
-
-                  {s.subsets.map((sub) => (
-                    <div key={sub.id} className="ml-4 text-text">
-                      Reps: {sub.reps}, Weight: {sub.weight}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
+      {workout_summaries.map((w) => (
+        <WorkoutSummaryCard key={w.workout_id} summary={w} />
       ))}
     </div>
   );
