@@ -73,7 +73,7 @@ def test_workout_summary(data):
     assert w_response.status_code == 200
 
     w_summary = w_response.json()[0]
-    assert "workout_id" in workout_data
+    assert "workout_id" in w_summary
     assert w_summary["user_id"] == workout_data["user_id"]
     assert w_summary["type"] == workout_data["type"]
     assert w_summary["total_exercises"] == len(workout_data["exercises"])
