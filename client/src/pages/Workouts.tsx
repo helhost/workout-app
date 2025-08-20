@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
 import { workoutsAPI, usersAPI } from "@/api";
-import type { Workout } from "@/types/api/workouts";
+import type { Workout, WorkoutSummary } from "@/types";
 
 export default function WokoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [workout_summaries, setWorkoutSummaries] = useState<WorkoutSummary[]>([]);
 
   useEffect(() => {
     workoutsAPI.getWorkouts().then((data) => {
       setWorkouts(data.filter((w) => w.user_id === 1));
+    });
+
+    workoutsAPI.getWorkoutSummaries(1).then((data) => {
+      setWorkoutSummaries(data);
     });
 
     const unsubscribe = usersAPI.subscribeToUser(1, (data) => {
@@ -21,6 +26,7 @@ export default function WokoutsPage() {
 
   return (
     <div className="font-sans p-4">
+      {console.log(workout_summaries)}
       <h1 className="text-2xl text-text font-bold mb-2">All Workouts (User 1)</h1>
 
       {workouts.map((w) => (

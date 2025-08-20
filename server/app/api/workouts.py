@@ -86,6 +86,7 @@ def get_workout_summaries(id: int, db: Session = Depends(get_db)):
 
         summaries.append(
             WorkoutSummary(
+                workout_id=w.id,
                 user_id=w.user_id,
                 type=w.type,
                 total_exercises=total_exercises,

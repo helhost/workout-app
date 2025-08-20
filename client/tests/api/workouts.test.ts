@@ -16,6 +16,23 @@ describe("Workout API Integration", () => {
     };
   });
 
+  test("can fetch all workout summaries for a user", async () => {
+    const workout: Workout = (globalThis as any).TEST_WORKOUT;
+    const summaries = await workoutsAPI.getWorkoutSummaries(workout.user_id);
+    expect(summaries).toBeDefined();
+    expect(Array.isArray(summaries)).toBeTruthy();
+
+    for (let i = 0; i < summaries.length; i++) {
+      expect(typeof summaries[i].workout_id).toBe("number");
+      expect(typeof summaries[i].user_id).toBe("number");
+      expect(summaries[i].total_exercises).toBe(workout.exercises.length);
+      expect(summaries[i].total_sets).toBe(workout.exercises.reduce((s, e) => s + e.sets.length, 0));
+      expect(summaries[i].created_at).toBeDefined();
+      expect(summaries[i].type).toBe(workout.type);
+    }
+
+  });
+
   test("can create new workout", async () => {
     const newWorkout: WorkoutCreate = workoutData.workout;
     const workout = await workoutsAPI.createWorkout(newWorkout);

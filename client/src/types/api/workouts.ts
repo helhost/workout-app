@@ -7,6 +7,7 @@ export type SubsetBase = {
 }
 
 export type Subset = SubsetBase & {
+  created_at: string,
   id: number,
   set_id: number
 }
@@ -18,7 +19,6 @@ export type SubsetCreate = SubsetBase & {
 // ------------ Sets ------------
 
 export type SetBase = {
-  created_at: string,
   set_number: number,
   exercise_name: string,
   subsets: SubsetBase[]
@@ -38,12 +38,12 @@ export type SetCreate = SetBase & {
 // ------------ Exercises ------------
 
 export type ExerciseBase = {
-  created_at: string,
   exercise_number: number,
   sets: SetBase[]
 }
 
 export type Exercise = Omit<ExerciseBase, 'sets'> & {
+  created_at: string,
   sets: Set[],
   id: number,
   workout_id: number
@@ -55,12 +55,12 @@ export type ExerciseCreate = ExerciseBase & {
 // ------------ Workouts ------------
 
 export type WorkoutBase = {
-  created_at: string,
   type: string,
   exercises: ExerciseBase[]
 }
 
 export type Workout = Omit<WorkoutBase, 'exercises'> & {
+  created_at: string,
   exercises: Exercise[],
   id: number,
   user_id: number
@@ -68,4 +68,23 @@ export type Workout = Omit<WorkoutBase, 'exercises'> & {
 
 export type WorkoutCreate = WorkoutBase & {
   user_id: number
+}
+
+export type WorkoutTypes =
+  | "Back"
+  | "Chest"
+  | "Legs"
+  | "Arms"
+  | "Shoulders"
+  | "Full Body"
+  | "Cardio"
+  | "Other";
+
+export type WorkoutSummary = {
+  workout_id: number
+  user_id: number
+  type: WorkoutTypes
+  total_exercises: number
+  total_sets: number
+  created_at: string
 }

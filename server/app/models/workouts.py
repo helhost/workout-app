@@ -102,6 +102,7 @@ class WorkoutRead(BaseModel):
 
 
 class WorkoutSummary(BaseModel):
+    workout_id: int
     user_id: int
     type: WorkoutTypes = Field(validation_alias=AliasChoices("workout_type", "type"))
     total_exercises: int

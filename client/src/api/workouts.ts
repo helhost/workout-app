@@ -1,6 +1,7 @@
 import { HttpClient } from "../http-client"
 import type {
   Workout, WorkoutCreate,
+  WorkoutSummary,
   Exercise, ExerciseCreate,
   Set, SetCreate,
   Subset, SubsetCreate,
@@ -22,6 +23,10 @@ class WorkoutsAPI {
 
   public async getWorkouts() {
     return this.client.get<Workout[]>("/workouts")
+  };
+
+  public async getWorkoutSummaries(user_id: number) {
+    return this.client.get<WorkoutSummary[]>(`/workouts/summary/${user_id}`)
   };
 
   public async getWorkout(workout_id: number) {
