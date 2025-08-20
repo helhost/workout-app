@@ -69,7 +69,7 @@ def test_workout_structure_integrity(data):
 def test_workout_summary(data):
     workout_data = create_workout(data)
 
-    w_response = client.post(f"/api/workouts/summary/{workout_data['id']}")
+    w_response = client.get(f"/api/workouts/summary/{workout_data['id']}")
     assert w_response.status_code == 200
 
     w_summary = w_response.json()
