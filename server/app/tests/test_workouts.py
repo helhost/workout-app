@@ -66,6 +66,19 @@ def test_workout_structure_integrity(data):
     assert first_subset["weight"] == 80.0
     assert first_subset["subset_number"] == 1
 
+def test_workout_summary(data):
+    workout_data = create_workout(data)["workout"]
+
+    w_response = client.post(f"/api/workouts/summary/{workout_data['id']}")
+    assert w_response.status_code == 200
+
+    w_summary = w_response.json()
+    assert w_summary["user_id"] == workout_data["user_id"]
+    assert w_summary["type"] == workout_data["type"]
+    assert w_summary["total_exercises"] == len(workout_data["exercises"])
+    assert w_summary["total_sets"] == sum(len(ex["sets"]) for ex in workout_data["exercises"])
+    assert w_summary["created_at"] == workout_data["created_at"]
+
 
 def test_create_exercise_for_existing_workout(data):
     workout_id = create_workout(data)["id"]

@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import TypeAdapter
 from database import get_db
 from sqlalchemy.orm import Session
 from schemas.workouts import Workout, Exercise, Set, Subset, WorkoutEnum
 from models.workouts import (
     WorkoutCreate, ExerciseCreate, SetCreate, SubsetCreate,
-    WorkoutRead, ExerciseRead, SetRead, SubsetRead
+    WorkoutRead, ExerciseRead, SetRead, SubsetRead, WorkoutSummary
 )
 from sqlalchemy.orm import joinedload
 from ws_manager import websocket_manager
@@ -58,10 +59,42 @@ def get_subset(id:int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Subset not found")
     return subset
 
-#@router.get("/workouts/summary/{id}", response_model=list[WorkoutSummary])
-#def get_workout_summaries(id:int, db: Session = Depends(get_db)):
-#    return id
+@router.get("/workouts/summary/{id}", response_model=list[WorkoutSummary])
+def get_workout_summaries(id: int, db: Session = Depends(get_db)):
 
+    workouts = (
+        db.query(Workout)
+        .options(
+            joinedload(Workout.exercises)
+            .joinedload(Exercise.sets)
+        )
+        .filter(Workout.user_id == id)
+        .order_by(Workout.created_at.desc())
+        .all()
+    )
+    adapter = TypeAdapter(list[WorkoutRead])
+    workouts = adapter.validate_python(workouts)
+
+    if not workouts:
+        return []
+
+
+    summaries: list[WorkoutSummary] = []
+    for w in workouts:
+        total_exercises = len(w.exercises)
+        total_sets = sum(len(ex.sets) for ex in w.exercises)
+
+        summaries.append(
+            WorkoutSummary(
+                user_id=w.user_id,
+                type=w.type,
+                total_exercises=total_exercises,
+                total_sets=total_sets,
+                created_at=w.created_at,
+            )
+        )
+
+    return summaries
 
 # =================== POST  ===================
 

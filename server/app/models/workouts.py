@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field,AliasChoices
 from typing import List, Literal
 from datetime import datetime
 
@@ -103,7 +103,7 @@ class WorkoutRead(BaseModel):
 
 class WorkoutSummary(BaseModel):
     user_id: int
-    type: WorkoutTypes = Field(validation_alias="workout_type")
+    type: WorkoutTypes = Field(validation_alias=AliasChoices("workout_type", "type"))
     total_exercises: int
     total_sets: int
     created_at: datetime
