@@ -72,7 +72,7 @@ def test_workout_summary(data):
     w_response = client.get(f"/api/workouts/summary/{workout_data['id']}")
     assert w_response.status_code == 200
 
-    w_summary = w_response.json()
+    w_summary = w_response.json()[0]
     assert w_summary["user_id"] == workout_data["user_id"]
     assert w_summary["type"] == workout_data["type"]
     assert w_summary["total_exercises"] == len(workout_data["exercises"])
