@@ -18,12 +18,14 @@ export type SubsetCreate = SubsetBase & {
 // ------------ Sets ------------
 
 export type SetBase = {
+  created_at: string,
   set_number: number,
   exercise_name: string,
   subsets: SubsetBase[]
 }
 
 export type Set = Omit<SetBase, 'subsets'> & {
+  created_at: string,
   subsets: Subset[],
   id: number,
   exercise_id: number
@@ -36,6 +38,7 @@ export type SetCreate = SetBase & {
 // ------------ Exercises ------------
 
 export type ExerciseBase = {
+  created_at: string,
   exercise_number: number,
   sets: SetBase[]
 }
@@ -52,6 +55,8 @@ export type ExerciseCreate = ExerciseBase & {
 // ------------ Workouts ------------
 
 export type WorkoutBase = {
+  created_at: string,
+  type: string,
   exercises: ExerciseBase[]
 }
 

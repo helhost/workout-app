@@ -31,6 +31,9 @@ export default function WokoutsPage() {
           <h2 className="text-text font-semibold">
             Workout #{w.id} — User {w.user_id}
           </h2>
+          <h3>
+            Workout type: {w.type}
+          </h3>
 
           {w.exercises.map((ex) => (
             <div key={ex.id} className="ml-4 mt-2 text-text">
