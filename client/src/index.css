@@ -16,7 +16,7 @@
 
   /* ===== Base ===== */
   --color-background: #FFF7FB;
-  --color-border: #e6dbe3;
+  --color-border: #444; /* lighter border for contrast */
 
   /* ===== Status ===== */
   --color-success: #2f9e44;
@@ -44,7 +44,7 @@
 
   /* ===== Base ===== */
   --color-background: #121212;
-  --color-border: #444; /* lighter border for contrast */
+  --color-border: #e6dbe3;
 
   /* ===== Status (darker for dark mode) ===== */
   --color-success: #237a34;

@@ -1,2 +1,3 @@
 export * from "./Banner";
-export * from "./WorkoutSummaryCard"
+export * from "./WorkoutSummary";
+export * from "./WorkoutDetail";

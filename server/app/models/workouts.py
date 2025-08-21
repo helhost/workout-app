@@ -59,6 +59,7 @@ class ExerciseCreate(ExerciseData):
 
 class ExerciseRead(BaseModel):
     id: int
+    name: str
     workout_id: int
     exercise_number: int
     created_at: datetime

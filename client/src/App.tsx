@@ -1,4 +1,4 @@
-import { WorkoutsPage, HomePage } from '@/pages';
+import { WorkoutsPage, HomePage, WorkoutDetailPage } from '@/pages';
 import { Banner } from '@/components';
 import { useState, useEffect } from "react";
 
@@ -9,19 +9,26 @@ export default function App() {
     setPage(window.location.pathname);
   }, []);
 
-  const pages = new Map([
-    ["/", <HomePage />],
-    ["/workouts", <WorkoutsPage />]
-  ]);
+  const routes = [
+    { pattern: /^\/workouts\/[^/]+$/, component: <WorkoutDetailPage /> },
+    { pattern: /^\/workouts$/, component: <WorkoutsPage /> },
+    { pattern: /.*/, component: <HomePage /> },
+  ];
+
+
+  const getBestMatch = (path: string) => {
+    for (const { pattern, component } of routes) {
+      if (pattern.test(path)) return component;
+    }
+  };
 
   return (
-
     <Banner name="test" navigation={[
       { href: "/", label: "Home" },
       { href: "/workouts", label: "Workouts" }
     ]}>
       {
-        pages.get(page) ?? <HomePage />
+        getBestMatch(page)
       }
     </Banner>
   )

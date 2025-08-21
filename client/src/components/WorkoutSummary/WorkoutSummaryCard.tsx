@@ -1,16 +1,10 @@
 import type { WorkoutSummary } from "@/types";
+import { formatYYMMDD } from "@/util";
 
 type WorkoutSummaryCardProps = {
   summary: WorkoutSummary;
 };
 
-function formatYYMMDD(iso: string) {
-  const d = new Date(iso);
-  const yy = String(d.getFullYear()).slice(-2);
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${yy}/${mm}/${dd}`;
-}
 
 export default function WorkoutSummaryCard({ summary }: WorkoutSummaryCardProps) {
 
@@ -28,7 +22,8 @@ export default function WorkoutSummaryCard({ summary }: WorkoutSummaryCardProps)
           bg-primary text-text
           px-4 py-4 sm:px-6 sm:py-5
           mx-1 my-4 sm:mx-2 sm:my-5
-          min-w-[50vw]
+          min-w-[75vw]
+          sm:min-w-[60vw]
           transition
           hover:bg-primary-accent
         "

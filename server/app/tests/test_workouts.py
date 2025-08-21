@@ -43,6 +43,7 @@ def test_workout_structure_integrity(data):
     # Verify Exercises
     first_exercise = workout_data["exercises"][0]
     assert "sets" in first_exercise
+    assert "name" in first_exercise
     assert "created_at" in first_exercise
     assert "exercise_number" in first_exercise
     assert len(first_exercise["sets"]) == 3

@@ -44,6 +44,7 @@ export type ExerciseBase = {
 
 export type Exercise = Omit<ExerciseBase, 'sets'> & {
   created_at: string,
+  name: string,
   sets: Set[],
   id: number,
   workout_id: number
