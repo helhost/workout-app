@@ -1,4 +1,4 @@
-import { WorkoutsPage, HomePage, WorkoutDetailPage } from '@/pages';
+import { WorkoutsPage, HomePage, WorkoutDetailPage, WorkoutEditPage } from '@/pages';
 import { Banner } from '@/components';
 import { useState, useEffect } from "react";
 
@@ -10,6 +10,7 @@ export default function App() {
   }, []);
 
   const routes = [
+    { pattern: /^\/workouts\/[^/]+\/edit$/, component: <WorkoutEditPage /> },
     { pattern: /^\/workouts\/[^/]+$/, component: <WorkoutDetailPage /> },
     { pattern: /^\/workouts$/, component: <WorkoutsPage /> },
     { pattern: /.*/, component: <HomePage /> },

@@ -24,7 +24,7 @@ export default function Banner({
           </div>
           <nav className="flex items-center gap-6">
             {navigation.map((item) => (
-              <NavItem key={item.href} {...item} active={path === item.href} />
+              <NavItem key={item.href} {...item} active={path.split('/').at(1) === item.href.slice(1)} />
             ))}
             <ThemeSwitch />
           </nav>
